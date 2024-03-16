@@ -143,7 +143,7 @@ class DataAllReport {
         revisedBy: json["revised_by"],
         fmeId: json["fme_id"] != null ? int.tryParse(json["fme_id"]) ?? 0 : 0,
         fmeDate: DateTime.parse(json["fme_date"] ?? DateTime.now().toString()),
-        estimationId: json["estimation_id"],
+estimationId: json["estimation_id"] != null ? int.tryParse(json["estimation_id"]) ?? 0 : 0,
         estimationDate: DateTime.parse(
             json["estimation_date"] ?? DateTime.now().toString()),
         acceptedBy: json["accepted_by"],

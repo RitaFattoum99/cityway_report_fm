@@ -59,12 +59,13 @@ class EditReportController extends GetxController {
   }
 
   Future<void> edit(List<JobDescription> jobDescriptions) async {
+    isLoading(true);
+
     try {
-      isLoading(true);
       String? token = await secureStorage.read("token");
       if (token != null) {
-        
         await service.editReports(jobDescriptions, token, reportId);
+        isLoading(true);
       }
     } finally {
       isLoading(false);

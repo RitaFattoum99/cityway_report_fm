@@ -1,5 +1,6 @@
 import 'package:cityway_report_fm/splash/splash_bindings.dart';
 import 'package:cityway_report_fm/splash/splash_screen.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '/auth/signin/signin.dart';
 import '/auth/signin/signin_bindings.dart';
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
           page: () => const NotificationListScreen(),
         ),
       ],
+      builder: EasyLoading.init(),
     );
   }
 }

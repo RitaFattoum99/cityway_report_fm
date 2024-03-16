@@ -114,15 +114,15 @@ class _TabBarWithListViewState extends State<TabBarWithListView> {
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'Completed':
+      case 'Complete':
         return Colors.green;
-      case 'Closed':
+      case 'Rejected':
         return Colors.red;
-      case 'In Progress':
+      case 'In-Progress':
         return Colors.blue;
       case 'Pending':
         return Colors.grey;
-      case 'Open':
+      case 'Done':
         return Colors.yellow[700]!;
       default:
         return Colors.purple;

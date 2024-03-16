@@ -1,5 +1,8 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
 
+import 'package:cityway_report_fm/homepage/reoport_list_controller.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+
 import '/core/resource/color_manager.dart';
 import '/core/resource/size_manger.dart';
 import '/edit_report_fm/edit_report_controller.dart';
@@ -377,7 +380,22 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         }
 
                         // Call the edit method of the controller and pass the jobDescriptions list
+                        // await editController.edit(jobDescriptions);
+                        EasyLoading.show(
+                            status: 'loading...', dismissOnTap: true);
                         await editController.edit(jobDescriptions);
+                        if (editController.createStatus) {
+                          EasyLoading.showSuccess(editController.message,
+                              duration: const Duration(seconds: 2));
+                          final reportListController =
+                              Get.find<ReportListController>();
+                          reportListController.fetchReports();
+
+                          Get.offNamed('home');
+                        } else {
+                          EasyLoading.showError(editController.message);
+                          print("error edit report");
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColorManger.mainAppColor,

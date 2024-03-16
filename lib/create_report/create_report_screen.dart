@@ -1,6 +1,9 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
 
+import 'package:cityway_report_fm/homepage/reoport_list_controller.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+
 import '/core/resource/color_manager.dart';
 import '/core/resource/size_manger.dart';
 import '/core/utils/text_form_field.dart';
@@ -27,7 +30,7 @@ class _CreateReportState extends State<CreateReport> {
   // //String _selectedValue = 'أبو علي';
   // List<String> listOfValue = ['أبو سيف', 'أبو محمد', 'أبو أحمد', 'أبو علي'];
 
-    final ReportController reportController = Get.put(ReportController());
+  final ReportController reportController = Get.put(ReportController());
 
   final TextEditingController _projectController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -494,11 +497,21 @@ class _CreateReportState extends State<CreateReport> {
                           print(
                               "description: ${reportController.jobDescription[i].description}");
                         }
+
+                        EasyLoading.show(
+                            status: 'loading...', dismissOnTap: true);
                         await reportController.create();
                         if (reportController.createStatus) {
+                          EasyLoading.showSuccess(reportController.message,
+                              duration: const Duration(seconds: 2));
+                          final reportListController =
+                              Get.find<ReportListController>();
+                          reportListController.fetchReports();
+
                           Get.offNamed('home');
                         } else {
-                          print("bad request");
+                          EasyLoading.showError(reportController.message);
+                          print("error create report");
                         }
                       },
                       style: ElevatedButton.styleFrom(
