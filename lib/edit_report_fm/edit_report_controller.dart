@@ -20,7 +20,7 @@ class EditReportController extends GetxController {
     reportId = id;
   }
 
-  var createStatus = false;
+  var editStatus = false;
   var message = '';
 
   EditReportService service = EditReportService();
@@ -64,7 +64,7 @@ class EditReportController extends GetxController {
     try {
       String? token = await secureStorage.read("token");
       if (token != null) {
-        await service.editReports(jobDescriptions, token, reportId);
+        editStatus = await service.editReports(jobDescriptions, token, reportId);
         isLoading(true);
       }
     } finally {

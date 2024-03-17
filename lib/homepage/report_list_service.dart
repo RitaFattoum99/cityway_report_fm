@@ -1,4 +1,6 @@
 
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import '/core/config/service_config.dart';
 import '/homepage/allreport_model.dart';

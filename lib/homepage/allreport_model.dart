@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:cityway_report_fm/material_model.dart';
+
 Allreports allreportsFromJson(String str) =>
     Allreports.fromJson(json.decode(str));
 
@@ -143,7 +145,9 @@ class DataAllReport {
         revisedBy: json["revised_by"],
         fmeId: json["fme_id"] != null ? int.tryParse(json["fme_id"]) ?? 0 : 0,
         fmeDate: DateTime.parse(json["fme_date"] ?? DateTime.now().toString()),
-estimationId: json["estimation_id"] != null ? int.tryParse(json["estimation_id"]) ?? 0 : 0,
+        estimationId: json["estimation_id"] != null
+            ? int.tryParse(json["estimation_id"]) ?? 0
+            : 0,
         estimationDate: DateTime.parse(
             json["estimation_date"] ?? DateTime.now().toString()),
         acceptedBy: json["accepted_by"],
@@ -251,7 +255,7 @@ class JobDescription {
   String? afterDesImg;
   int price;
   int quantity;
-  dynamic material;
+  DataMaterial? material;
 
   JobDescription({
     this.id,
@@ -265,27 +269,87 @@ class JobDescription {
     this.material,
   });
 
-  factory JobDescription.fromJson(Map<String, dynamic> json) => JobDescription(
-        id: json["id"],
-        reportId: int.tryParse(json["report_id"]) ?? 0,
-        materialId: json["material_id"],
-        description: json["description"] ?? '',
-        desImg: json["des_img"],
-        afterDesImg: json["after_des_img"],
-        price: int.tryParse(json["price"]) ?? 0,
-        quantity: int.tryParse(json["quantity"]) ?? 0,
-        material: json["material"],
-      );
+  factory JobDescription.fromJson(Map<String, dynamic> json) {
+    return JobDescription(
+      id: json['id'] is String ? int.tryParse(json['id']) : json['id'],
+      reportId: json["report_id"] is String
+          ? int.tryParse(json["report_id"])
+          : json["report_id"],
+      materialId: json[
+          'material_id'], // Assuming this can be dynamic as originally intended
+      description: json['description'] ?? '',
+      desImg: json['des_img'],
+      afterDesImg: json['after_des_img'],
+      price:
+          json["price"] is String ? int.tryParse(json["price"]) : json["price"],
+      quantity: json["quantity"] is String
+          ? int.tryParse(json["quantity"])
+          : json["quantity"],
+      material: json['material'] != null
+          ? DataMaterial.fromJson(json['material'])
+          : null,
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "report_id": reportId,
-        "material_id": materialId,
-        "description": description,
-        "des_img": desImg,
-        "after_des_img": afterDesImg,
-        "price": price,
-        "quantity": quantity,
-        "material": material,
-      };
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'report_id': reportId,
+      'material_id': materialId,
+      'description': description,
+      'des_img': desImg,
+      'after_des_img': afterDesImg,
+      'price': price,
+      'quantity': quantity,
+      'material': material?.toJson(),
+    };
+  }
 }
+
+// class JobDescription {
+//   int? id;
+//   int? reportId;
+//   dynamic materialId;
+//   String description;
+//   String? desImg;
+//   String? afterDesImg;
+//   int price;
+//   int quantity;
+//   DataMaterial? material;
+
+//   JobDescription({
+//     this.id,
+//     this.reportId,
+//     required this.materialId,
+//     required this.description,
+//     this.desImg,
+//     this.afterDesImg,
+//     required this.price,
+//     required this.quantity,
+//     this.material,
+//   });
+
+//   factory JobDescription.fromJson(Map<String, dynamic> json) => JobDescription(
+//         id: json["id"],
+//         reportId: int.tryParse(json["report_id"]) ?? 0,
+//         materialId: json["material_id"],
+//         description: json["description"] ?? '',
+//         desImg: json["des_img"],
+//         afterDesImg: json["after_des_img"],
+//         price: int.tryParse(json["price"]) ?? 0,
+//         quantity: int.tryParse(json["quantity"]) ?? 0,
+//         material: json["material"],
+//       );
+
+//   Map<String, dynamic> toJson() => {
+//         "id": id,
+//         "report_id": reportId,
+//         "material_id": materialId,
+//         "description": description,
+//         "des_img": desImg,
+//         "after_des_img": afterDesImg,
+//         "price": price,
+//         "quantity": quantity,
+//         "material": material,
+//       };
+// }

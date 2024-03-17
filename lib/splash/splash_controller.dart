@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:cityway_report_fm/core/native_service/secure_storage.dart';
 import 'package:get/get.dart';
 

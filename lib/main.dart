@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
 
       getPages: [
         GetPage(
-            name: '/splash', page: () => Splash(), binding: SplashBindings()),
+            name: '/splash', page: () => const Splash(), binding: SplashBindings()),
         GetPage(
             name: '/signin',
             page: () => const SignIn(),

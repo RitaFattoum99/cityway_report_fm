@@ -22,6 +22,8 @@ class EditReportScreen extends StatefulWidget {
 
 class _EditReportScreenState extends State<EditReportScreen> {
   final EditReportController editController = Get.put(EditReportController());
+  // late List<String?> selectedMaterials;
+  late List<Map<String, dynamic>> selectedMaterials;
 
   List<TextEditingController> desControllers = [];
   TextEditingController unitController = TextEditingController();
@@ -34,23 +36,68 @@ class _EditReportScreenState extends State<EditReportScreen> {
   List<TextEditingController> priceControllers = [];
   List<TextEditingController> totalpriceControllers = [];
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   desControllers = List.generate(widget.report.jobDescription!.length,
+  //       (index) => TextEditingController());
+  //   unitControllers = List.generate(widget.report.jobDescription!.length,
+  //       (index) => TextEditingController());
+  //   quantityControllers = List.generate(widget.report.jobDescription!.length,
+  //       (index) => TextEditingController());
+  //   priceControllers = List.generate(widget.report.jobDescription!.length,
+  //       (index) => TextEditingController());
+  //   totalpriceControllers = List.generate(widget.report.jobDescription!.length,
+  //       (index) => TextEditingController());
+
+  //   for (int i = 0; i < widget.report.jobDescription!.length; i++) {
+  //     desControllers[i].text = widget.report.jobDescription![i].description;
+  //   }
+  //   editController.setReportId(widget.report.id!);
+  //   // selectedMaterials =
+  //   //     List<String?>.filled(widget.report.jobDescription!.length, null);
+  //   selectedMaterials = List.generate(widget.report.jobDescription!.length,
+  //       (_) => {'id': null, 'name': null});
+  // }
+
   @override
   void initState() {
     super.initState();
-    desControllers = List.generate(widget.report.jobDescription!.length,
-        (index) => TextEditingController());
-    unitControllers = List.generate(widget.report.jobDescription!.length,
-        (index) => TextEditingController());
-    quantityControllers = List.generate(widget.report.jobDescription!.length,
-        (index) => TextEditingController());
-    priceControllers = List.generate(widget.report.jobDescription!.length,
-        (index) => TextEditingController());
-    totalpriceControllers = List.generate(widget.report.jobDescription!.length,
-        (index) => TextEditingController());
 
-    for (int i = 0; i < widget.report.jobDescription!.length; i++) {
-      desControllers[i].text = widget.report.jobDescription![i].description;
-    }
+    // Initialize description controllers
+    desControllers = List.generate(
+        widget.report.jobDescription!.length,
+        (index) => TextEditingController(
+            text: widget.report.jobDescription![index].description));
+
+    // Initialize unit, quantity, and price controllers with values from the report
+    unitControllers = List.generate(
+        widget.report.jobDescription!.length,
+        (index) => TextEditingController(
+            text: widget.report.jobDescription![index].material?.unit ?? ''));
+
+    quantityControllers = List.generate(
+        widget.report.jobDescription!.length,
+        (index) => TextEditingController(
+            text: widget.report.jobDescription![index].quantity.toString()));
+
+    priceControllers = List.generate(
+        widget.report.jobDescription!.length,
+        (index) => TextEditingController(
+            text: widget.report.jobDescription![index].price.toString()));
+
+    // Initialize totalpriceControllers, you might need to calculate total price here as well
+    totalpriceControllers =
+        List.generate(widget.report.jobDescription!.length, (index) {
+      int total = widget.report.jobDescription![index].quantity *
+          widget.report.jobDescription![index].price;
+      return TextEditingController(text: total.toString());
+    });
+
+    // Your existing logic for selectedMaterials initialization
+    selectedMaterials = List.generate(widget.report.jobDescription!.length,
+        (_) => {'id': null, 'name': null});
+
     editController.setReportId(widget.report.id!);
   }
 
@@ -62,17 +109,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
       totalpriceControllers[index].text = total.toString();
     });
   }
-
-  final List<String> imageList = [
-    'assets/images/des1.jpg',
-    'assets/images/des2.jpg',
-    //'assets/images/des1.jpg',
-  ];
-  final List<String> imageList2 = [
-    'assets/images/used.jpg',
-    'assets/images/used2.jpg',
-    //'assets/images/used3.jpg',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -198,79 +234,135 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                   ),
                                 ),
                                 SizedBox(height: 10),
-                                SizedBox(
-                                  width: size.width * 0.8,
-                                  child: Obx(() {
-                                    if (editController.isLoading.value) {
-                                      return const SizedBox();
-                                    } else {
-                                      if (editController
-                                          .materialList.isNotEmpty) {
-                                        // Map materialList to DropdownMenuItem<String>
-                                        List<DropdownMenuItem<String>>
-                                            dropdownItems = editController
-                                                .materialList
-                                                .map((material) {
-                                          return DropdownMenuItem<String>(
-                                            value: material.name,
-                                            child: Text(material.name),
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                        width: size.width * 0.4,
+                                        child: Text(
+                                          "المادة:",
+                                          style: TextStyle(
+                                              color: AppColorManger
+                                                  .secondaryAppColor,
+                                              fontSize: 16),
+                                        )),
+                                    SizedBox(
+                                      width: size.width * 0.4,
+                                      child: Obx(() {
+                                        if (editController.isLoading.value) {
+                                          return const Text(
+                                            "اختر المادة..",
+                                            style: TextStyle(
+                                                color: AppColorManger
+                                                    .mainAppColor),
                                           );
-                                        }).toList();
+                                        } else {
+                                          if (editController
+                                              .materialList.isNotEmpty) {
+                                            // Map materialList to DropdownMenuItem<String>
+                                            List<DropdownMenuItem<String>>
+                                                // ignore: unused_local_variable
+                                                dropdownItems = editController
+                                                    .materialList
+                                                    .map((material) {
+                                              return DropdownMenuItem<String>(
+                                                value: material.name,
+                                                child: Text(material.name),
+                                              );
+                                            }).toList();
 
-                                        // Return the DropdownButton with the dropdownItems
-                                        return DropdownButton<String>(
-                                          value: editController.selected.value,
-                                          onChanged: (String? newValue) {
-                                            // Find the selected material by name
-                                            DataMaterial setSelectedMaterial =
-                                                editController.materialList
-                                                    .firstWhere(
-                                              (material) =>
-                                                  material.name == newValue,
+                                            // Return the DropdownButton with the dropdownItems
+                                            return DropdownButtonHideUnderline(
+                                              child: DropdownButton<String>(
+                                                value: selectedMaterials[index]
+                                                        ['name'] ??
+                                                    widget
+                                                        .report
+                                                        .jobDescription?[index]
+                                                        .material
+                                                        ?.name,
+                                                onChanged: (String? newValue) {
+                                                  setState(() {
+                                                    DataMaterial?
+                                                        selectedMaterial =
+                                                        editController
+                                                            .materialList
+                                                            .firstWhereOrNull(
+                                                                (material) =>
+                                                                    material
+                                                                        .name ==
+                                                                    newValue);
+                                                    if (selectedMaterial !=
+                                                        null) {
+                                                      selectedMaterials[index] =
+                                                          {
+                                                        'id':
+                                                            selectedMaterial.id,
+                                                        'name': selectedMaterial
+                                                            .name
+                                                      };
+
+                                                      // Also set the price and unit for display
+                                                      priceControllers[index]
+                                                              .text =
+                                                          selectedMaterial.price
+                                                              .toString();
+                                                      unitControllers[index]
+                                                              .text =
+                                                          selectedMaterial.unit;
+
+                                                      print(
+                                                          'material id in screen on change: ${selectedMaterial.id}');
+                                                    }
+                                                  });
+                                                },
+                                                items: editController
+                                                    .materialList
+                                                    .map((material) {
+                                                  return DropdownMenuItem<
+                                                      String>(
+                                                    value: material.name,
+                                                    child: Text(material.name),
+                                                  );
+                                                }).toList(),
+                                              ),
                                             );
-
-                                            // Save the selected material ID to the controller
-                                            editController.materialList[index]
-                                                .id = setSelectedMaterial.id;
-                                            // Update the selected value in the controller
-                                            editController.selected.value =
-                                                newValue!;
-                                            print(
-                                                'onchange:  ${editController.materialList[index].id}');
-                                          },
-                                          items: dropdownItems,
-                                        );
-                                      } else {
-                                        // Return a placeholder widget if materialList is empty
-                                        return const Text('No items available');
-                                      }
-                                    }
-                                  }),
+                                          } else {
+                                            // Return a placeholder widget if materialList is empty
+                                            return const Text(
+                                                'No items available');
+                                          }
+                                        }
+                                      }),
+                                    ),
+                                  ],
                                 ),
                                 SizedBox(width: 10), // Spacer between fields
-                                SizedBox(
-                                  width: size.width *
-                                      0.8, // Adjust the width as needed
-                                  child: TextFormField(
-                                    // controller: unitController,
-                                    controller: unitControllers[index],
 
-                                    decoration: InputDecoration(
-                                      labelText: 'الوحدة',
-                                    ),
-                                    onChanged: (value) {
-                                      // Ensure that the unit list has enough elements to accommodate the index
-                                      if (index < editController.unit.length) {
-                                        editController.unit[index] = value;
-                                      }
-                                    },
-                                  ),
-                                ),
                                 SizedBox(height: 10),
                                 Row(
                                   children: [
                                     SizedBox(
-                                      width: size.width * 0.2,
+                                      width: size.width *
+                                          0.15, // Adjust the width as needed
+                                      child: TextFormField(
+                                        // controller: unitController,
+                                        controller: unitControllers[index],
+                                        readOnly: true,
+                                        decoration: InputDecoration(
+                                          labelText: 'الوحدة',
+                                        ),
+                                        onChanged: (value) {
+                                          // Ensure that the unit list has enough elements to accommodate the index
+                                          if (index <
+                                              editController.unit.length) {
+                                            editController.unit[index] = value;
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(width: 20),
+                                    SizedBox(
+                                      width: size.width * 0.1,
                                       child: TextFormField(
                                         keyboardType: TextInputType.number,
                                         controller: quantityControllers[index],
@@ -284,10 +376,11 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                     ),
                                     SizedBox(width: 20),
                                     SizedBox(
-                                      width: size.width * 0.2,
+                                      width: size.width * 0.15,
                                       child: TextFormField(
                                         keyboardType: TextInputType.number,
                                         controller: priceControllers[index],
+                                        readOnly: true,
                                         decoration: InputDecoration(
                                           labelText: 'سعر الوحدة',
                                         ),
@@ -298,7 +391,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                     ),
                                     SizedBox(width: 20),
                                     SizedBox(
-                                      width: size.width * 0.2,
+                                      width: size.width * 0.15,
                                       child: TextFormField(
                                         controller:
                                             totalpriceControllers[index],
@@ -312,20 +405,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                 ),
 
                                 const SizedBox(height: 10),
-                                /*Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColorManger.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Image.network(
-                                     widget
-                                      .report.jobDescription![index].desImg!,
-                                    // imageList2[index],
-                                    fit: BoxFit.cover,
-                                    height: 150,
-                                    width: 150,
-                                  ),
-                                ),*/
 
                                 Expanded(
                                   child: Container(
@@ -358,20 +437,20 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         List<JobDescription> jobDescriptions = [];
                         for (int i = 0; i < desControllers.length; i++) {
                           String description = desControllers[i].text;
-                          //String unit = unitControllers[i].text;
+                          // String unit = unitControllers[i].text;
                           int quantity =
                               int.tryParse(quantityControllers[i].text) ?? 0;
                           int price =
                               int.tryParse(priceControllers[i].text) ?? 0;
-                          //int totalPrice = int.tryParse(totalpriceControllers[i].text) ?? 0;
-                          int materialId = editController.materialList[i].id;
+                          // int totalPrice =
+                          //     int.tryParse(totalpriceControllers[i].text) ?? 0;
+                          int materialId = selectedMaterials[i]['id'];
+                          print('material id in screen: $materialId');
                           // Create a JobDescription object with the collected data
                           JobDescription jobDescription = JobDescription(
                             description: description,
-                            // unit: unit,
                             quantity: quantity,
                             price: price,
-                            // totalPrice: totalPrice,
                             materialId: materialId,
                           );
 
@@ -384,7 +463,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         EasyLoading.show(
                             status: 'loading...', dismissOnTap: true);
                         await editController.edit(jobDescriptions);
-                        if (editController.createStatus) {
+                        if (editController.editStatus) {
                           EasyLoading.showSuccess(editController.message,
                               duration: const Duration(seconds: 2));
                           final reportListController =

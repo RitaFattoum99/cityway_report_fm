@@ -1,11 +1,6 @@
-// To parse this JSON data, do
-//
-//     final material = materialFromJson(jsonString);
-
 import 'dart:convert';
 
 Material materialFromJson(String str) => Material.fromJson(json.decode(str));
-
 String materialToJson(Material data) => json.encode(data.toJson());
 
 class Material {
@@ -28,7 +23,7 @@ class Material {
 
   Map<String, dynamic> toJson() => {
         "status": status,
-        "data": List<dynamic>.from(data.map((x) => x.toJson())),
+        "data": data.map((x) => x.toJson()).toList(),
         "message": message,
       };
 }
@@ -37,7 +32,7 @@ class DataMaterial {
   int id;
   String name;
   int price;
-  Unit unit;
+  String unit;
   dynamic createdAt;
   dynamic updatedAt;
 
@@ -46,15 +41,15 @@ class DataMaterial {
     required this.name,
     required this.price,
     required this.unit,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory DataMaterial.fromJson(Map<String, dynamic> json) => DataMaterial(
         id: json["id"],
         name: json["name"],
         price: int.tryParse(json["price"]) ?? 0,
-        unit: unitValues.map[json["unit"]]!,
+        unit: json["unit"],
         createdAt: json["created_at"],
         updatedAt: json["updated_at"],
       );
@@ -63,25 +58,8 @@ class DataMaterial {
         "id": id,
         "name": name,
         "price": price,
-        "unit": unitValues.reverse[unit],
+        "unit": unit,
         "created_at": createdAt,
         "updated_at": updatedAt,
       };
-}
-
-// ignore: constant_identifier_names
-enum Unit { EMPTY }
-
-final unitValues = EnumValues({"كيلو": Unit.EMPTY});
-
-class EnumValues<T> {
-  Map<String, T> map;
-  late Map<T, String> reverseMap;
-
-  EnumValues(this.map);
-
-  Map<T, String> get reverse {
-    reverseMap = map.map((k, v) => MapEntry(v, k));
-    return reverseMap;
-  }
 }
