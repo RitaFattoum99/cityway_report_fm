@@ -39,7 +39,6 @@ class EditReportController extends GetxController {
     print("onInit");
     materialList = await service.getMaterialList(token!);
     selected.value = materialList.isNotEmpty ? materialList[0].name : '';
-    print("name in controller: $materialList");
   }
 
   @override
@@ -48,7 +47,6 @@ class EditReportController extends GetxController {
     String? token = await secureStorage.read("token");
     materialList = await service.getMaterialList(token!);
     selected.value = materialList.isNotEmpty ? materialList[0].name : '';
-    print("name in controller: $materialList");
     isLoading(false);
     super.onReady();
     print("onReady");
@@ -64,7 +62,8 @@ class EditReportController extends GetxController {
     try {
       String? token = await secureStorage.read("token");
       if (token != null) {
-        editStatus = await service.editReports(jobDescriptions, token, reportId);
+        editStatus =
+            await service.editReports(jobDescriptions, token, reportId);
         isLoading(true);
       }
     } finally {

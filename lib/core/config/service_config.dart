@@ -13,4 +13,5 @@ class ServiceConfig {
   static const complaintParty = 'complaint_party';
   static const getListReport = 'report';
   static const getListMaterial= 'material';
+  
 }
