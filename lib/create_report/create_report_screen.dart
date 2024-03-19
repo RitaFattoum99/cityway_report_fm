@@ -211,37 +211,6 @@ class _CreateReportState extends State<CreateReport> {
                           fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 20),
-                    /*  Obx(() {
-                      if (reportController.isLoading.value) {
-                        return CircularProgressIndicator(); // Show loading indicator while loading data
-                      } else {
-                        if (reportController.complaintPartyList.isNotEmpty) {
-                          // Map complaintPartyList to DropdownMenuItem<String>
-                          List<DropdownMenuItem<String>> dropdownItems =
-                              reportController.complaintPartyList
-                                  .map((complaintParty) {
-                            return DropdownMenuItem<String>(
-                              value: complaintParty.name,
-                              child: Text(complaintParty.name),
-                            );
-                          }).toList();
-
-                          // Return the DropdownButton with the dropdownItems
-                          return DropdownButton<String>(
-                            value: reportController.selected.value,
-                            onChanged: (String? newValue) {
-                              reportController.selected.value = newValue!;
-                            },
-                            items: dropdownItems,
-                          );
-                        } else {
-                          // Return a placeholder widget if complaintPartyList is empty
-                          return Text('No items available');
-                        }
-                      }
-                    }),
-*/
-
                     Obx(() {
                       if (reportController.isLoading.value) {
                         return const CircularProgressIndicator(); // Show loading indicator while loading data
@@ -285,46 +254,6 @@ class _CreateReportState extends State<CreateReport> {
                         }
                       }
                     }),
-
-                    /* Expanded(
-                      child: Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border:
-                              Border.all(color: AppColorManger.greyAppColor),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.only(left: 4, right: 4, top: 2),
-                          child: DropdownButtonFormField(
-                            decoration:
-                                const InputDecoration.collapsed(hintText: ''),
-                            value: _selectedValue,
-                            isExpanded: true,
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedValue = value!;
-                              });
-                            },
-                            onSaved: (value) {
-                              setState(() {
-                                _selectedValue = value!;
-                              });
-                            },
-                            items: listOfValue.map((String val) {
-                              return DropdownMenuItem(
-                                value: val,
-                                child: Text(
-                                  val,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  */
                   ],
                 ),
                 const SizedBox(height: 16.0),
@@ -487,6 +416,19 @@ class _CreateReportState extends State<CreateReport> {
                     width: size.width * 0.5,
                     child: ElevatedButton(
                       onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          // Validate the form
+                          // Check if at least one work type is selected
+                          if (selectedWorkTypes == null ||
+                              selectedWorkTypes!.isEmpty) {
+                            // Show an error message or handle as needed
+                            EasyLoading.showError(
+                                'Please select at least one work type.');
+                            return;
+                          }
+                          // Continue with the submission logic if all validations pass
+                          // Your existing submission logic goes here...
+                        }
                         print("إرسال");
 
                         for (int i = 0; i < data.length; i++) {

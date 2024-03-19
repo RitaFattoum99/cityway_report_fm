@@ -1,3 +1,6 @@
+import 'package:cityway_report_fm/core/config/information.dart';
+import 'package:cityway_report_fm/core/native_service/secure_storage.dart';
+
 import '/core/resource/color_manager.dart';
 import '/edit_report_fm/edit_screen.dart';
 import '/homepage/reoport_list_controller.dart';
@@ -15,12 +18,57 @@ class TabBarWithListView extends StatefulWidget {
 
 class _TabBarWithListViewState extends State<TabBarWithListView> {
   ReportListController controller = Get.put(ReportListController());
+  Future<void> _showLogoutConfirmationDialog() async {
+    final confirmLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('تسجيل خروج'),
+          content: Text('هل أنت متأكد؟'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('إلغاء'),
+              onPressed: () => Navigator.of(context)
+                  .pop(false), // Dismiss the dialog and return false
+            ),
+            TextButton(
+              child: Text('تأكيد'),
+              onPressed: () => Navigator.of(context)
+                  .pop(true), // Dismiss the dialog and return true
+            ),
+          ],
+        );
+      },
+    );
+
+    // If the user confirmed logout, proceed with the logout logic
+    if (confirmLogout == true) {
+      _logout();
+    }
+  }
+
+  void _logout() async {
+    // Assuming 'token' is the key for storing token in SecureStorage
+    final secureStorage = SecureStorage();
+    await secureStorage.delete('token'); // Delete the token
+    Information.TOKEN = ''; // Clear token from the Information class if needed
+
+    // Navigate to login page, assuming 'login' is the route name for your login screen
+    Get.offAllNamed('/signin');
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: const Text('التقاريـر'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.logout),
+              onPressed:
+                  _showLogoutConfirmationDialog, // Show confirmation dialog
+            ),
+          ],
         ),
         body: Obx(
           () => controller.isLoading.value

@@ -11,6 +11,10 @@ class SecureStorage {
     return await storage.read(key: key);
   }
 
+  Future<void> delete(String key) async {
+    await storage.delete(key: key);
+  }
+
   Future<void> saveInt(String key, int value) async {
     await storage.write(key: key, value: value.toString());
   }

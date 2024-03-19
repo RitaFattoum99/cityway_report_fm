@@ -64,6 +64,7 @@ class EditReportController extends GetxController {
       if (token != null) {
         editStatus =
             await service.editReports(jobDescriptions, token, reportId);
+
         isLoading(true);
       }
     } finally {

@@ -2,7 +2,9 @@
 
 import 'dart:convert';
 import 'dart:io';
+// ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '/core/config/service_config.dart';
 import '/homepage/allreport_model.dart';
@@ -34,78 +36,74 @@ class EditReportService {
     }
   }
 
-  /* Future<bool> editReports(
-      List<JobDescription> jobDescriptions, String token, int reportId) async {
-    print("report id: $reportId");
-    try {
-      var url = Uri.parse(
-          '${ServiceConfig.domainNameServer}${ServiceConfig.edit}/$reportId');
-      final request = http.MultipartRequest('POST', url);
+  /*Future<bool> editReports(
+        List<JobDescription> jobDescriptions, String token, int reportId) async {
+      try {
+        var url = Uri.parse(
+            '${ServiceConfig.domainNameServer}${ServiceConfig.edit}/$reportId');
+        final request = http.MultipartRequest('POST', url);
 
-      // Adding fields from jobDescriptions
-      for (int i = 0; i < jobDescriptions.length; i++) {
-        request.fields['job_descriptions[$i][id]'] =
-            jobDescriptions[i].id.toString();
-        request.fields['job_descriptions[$i][material_id]'] =
-            jobDescriptions[i].materialId.toString();
-        request.fields['job_descriptions[$i][description]'] =
-            jobDescriptions[i].description;
-        request.fields['job_descriptions[$i][price]'] =
-            jobDescriptions[i].price.toString();
-        request.fields['job_descriptions[$i][quantity]'] =
-            jobDescriptions[i].quantity.toString();
-
-        // Adding image
-        if (jobDescriptions[i].desImg != null &&
-            jobDescriptions[i].desImg!.isNotEmpty) {
-          var imageFile = File(jobDescriptions[i].desImg!);
-          var stream = http.ByteStream(imageFile.openRead())..cast();
-          var length = await imageFile.length();
-          var multipartFile = http.MultipartFile(
-            'job_descriptions[$i][des_img]',
-            stream,
-            length,
-            filename: basename(imageFile.path),
-          );
-
-          request.files.add(multipartFile);
+        // Adding fields from jobDescriptions
+        for (int i = 0; i < jobDescriptions.length; i++) {
+          request.fields['job_descriptions[$i][id]'] =
+              jobDescriptions[i].id.toString();
+          request.fields['job_descriptions[$i][material_id]'] =
+              jobDescriptions[i].materialId.toString();
+          request.fields['job_descriptions[$i][description]'] =
+              jobDescriptions[i].description;
+          request.fields['job_descriptions[$i][price]'] =
+              jobDescriptions[i].price.toString();
+          request.fields['job_descriptions[$i][quantity]'] =
+              jobDescriptions[i].quantity.toString();
+        
+          if (jobDescriptions[i].desImg != null) {
+            var imageFile = File(jobDescriptions[i].desImg!);
+            var stream = http.ByteStream(imageFile.openRead())..cast<List<int>>();
+            var length = await imageFile.length();
+            var multipartFile = http.MultipartFile(
+              'job_descriptions[$i][des_img]',
+              stream,
+              length,
+              filename: basename(imageFile.path),
+            );
+            request.files.add(multipartFile);
+            print("multipartFile: $multipartFile");
+          }
         }
-        print(
-            "material id in service: ${jobDescriptions[i].materialId.toString()}");
-      }
-      // Set headers
-      request.headers.addAll({
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-      });
 
-      // Send the request
-      final response = await request.send();
-      // Read the response
-      final responseBody = await response.stream.bytesToString();
-      final jsonResponse = jsonDecode(responseBody);
-      print("Raw response body: $responseBody");
+        request.headers.addAll({
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        });
 
-      print("statusCode: ${response.statusCode}");
-      print("body: $jsonResponse");
+        final response = await request.send();
+        final responseBody = await response.stream.bytesToString();
+        final jsonResponse = jsonDecode(responseBody);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        message = "Report Edited Successfully";
-        // Handle successful response
-        return true;
-      } else {
-        // Handle other statuses
-        print("Error: $responseBody");
-        message = "Failed to edit report";
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          message = jsonResponse['message'] ?? "Report Edited Successfully";
+          return true;
+        } else {
+          message = jsonResponse['error'] ?? "Failed to edit report";
+          return false;
+        }
+      } catch (e) {
+        message = 'Exception caught: $e';
         return false;
       }
-    } catch (error) {
-      throw Exception('Failed to edit reports: $error');
     }
-  }
 */
+
+  Future<File> downloadImage(String url) async {
+    final response = await http.get(Uri.parse(url));
+    final documentDirectory = await getApplicationDocumentsDirectory();
+    final fileName = basename(url);
+    final file = File('${documentDirectory.path}/$fileName');
+
+    await file.writeAsBytes(response.bodyBytes);
+    return file;
+  }
+
   Future<bool> editReports(
       List<JobDescription> jobDescriptions, String token, int reportId) async {
     try {
@@ -113,8 +111,8 @@ class EditReportService {
           '${ServiceConfig.domainNameServer}${ServiceConfig.edit}/$reportId');
       final request = http.MultipartRequest('POST', url);
 
-      // Adding fields from jobDescriptions
       for (int i = 0; i < jobDescriptions.length; i++) {
+        // Adding fields from jobDescriptions
         request.fields['job_descriptions[$i][id]'] =
             jobDescriptions[i].id.toString();
         request.fields['job_descriptions[$i][material_id]'] =
@@ -126,18 +124,33 @@ class EditReportService {
         request.fields['job_descriptions[$i][quantity]'] =
             jobDescriptions[i].quantity.toString();
 
+        // Add non-image fields to the request as before
+        request.fields['job_descriptions[$i][description]'] =
+            jobDescriptions[i].description;
+
         if (jobDescriptions[i].desImg != null) {
-          var imageFile = File(jobDescriptions[i].desImg!);
+          File imageFile;
+
+          // Check if the image path is a remote URL
+          if (jobDescriptions[i].desImg!.startsWith('http')) {
+            // Download the image first
+            imageFile = await downloadImage(jobDescriptions[i].desImg!);
+          } else {
+            // It's a local file path, use directly
+            imageFile = File(jobDescriptions[i].desImg!);
+          }
+
           var stream = http.ByteStream(imageFile.openRead())..cast<List<int>>();
           var length = await imageFile.length();
+
           var multipartFile = http.MultipartFile(
             'job_descriptions[$i][des_img]',
             stream,
             length,
             filename: basename(imageFile.path),
           );
+
           request.files.add(multipartFile);
-          print("multipartFile: $multipartFile");
         }
       }
 
@@ -147,18 +160,16 @@ class EditReportService {
       });
 
       final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-      final jsonResponse = jsonDecode(responseBody);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        message = jsonResponse['message'] ?? "Report Edited Successfully";
+        // Handle success
         return true;
       } else {
-        message = jsonResponse['error'] ?? "Failed to edit report";
+        // Handle failure
         return false;
       }
     } catch (e) {
-      message = 'Exception caught: $e';
+      // Handle exception
       return false;
     }
   }

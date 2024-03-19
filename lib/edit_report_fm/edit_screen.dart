@@ -25,6 +25,12 @@ class EditReportScreen extends StatefulWidget {
 
 class _EditReportScreenState extends State<EditReportScreen> {
   final EditReportController editController = Get.put(EditReportController());
+  final _formKey1 = GlobalKey<FormState>();
+  final _formKey2 = GlobalKey<FormState>();
+  final _formKey3 = GlobalKey<FormState>();
+  final _formKey4 = GlobalKey<FormState>();
+  final _formKey5 = GlobalKey<FormState>();
+
   late List<Map<String, dynamic>> selectedMaterials;
 
   List<TextEditingController> desControllers = [];
@@ -65,9 +71,12 @@ class _EditReportScreenState extends State<EditReportScreen> {
           widget.report.jobDescription![index].price;
       return TextEditingController(text: total.toString());
     });
-    selectedMaterials =
-        List.generate(itemsLength, (_) => {'id': null, 'name': null});
 
+    //initialization of selectedMaterials to reflect the initial materials from widget.report
+    selectedMaterials = widget.report.jobDescription!.map((jd) {
+      // Assuming jd.material is the material object with 'id' and 'name' properties
+      return {'id': jd.material?.id, 'name': jd.material?.name};
+    }).toList();
     // Assuming report.jobDescription is a list of objects that include desImg (String?).
     selectedImages = widget.report.jobDescription!
         .map(
@@ -104,33 +113,41 @@ class _EditReportScreenState extends State<EditReportScreen> {
   }
 
   String? getMaterialNameSafe(int index) {
-    // Check if index is within bounds for selectedMaterials.
     if (index < selectedMaterials.length) {
       return selectedMaterials[index]['name'];
     }
-    // Check if index is within bounds for job descriptions.
-    else if (widget.report.jobDescription != null &&
-        index < widget.report.jobDescription!.length) {
-      return widget.report.jobDescription![index].material?.name;
-    }
-    // Return null or a default value if out of bounds.
-    return null;
+    return null; // Or a default value as needed
   }
 
+  // Future<void> _pickImage(int index) async {
+  //   final XFile? pickedImage =
+  //       await _picker.pickImage(source: ImageSource.gallery);
+  //   if (pickedImage != null) {
+  //     setState(() {
+  //       // Ensure that the list can accommodate the new item
+  //       // This check is redundant if you're only calling _pickImage for existing indices
+  //       // But it's useful if you might have dynamic addition of images beyond current list size
+  //       while (index >= selectedImages.length) {
+  //         selectedImages.add(null); // Ensure list size
+  //       }
+  //       selectedImages[index] = ImageSourceWrapper(filePath: pickedImage.path);
+  //     });
+  //   }
+  // }
   Future<void> _pickImage(int index) async {
     final XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       setState(() {
-        // Ensure that the list can accommodate the new item
-        // This check is redundant if you're only calling _pickImage for existing indices
-        // But it's useful if you might have dynamic addition of images beyond current list size
-        while (index >= selectedImages.length) {
-          selectedImages.add(null); // Ensure list size
+        if (index < selectedImages.length) {
+          selectedImages[index] =
+              ImageSourceWrapper(filePath: pickedImage.path);
+        } else {
+          selectedImages.add(ImageSourceWrapper(filePath: pickedImage.path));
         }
-        selectedImages[index] = ImageSourceWrapper(filePath: pickedImage.path);
       });
     }
+    // No else part needed, as existing images should remain unchanged if no new image is selected
   }
 
   void _deleteItem(int index) {
@@ -258,14 +275,22 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                 SizedBox(
                                   width: size.width *
                                       0.8, // Adjust the width as needed
-                                  child: TextFormField(
-                                    controller: desControllers.isNotEmpty &&
-                                            index < desControllers.length
-                                        ? desControllers[index]
-                                        : TextEditingController(),
-                                    decoration: InputDecoration(
-                                      labelText: 'الوصف',
-                                    ),
+                                  child: Form(
+                                    key: _formKey1,
+                                    child: TextFormField(
+                                        controller: desControllers.isNotEmpty &&
+                                                index < desControllers.length
+                                            ? desControllers[index]
+                                            : TextEditingController(),
+                                        decoration: InputDecoration(
+                                          labelText: 'الوصف',
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'الوصف مطلوب';
+                                          }
+                                          return null;
+                                        }),
                                   ),
                                 ),
                                 SizedBox(height: 10),
@@ -390,15 +415,26 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                     SizedBox(width: 20),
                                     SizedBox(
                                       width: size.width * 0.1,
-                                      child: TextFormField(
-                                        keyboardType: TextInputType.number,
-                                        controller: quantityControllers[index],
-                                        decoration: InputDecoration(
-                                          labelText: 'الكمية',
+                                      child: Form(
+                                        key: _formKey2,
+                                        child: TextFormField(
+                                          keyboardType: TextInputType.number,
+                                          controller:
+                                              quantityControllers[index],
+                                          decoration: InputDecoration(
+                                            labelText: 'الكمية',
+                                          ),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'الكمية مطلوبة';
+                                            }
+                                            return null;
+                                          },
+                                          onChanged: (value) {
+                                            updateTotalPrice(index);
+                                          },
                                         ),
-                                        onChanged: (value) {
-                                          updateTotalPrice(index);
-                                        },
                                       ),
                                     ),
                                     SizedBox(width: 20),
@@ -496,44 +532,57 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         ),
                         ElevatedButton(
                           onPressed: () async {
-                            List<JobDescription> jobDescriptions = [];
-                            for (int i = 0; i < desControllers.length; i++) {
-                              String description = desControllers[i].text;
-                              int quantity =
-                                  int.tryParse(quantityControllers[i].text) ??
-                                      0;
-                              int price =
-                                  int.tryParse(priceControllers[i].text) ?? 0;
-                              int materialId = selectedMaterials[i]['id'] ?? 0;
-                              String? desImgPath = selectedImages[i]
-                                  ?.filePath; // Path of the image
+                            if (_formKey1.currentState!.validate() &&
+                                _formKey2.currentState!.validate()) {
+                              List<JobDescription> jobDescriptions = [];
+                              for (int i = 0; i < desControllers.length; i++) {
+                                String description = desControllers[i].text;
+                                int quantity =
+                                    int.tryParse(quantityControllers[i].text) ??
+                                        0;
+                                int price =
+                                    int.tryParse(priceControllers[i].text) ?? 0;
+                                int materialId =
+                                    selectedMaterials[i]['id'] ?? 0;
+                                // String? desImgPath = selectedImages[i]
+                                //     ?.filePath; // Path of the image
+                                String? desImgPath;
+                                if (selectedImages[i]?.isLocal ?? false) {
+                                  // New image picked by the user
+                                  desImgPath = selectedImages[i]?.filePath;
+                                } else if (selectedImages[i]?.isNetwork ??
+                                    false) {
+                                  // Existing image from the server
+                                  desImgPath = selectedImages[i]?.networkUrl;
+                                }
+                                print('image in screen: $desImgPath');
+                                // Assuming `JobDescription` constructor can handle all these fields...
+                                JobDescription jobDescription = JobDescription(
+                                  description: description,
+                                  quantity: quantity,
+                                  price: price,
+                                  materialId: materialId,
+                                  desImg: desImgPath,
+                                  // Add any new fields here
+                                );
+                                jobDescriptions.add(jobDescription);
+                              }
+                              // Call the edit method of the controller and pass the jobDescriptions list
+                              EasyLoading.show(
+                                  status: 'loading...', dismissOnTap: true);
+                              await editController.edit(jobDescriptions);
+                              if (editController.editStatus) {
+                                EasyLoading.showSuccess(editController.message,
+                                    duration: const Duration(seconds: 2));
+                                final reportListController =
+                                    Get.find<ReportListController>();
+                                reportListController.fetchReports();
 
-                              // Assuming `JobDescription` constructor can handle all these fields...
-                              JobDescription jobDescription = JobDescription(
-                                description: description,
-                                quantity: quantity,
-                                price: price,
-                                materialId: materialId,
-                                desImg: desImgPath,
-                                // Add any new fields here
-                              );
-                              jobDescriptions.add(jobDescription);
-                            }
-                            // Call the edit method of the controller and pass the jobDescriptions list
-                            EasyLoading.show(
-                                status: 'loading...', dismissOnTap: true);
-                            await editController.edit(jobDescriptions);
-                            if (editController.editStatus) {
-                              EasyLoading.showSuccess(editController.message,
-                                  duration: const Duration(seconds: 2));
-                              final reportListController =
-                                  Get.find<ReportListController>();
-                              reportListController.fetchReports();
-
-                              Get.offNamed('home');
-                            } else {
-                              EasyLoading.showError(editController.message);
-                              print("error edit report");
+                                Get.offNamed('home');
+                              } else {
+                                EasyLoading.showError(editController.message);
+                                print("error edit report");
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(

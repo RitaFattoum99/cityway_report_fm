@@ -252,6 +252,7 @@ class JobDescription {
   dynamic materialId;
   String description;
   String? desImg;
+   bool isDefaultImage = true;
   String? afterDesImg;
   int price;
   int quantity;
@@ -263,6 +264,7 @@ class JobDescription {
     required this.materialId,
     required this.description,
     this.desImg,
+    this.isDefaultImage = true,
     this.afterDesImg,
     required this.price,
     required this.quantity,
