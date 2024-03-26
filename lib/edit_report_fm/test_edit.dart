@@ -434,7 +434,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                     ),
                     SizedBox(height: 10),
                     SizedBox(
-                      height: 600,
+                      height: 400,
                       child: ListView.builder(
                         itemCount: jobCards.length,
                         itemBuilder: (context, index) {
@@ -613,6 +613,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                 ),
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GestureDetector(
                     onTap: _addJobCard,
@@ -629,9 +630,10 @@ class _EditReportScreenState extends State<EditReportScreen> {
                       ),
                     ),
                   ),
+                  SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      print("إرسال");
+                      print("تعديل");
                       // Iterate through jobCards to update editController data
                       var updatedJobDescriptions = jobCards.map((card) {
                         return ReportJobDescription(
@@ -668,7 +670,15 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         print("error edit report");
                       }
                     },
-                    child: Text('تعديـل'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColorManager.mainAppColor,
+                    ),
+                    child: const Text(
+                      'تعديـل',
+                      style: TextStyle(
+                          color: AppColorManager.white,
+                          fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
