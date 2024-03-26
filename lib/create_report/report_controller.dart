@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print
+
+import '../jobDes/job_description_model.dart';
 import '/create_report/complaint_party_model.dart';
 import '/create_report/report_model.dart';
 import '/create_report/report_service.dart';
@@ -10,14 +12,17 @@ class ReportController extends GetxController {
   var userId = 0;
   var project = '';
   var location = '';
-  var complaintPartyId = 0;
-  var reportNumber = '';
+  int? complaintPartyId = 0;
+  var complaintNumber = '';
   var contactName = '';
   var contactPosition = '';
   var contactNumber = '';
   var typeOfWork = '';
-
-  final List<JobDescription> jobDescription = [];
+  var urgent = 0;
+  var budget = 0;
+  final List<ReportDescription> reportDescription = [];
+  final List<ReportJobDescription> reportJobDescription = [];
+  final List<ContactInfo> contactInfo = [];
   var createStatus = false;
   var message = '';
 
@@ -27,41 +32,27 @@ class ReportController extends GetxController {
   var isLoading = true.obs;
   List<DataComplaintParty> complaintPartyList = [];
   var selected = RxString('');
-
+  var desList = <DataAllDes>[].obs; // Use RxList for reactivity
   @override
   void onInit() async {
     secureStorage = SecureStorage();
     String? token = await secureStorage.read("token");
-    print('token in check controller: $token');
+    complaintPartyList = await service.getComplaintList(token!);
+    selected.value =
+        complaintPartyList.isNotEmpty ? complaintPartyList[0].username : '';
     super.onInit();
+    fetchDes(); // Fetch reports asynchronously
     print("onInit");
-    //if (token != null) {
-      complaintPartyList = await service.getComplaintList(token!);
-      selected.value =
-          complaintPartyList.isNotEmpty ? complaintPartyList[0].name : '';
-      print("name in controller: $complaintPartyList");
-   // } 
-    /*else {
-      // Handle the case where token is null
-      print("Token is null");
-    }*/
   }
 
   @override
   void onReady() async {
+    super.onReady();
     secureStorage = SecureStorage();
     String? token = await secureStorage.read("token");
-   // if (token != null) {
-      complaintPartyList = await service.getComplaintList(token!);
-      selected.value =
-          complaintPartyList.isNotEmpty ? complaintPartyList[0].name : '';
-      print("name in controller: $complaintPartyList");
-    //} else {
-      // Handle the case where token is null
-      //print("Token is null");
-    //}
-    isLoading(false);
-    super.onReady();
+    complaintPartyList = await service.getComplaintList(token!);
+    selected.value =
+        complaintPartyList.isNotEmpty ? complaintPartyList[0].username : '';
     print("onReady");
   }
 
@@ -70,24 +61,35 @@ class ReportController extends GetxController {
   }
 
   Future<void> create() async {
+    secureStorage = SecureStorage();
+    complaintPartyId = await secureStorage.readInt("id");
+
     Data report = Data(
       id: id,
-      userId: userId,
       project: project,
       location: location,
-      contactPosition: contactPosition,
-      contactNumber: contactNumber,
-      typeOfWork: typeOfWork,
-      jobDescription: jobDescription,
       complaintPartyId: complaintPartyId,
-      reportNumber: reportNumber,
-      contactName: contactName,
+      typeOfWork: typeOfWork,
+      urgent: urgent,
+      budget: budget,
+      contactInfo: contactInfo,
+      complaintNumber: complaintNumber,
+      reportDescription: reportDescription,
+      reportJobDescription: reportJobDescription
     );
-    for (int i = 0; i < jobDescription.length; i++) {
-      print('image in controller ${jobDescription[i].desImg}');
-    }
     String? token = await secureStorage.read("token");
     createStatus = await service.create(report, token!);
     //message = service.message;
+  }
+
+  void fetchDes() async {
+    isLoading.value = true;
+    String? token = await secureStorage.read("token");
+    if (token != null) {
+      var fetchedDes = await service.getDesList(token);
+      desList.assignAll(
+          fetchedDes); // This will automatically update any listeners
+    }
+    isLoading.value = false;
   }
 }

@@ -1,615 +1,822 @@
-// ignore_for_file: prefer_const_constructors, avoid_print
+// // ignore_for_file: prefer_const_constructors, avoid_print
+// import 'dart:io';
 
-import 'dart:io';
+// import 'package:cityway_report_fm/core/config/service_config.dart';
+// import 'package:cityway_report_fm/homepage/reoport_list_controller.dart';
+// import 'package:flutter_easyloading/flutter_easyloading.dart';
+// import 'package:image_picker/image_picker.dart';
 
-import 'package:cityway_report_fm/homepage/reoport_list_controller.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:image_picker/image_picker.dart';
+// import '../create_report/report_controller.dart';
+// import '/core/resource/color_manager.dart';
+// import '../core/resource/size_manager.dart';
+// import '/edit_report_fm/edit_report_controller.dart';
+// import '/homepage/allreport_model.dart';
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
 
-import '/core/resource/color_manager.dart';
-import '/core/resource/size_manger.dart';
-import '/edit_report_fm/edit_report_controller.dart';
-import '/homepage/allreport_model.dart';
-import '/material_model.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+// class EditReportScreen extends StatefulWidget {
+//   final DataAllReport report;
 
-class EditReportScreen extends StatefulWidget {
-  final DataAllReport report;
+//   const EditReportScreen({Key? key, required this.report}) : super(key: key);
 
-  const EditReportScreen({Key? key, required this.report}) : super(key: key);
+//   @override
+//   State<EditReportScreen> createState() => _EditReportScreenState();
+// }
 
-  @override
-  State<EditReportScreen> createState() => _EditReportScreenState();
-}
+// class _EditReportScreenState extends State<EditReportScreen> {
+//   final EditReportController editController = Get.put(EditReportController());
+//   final ReportController reportController = Get.put(ReportController());
 
-class _EditReportScreenState extends State<EditReportScreen> {
-  final EditReportController editController = Get.put(EditReportController());
-  final _formKey1 = GlobalKey<FormState>();
-  final _formKey2 = GlobalKey<FormState>();
-  final _formKey3 = GlobalKey<FormState>();
-  final _formKey4 = GlobalKey<FormState>();
-  final _formKey5 = GlobalKey<FormState>();
+//   // final _formKey1 = GlobalKey<FormState>();
+//   // final _formKey2 = GlobalKey<FormState>();
 
-  late List<Map<String, dynamic>> selectedMaterials;
+//   late List<Map<String, dynamic>> selectedMaterials;
 
-  List<TextEditingController> desControllers = [];
-  TextEditingController unitController = TextEditingController();
-  TextEditingController quantityController = TextEditingController();
-  TextEditingController priceController = TextEditingController();
-  TextEditingController totalpriceController = TextEditingController();
+//   List<TextEditingController> desControllers = [];
+//   TextEditingController unitController = TextEditingController();
+//   TextEditingController quantityController = TextEditingController();
+//   TextEditingController priceController = TextEditingController();
+//   TextEditingController totalpriceController = TextEditingController();
 
-  List<TextEditingController> unitControllers = [];
-  List<TextEditingController> quantityControllers = [];
-  List<TextEditingController> priceControllers = [];
-  List<TextEditingController> totalpriceControllers = [];
-  final ImagePicker _picker = ImagePicker();
-  List<ImageSourceWrapper?> selectedImages = [];
+//   List<TextEditingController> unitControllers = [];
+//   List<TextEditingController> quantityControllers = [];
+//   List<TextEditingController> priceControllers = [];
+//   List<TextEditingController> totalpriceControllers = [];
+//   List<ImageSourceWrapper?> selectedImages = [];
 
-  @override
-  void initState() {
-    super.initState();
-    int itemsLength = widget.report.jobDescription!.length;
-    desControllers = List.generate(
-        itemsLength,
-        (index) => TextEditingController(
-            text: widget.report.jobDescription![index].description));
-    unitControllers = List.generate(
-        itemsLength,
-        (index) => TextEditingController(
-            text: widget.report.jobDescription![index].material?.unit ?? ''));
-    quantityControllers = List.generate(
-        itemsLength,
-        (index) => TextEditingController(
-            text: widget.report.jobDescription![index].quantity.toString()));
-    priceControllers = List.generate(
-        itemsLength,
-        (index) => TextEditingController(
-            text: widget.report.jobDescription![index].price.toString()));
-    totalpriceControllers = List.generate(itemsLength, (index) {
-      int total = widget.report.jobDescription![index].quantity *
-          widget.report.jobDescription![index].price;
-      return TextEditingController(text: total.toString());
-    });
+//   void updateTotalPrice(int index) {
+//     setState(() {
+//       int quantity = int.tryParse(quantityControllers[index].text) ?? 0;
+//       int price = int.tryParse(priceControllers[index].text) ?? 0;
+//       int total = quantity * price;
+//       totalpriceControllers[index].text = total.toString();
+//     });
+//   }
 
-    //initialization of selectedMaterials to reflect the initial materials from widget.report
-    selectedMaterials = widget.report.jobDescription!.map((jd) {
-      // Assuming jd.material is the material object with 'id' and 'name' properties
-      return {'id': jd.material?.id, 'name': jd.material?.name};
-    }).toList();
-    // Assuming report.jobDescription is a list of objects that include desImg (String?).
-    selectedImages = widget.report.jobDescription!
-        .map(
-            (description) => ImageSourceWrapper(networkUrl: description.desImg))
-        .toList(growable: true);
+//   void addRow() {
+//     setState(() {
+//       data.add({
+//         'description': TextEditingController(),
+//         'note': TextEditingController(),
+//         'descriptionImage': null,
+//       });
+//       TextEditingController controller = TextEditingController();
+//       controllers.add(controller);
+//     });
+//   }
 
-    print("selected image: $selectedImages");
-    editController.setReportId(widget.report.id!);
-  }
+//   String? getMaterialNameSafe(int index) {
+//     if (index < selectedMaterials.length) {
+//       return selectedMaterials[index]['name'];
+//     }
+//     return null; // Or a default value as needed
+//   }
 
-  void updateTotalPrice(int index) {
-    setState(() {
-      int quantity = int.tryParse(quantityControllers[index].text) ?? 0;
-      int price = int.tryParse(priceControllers[index].text) ?? 0;
-      int total = quantity * price;
-      totalpriceControllers[index].text = total.toString();
-    });
-  }
+//   List<Map<String, dynamic>> data = [
+//     {
+//       'description': TextEditingController(),
+//       'unit': TextEditingController(),
+//       'quantity': TextEditingController(),
+//       'price': TextEditingController(),
+//       'descriptionImage': null,
+//       'job_description_id': null,
+//     },
+//   ];
+//   // Function to get an ID based on a description
+//   int getIdFromDescription(String description) {
+//     final mapping = data.firstWhere(
+//       (map) => map['description'] == description,
+//       orElse: () => {'id': null},
+//     );
+//     return mapping['id'] ?? 0;
+//   }
 
-  void _addNewItem() {
-    setState(() {
-      print('Adding new item');
-      desControllers.add(TextEditingController());
-      unitControllers.add(TextEditingController());
-      quantityControllers.add(TextEditingController());
-      priceControllers.add(TextEditingController());
-      totalpriceControllers.add(TextEditingController());
-      selectedMaterials.add({'id': null, 'name': null});
-      // Add a placeholder for a new image in the list
-      selectedImages.add(ImageSourceWrapper(
-          networkUrl:
-              "https://cityway.boomuae.com/reports_cityway_backend/public/default.png"));
-    });
-  }
+//   Future<void> _pickImage(int rowIndex) async {
+//     final option = await showDialog<ImageSource>(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: const Text('اختر مصدر الصورة',
+//               style: TextStyle(fontWeight: FontWeight.bold)),
+//           content: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             children: [
+//               ElevatedButton(
+//                 style: ElevatedButton.styleFrom(
+//                   backgroundColor: AppColorManager.mainAppColor,
+//                 ),
+//                 onPressed: () => Navigator.pop(context, ImageSource.camera),
+//                 child: const Text(
+//                   'الكاميرا',
+//                   style: TextStyle(color: AppColorManager.white),
+//                 ),
+//               ),
+//               ElevatedButton(
+//                 style: ElevatedButton.styleFrom(
+//                   backgroundColor: AppColorManager.mainAppColor,
+//                 ),
+//                 onPressed: () => Navigator.pop(context, ImageSource.gallery),
+//                 child: const Text('المعرض',
+//                     style: TextStyle(color: AppColorManager.white)),
+//               ),
+//             ],
+//           ),
+//         );
+//       },
+//     );
 
-  String? getMaterialNameSafe(int index) {
-    if (index < selectedMaterials.length) {
-      return selectedMaterials[index]['name'];
-    }
-    return null; // Or a default value as needed
-  }
+//     if (option == null) return;
 
-  // Future<void> _pickImage(int index) async {
-  //   final XFile? pickedImage =
-  //       await _picker.pickImage(source: ImageSource.gallery);
-  //   if (pickedImage != null) {
-  //     setState(() {
-  //       // Ensure that the list can accommodate the new item
-  //       // This check is redundant if you're only calling _pickImage for existing indices
-  //       // But it's useful if you might have dynamic addition of images beyond current list size
-  //       while (index >= selectedImages.length) {
-  //         selectedImages.add(null); // Ensure list size
-  //       }
-  //       selectedImages[index] = ImageSourceWrapper(filePath: pickedImage.path);
-  //     });
-  //   }
-  // }
-  Future<void> _pickImage(int index) async {
-    final XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
-      setState(() {
-        if (index < selectedImages.length) {
-          selectedImages[index] =
-              ImageSourceWrapper(filePath: pickedImage.path);
-        } else {
-          selectedImages.add(ImageSourceWrapper(filePath: pickedImage.path));
-        }
-      });
-    }
-    // No else part needed, as existing images should remain unchanged if no new image is selected
-  }
+//     final ImagePicker picker = ImagePicker();
+//     final XFile? image = await picker.pickImage(source: option);
 
-  void _deleteItem(int index) {
-    setState(() {
-      desControllers.removeAt(index);
-      unitControllers.removeAt(index);
-      quantityControllers.removeAt(index);
-      priceControllers.removeAt(index);
-      totalpriceControllers.removeAt(index);
-      selectedMaterials.removeAt(index);
-      selectedImages.removeAt(index);
-    });
-  }
+//     if (image != null) {
+//       setState(() {
+//         if (rowIndex < data.length) {
+//           data[rowIndex]['descriptionImage'] = File(image.path);
+//           print(data[rowIndex]['descriptionImage']);
+//         }
+//         if (rowIndex < reportController.reportDescription.length) {
+//           reportController.reportDescription[rowIndex].desImg =
+//               File(image.path);
+//         } else {
+//           // Ensure that the jobDescription list is long enough to add a new item
+//           for (int i = reportController.reportDescription.length;
+//               i <= rowIndex;
+//               i++) {
+//             // reportController.
+//             //     .add(ReportDescription(description: ''));
+//           }
+//           reportController.reportDescription[rowIndex].desImg =
+//               File(image.path);
+//         }
+//         print(
+//             "img in controller in _pickImage function: ${reportController.reportDescription[rowIndex].desImg}");
+//       });
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+//   final List<TextEditingController> controllers = [];
 
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(
-          top: AppPaddingManger.p50,
-          right: AppPaddingManger.p18,
-          left: AppPaddingManger.p18,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              Center(
-                child: SizedBox(
-                  height: size.height * 0.1,
-                  child: Image.asset('assets/images/logo.png'),
-                ),
-              ),
-              SizedBox(
-                height: size.height * 0.02,
-              ),
-              Text(
-                'رقم البلاغ: ${widget.report.reportNumber}',
-                style: const TextStyle(
-                  color: AppColorManger.mainAppColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'اسم المشروع : ${widget.report.project}',
-                style: const TextStyle(
-                  color: AppColorManger.secondaryAppColor,
-                  fontSize: 16,
-                ),
-              ),
-              Text(
-                'الموقع: ${widget.report.location}',
-                style: const TextStyle(
-                  color: AppColorManger.secondaryAppColor,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'مقدم البلاغ : ${widget.report.complaintParty!.name}',
-                style: const TextStyle(
-                  color: AppColorManger.secondaryAppColor,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'الشخص المسؤول : ${widget.report.contactName}',
-                style: const TextStyle(
-                  color: AppColorManger.secondaryAppColor,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'منصب المسؤول : ${widget.report.contactPosition}',
-                style: const TextStyle(
-                  color: AppColorManger.secondaryAppColor,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'رقم المسؤول : ${widget.report.contactNumber}',
-                style: const TextStyle(
-                  color: AppColorManger.secondaryAppColor,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "وصف الأعمال:",
-                      style: TextStyle(
-                        color: AppColorManger.mainAppColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 600,
-                      child: ListView.separated(
-                        separatorBuilder: (context, index) =>
-                            SizedBox(width: 20),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: desControllers.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Padding(
-                            padding:
-                                EdgeInsets.only(bottom: size.height * 0.0001),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  width: size.width *
-                                      0.8, // Adjust the width as needed
-                                  child: Form(
-                                    key: _formKey1,
-                                    child: TextFormField(
-                                        controller: desControllers.isNotEmpty &&
-                                                index < desControllers.length
-                                            ? desControllers[index]
-                                            : TextEditingController(),
-                                        decoration: InputDecoration(
-                                          labelText: 'الوصف',
-                                        ),
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return 'الوصف مطلوب';
-                                          }
-                                          return null;
-                                        }),
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                Row(
-                                  children: [
-                                    SizedBox(
-                                        width: size.width * 0.4,
-                                        child: Text(
-                                          "المادة:",
-                                          style: TextStyle(
-                                              color: AppColorManger
-                                                  .secondaryAppColor,
-                                              fontSize: 16),
-                                        )),
-                                    SizedBox(
-                                      width: size.width * 0.4,
-                                      child: Obx(() {
-                                        if (editController.isLoading.value) {
-                                          return const Text(
-                                            "اختر المادة..",
-                                            style: TextStyle(
-                                                color: AppColorManger
-                                                    .mainAppColor),
-                                          );
-                                        } else {
-                                          if (editController
-                                              .materialList.isNotEmpty) {
-                                            // Map materialList to DropdownMenuItem<String>
-                                            List<DropdownMenuItem<String>>
-                                                // ignore: unused_local_variable
-                                                dropdownItems = editController
-                                                    .materialList
-                                                    .map((material) {
-                                              return DropdownMenuItem<String>(
-                                                value: material.name,
-                                                child: Text(material.name),
-                                              );
-                                            }).toList();
+//   void removeRow(int index) {
+//     setState(() {
+//       print("remove");
+//       if (data.isNotEmpty && index >= 0 && index < data.length) {
+//         data.removeAt(index);
+//         if (index < controllers.length) {
+//           controllers.removeAt(index);
+//         }
+//       }
+//     });
+//   }
 
-                                            // Return the DropdownButton with the dropdownItems
-                                            return DropdownButtonHideUnderline(
-                                              child: DropdownButton<String>(
-                                                value:
-                                                    getMaterialNameSafe(index),
-                                                onChanged: (String? newValue) {
-                                                  setState(() {
-                                                    DataMaterial?
-                                                        selectedMaterial =
-                                                        editController
-                                                            .materialList
-                                                            .firstWhereOrNull(
-                                                                (material) =>
-                                                                    material
-                                                                        .name ==
-                                                                    newValue);
-                                                    if (selectedMaterial !=
-                                                        null) {
-                                                      selectedMaterials[index] =
-                                                          {
-                                                        'id':
-                                                            selectedMaterial.id,
-                                                        'name': selectedMaterial
-                                                            .name
-                                                      };
+//   bool isExpanded = false;
+//   @override
+//   Widget build(BuildContext context) {
+//     final size = MediaQuery.of(context).size;
 
-                                                      // Also set the price and unit for display
-                                                      priceControllers[index]
-                                                              .text =
-                                                          selectedMaterial.price
-                                                              .toString();
-                                                      unitControllers[index]
-                                                              .text =
-                                                          selectedMaterial.unit;
+//     return Scaffold(
+//       body: Padding(
+//         padding: const EdgeInsets.only(
+//           top: AppPaddingManager.p50,
+//           right: AppPaddingManager.p18,
+//           left: AppPaddingManager.p18,
+//         ),
+//         child: SingleChildScrollView(
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               const SizedBox(height: 20),
+//               Center(
+//                 child: SizedBox(
+//                   height: size.height * 0.1,
+//                   child: Image.asset('assets/images/logo.png'),
+//                 ),
+//               ),
+//               SizedBox(
+//                 height: size.height * 0.02,
+//               ),
+//               Row(
+//                 children: [
+//                   Icon(
+//                     Icons.numbers,
+//                     color: AppColorManager.mainAppColor,
+//                   ),
+//                   SizedBox(width: 10),
+//                   Text(
+//                     widget.report.complaintNumber,
+//                     style: const TextStyle(
+//                       color: AppColorManager.mainAppColor,
+//                       fontSize: 16,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 8),
+//               Row(
+//                 children: [
+//                   Icon(
+//                     Icons.file_copy,
+//                     color: AppColorManager.secondaryAppColor,
+//                   ),
+//                   SizedBox(width: 10),
+//                   Text(
+//                     widget.report.project,
+//                     style: const TextStyle(
+//                       color: AppColorManager.secondaryAppColor,
+//                       fontSize: 16,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 8),
+//               Row(
+//                 children: [
+//                   Icon(
+//                     Icons.location_on,
+//                     color: AppColorManager.secondaryAppColor,
+//                   ),
+//                   SizedBox(width: 10),
+//                   Text(
+//                     widget.report.location,
+//                     style: const TextStyle(
+//                       color: AppColorManager.secondaryAppColor,
+//                       fontSize: 16,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 8),
+//               Row(
+//                 children: [
+//                   Icon(
+//                     Icons.person_2_rounded,
+//                     color: AppColorManager.secondaryAppColor,
+//                   ),
+//                   SizedBox(width: 10),
+//                   Text(
+//                     widget.report.complaintParty,
+//                     style: const TextStyle(
+//                       color: AppColorManager.secondaryAppColor,
+//                       fontSize: 16,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               SizedBox(height: 10),
+//               Text(
+//                 'المسؤولين:',
+//                 style: const TextStyle(
+//                     color: AppColorManager.mainAppColor,
+//                     fontSize: 16,
+//                     fontWeight: FontWeight.bold),
+//               ),
+//               SizedBox(
+//                 height: 120,
+//                 child: ListView.separated(
+//                   separatorBuilder: (context, index) => SizedBox(width: 20),
+//                   scrollDirection: Axis.vertical,
+//                   itemCount: widget.report.contactInfo.length,
+//                   itemBuilder: (BuildContext context, int index) {
+//                     return Padding(
+//                       padding: const EdgeInsets.all(8.0),
+//                       child: Container(
+                        // decoration: BoxDecoration(
+                        //   color: Colors.white,
+                        //   boxShadow: [
+                        //     BoxShadow(
+                        //       color: AppColorManager.secondaryAppColor
+                        //           .withOpacity(0.5),
+                        //       spreadRadius: 3,
+                        //       blurRadius: 4,
+                        //       offset: const Offset(0, 1),
+                        //     ),
+                        //   ],
+                        //   borderRadius: BorderRadius.circular(10),
+                        // ),
+//                         child: Column(
+//                           children: [
+//                             Row(
+//                               children: [
+//                                 Icon(
+//                                   Icons.person_2_rounded,
+//                                   color: AppColorManager.secondaryAppColor,
+//                                 ),
+//                                 SizedBox(width: 10),
+//                                 Text(
+//                                   widget.report.contactInfo[index].name,
+//                                   style: const TextStyle(
+//                                     color: AppColorManager.secondaryAppColor,
+//                                     fontSize: 16,
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                             Row(
+//                               children: [
+//                                 Icon(
+//                                   Icons.work_rounded,
+//                                   color: AppColorManager.secondaryAppColor,
+//                                 ),
+//                                 SizedBox(width: 10),
+//                                 Text(
+//                                   widget.report.contactInfo[index].position,
+//                                   style: const TextStyle(
+//                                     color: AppColorManager.secondaryAppColor,
+//                                     fontSize: 16,
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                             Row(
+//                               children: [
+//                                 Icon(
+//                                   Icons.phone,
+//                                   color: AppColorManager.secondaryAppColor,
+//                                 ),
+//                                 SizedBox(width: 10),
+//                                 Text(
+//                                   widget.report.contactInfo[index].phone,
+//                                   style: const TextStyle(
+//                                     color: AppColorManager.secondaryAppColor,
+//                                     fontSize: 16,
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                             SizedBox(height: 10),
+//                           ],
+//                         ),
+//                       ),
+//                     );
+//                   },
+//                 ),
+//               ),
+//               const SizedBox(
+//                 height: 10,
+//               ),
+//               Padding(
+//                 padding: const EdgeInsets.all(8.0),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     const Text(
+//                       "وصف البلاغ:",
+//                       style: TextStyle(
+//                         color: AppColorManager.mainAppColor,
+//                         fontWeight: FontWeight.bold,
+//                         fontSize: 18,
+//                       ),
+//                     ),
+//                     SizedBox(
+//                       height: 400,
+//                       width: 300,
+//                       child: ListView.separated(
+//                         separatorBuilder: (context, index) =>
+//                             SizedBox(width: 20),
+//                         scrollDirection: Axis.horizontal,
+//                         itemCount: widget.report.reportDescription.length,
+//                         itemBuilder: (BuildContext context, int index) {
+//                           return Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               SizedBox(
+//                                 width: 300,
+//                                 child: Text(
+//                                   isExpanded
+//                                       ? widget.report.reportDescription[index]
+//                                           .description!
+//                                       : "${widget.report.reportDescription[index].description!.substring(0, 50)}...",
+//                                   style: const TextStyle(
+//                                     color: Colors
+//                                         .black, // Replace with your actual color
+//                                     fontSize: 16,
+//                                   ),
+//                                 ),
+//                               ),
+//                               InkWell(
+//                                 onTap: () {
+//                                   setState(() {
+//                                     isExpanded = !isExpanded;
+//                                   });
+//                                 },
+//                                 child: Text(
+//                                   isExpanded ? "عرض أقل" : "عرض المزيد",
+//                                   style: TextStyle(
+//                                       color: Colors.blue, fontSize: 16),
+//                                 ),
+//                               ),
+//                               Expanded(
+//                                 child: Container(
+//                                   height: 200,
+//                                   width: 300,
+//                                   decoration: BoxDecoration(
+//                                     borderRadius: BorderRadius.circular(8),
+//                                     image: DecorationImage(
+//                                       fit: BoxFit.cover,
+//                                       image: NetworkImage(getFullImageUrl(widget
+//                                           .report
+//                                           .reportDescription[index]
+//                                           .desImg)),
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ),
+//                             ],
+//                           );
+//                         },
+//                       ),
+//                     ),
+//                     const SizedBox(
+//                       height: 10,
+//                     ),
+//                     Text(
+//                       "وصف الأعمال:",
+//                       style: TextStyle(
+//                         color: AppColorManager.mainAppColor,
+//                         fontWeight: FontWeight.bold,
+//                         fontSize: 18,
+//                       ),
+//                     ),
+//                     Obx(() {
+//                       final descriptionSuggestions = reportController.desList
+//                           .map((des) => des
+//                               .description) // Assuming your model has a 'description' field
+//                           .toList();
+//                       return SizedBox(
+//                         width: double.infinity,
+//                         child: ListView.builder(
+//                           shrinkWrap: true,
+//                           physics: const NeverScrollableScrollPhysics(),
+//                           itemCount: data.length,
+//                           itemBuilder: (context, index) {
+//                             return Card(
+//                               margin: const EdgeInsets.symmetric(vertical: 4),
+//                               child: Padding(
+//                                 padding: const EdgeInsets.all(8.0),
+//                                 child: Column(
+//                                   crossAxisAlignment: CrossAxisAlignment.start,
+//                                   children: [
+//                                     /*  Autocomplete<String>(
+//                                       optionsBuilder:
+//                                           (TextEditingValue textEditingValue) {
+//                                         if (textEditingValue.text == '') {
+//                                           return const Iterable<String>.empty();
+//                                         }
+//                                         return descriptionSuggestions
+//                                             .where((String option) {
+//                                           return option.toLowerCase().contains(
+//                                               textEditingValue.text
+//                                                   .toLowerCase());
+//                                         });
+//                                       },
+//                                       onSelected: (String selection) {
+//                                         data[index]['description'] = selection;
+//                                         if (index <
+//                                             reportController
+//                                                 .reportJobDescription.length) {
+//                                           reportController
+//                                               .reportJobDescription[index]
+//                                               .jobDescription
+//                                               .description = selection;
+//                                         }
+//                                       },
+//                                       fieldViewBuilder: (BuildContext context,
+//                                           TextEditingController
+//                                               fieldTextEditingController,
+//                                           FocusNode fieldFocusNode,
+//                                           VoidCallback onFieldSubmitted) {
+//                                         return TextFormField(
+//                                           controller:
+//                                               fieldTextEditingController,
+//                                           focusNode: fieldFocusNode,
+//                                           decoration: const InputDecoration(
+//                                             labelText: 'وصف العمل',
+//                                             labelStyle: TextStyle(
+//                                               color:
+//                                                   AppColorManager.greyAppColor,
+//                                               fontSize: 12,
+//                                             ),
+//                                             border: InputBorder.none,
+//                                           ),
+//                                           onChanged: (value) {
+//                                             data[index]['description'] = value;
+//                                             if (index <
+//                                                 reportController
+//                                                     .reportJobDescription
+//                                                     .length) {
+//                                               reportController
+//                                                   .reportJobDescription[index]
+//                                                   .jobDescription
+//                                                   .description = value;
+//                                             } else {
+//                                               reportController
+//                                                   .reportJobDescription
+//                                                   .add();
+//                                             }
+//                                           },
+//                                         );
+//                                       },
+//                                     ),
+//                                     */
+//                                     Autocomplete<String>(
+//                                       optionsBuilder:
+//                                           (TextEditingValue textEditingValue) {
+//                                         if (textEditingValue.text == '') {
+//                                           return const Iterable<String>.empty();
+//                                         }
+//                                         return descriptionSuggestions
+//                                             .where((String option) {
+//                                           return option.toLowerCase().contains(
+//                                               textEditingValue.text
+//                                                   .toLowerCase());
+//                                         });
+//                                       },
+//                                       onSelected: (String selection) {
+//                                         // Assuming selection is just the description and you can map it to an ID
+//                                         var selectedId =
+//                                             getIdFromDescription(selection);
+//                                         data[index]['description'] = selection;
+//                                         data[index]['job_description_id'] =
+//                                             selectedId; // Ensure this matches your data structure
+//                                         // if (index <
+//                                         //     reportController
+//                                         //         .reportJobDescription.length) {
+//                                         //   reportController
+//                                         //       .reportJobDescription[index]
+//                                         //       .jobDescription
+//                                         //       .description = selection;
+//                                         //   reportController
+//                                         //       .reportJobDescription[index]
+//                                         //       .jobDescription
+//                                         //       .id = selectedId;
+//                                         // }
+//                                         if (index <
+//                                             editController
+//                                                 .jobDescription.length) {
+//                                           editController.jobDescription[index]
+//                                               .description = selection;
+//                                           editController.jobDescription[index]
+//                                               .id = selectedId;
+//                                         }
+//                                       },
+//                                       fieldViewBuilder: (
+//                                         BuildContext context,
+//                                         TextEditingController
+//                                             fieldTextEditingController,
+//                                         FocusNode fieldFocusNode,
+//                                         VoidCallback onFieldSubmitted,
+//                                       ) {
+//                                         return TextFormField(
+//                                           controller:
+//                                               fieldTextEditingController,
+//                                           focusNode: fieldFocusNode,
+//                                           decoration: const InputDecoration(
+//                                             labelText: 'وصف العمل',
+//                                             labelStyle: TextStyle(
+//                                               color:
+//                                                   AppColorManager.greyAppColor,
+//                                               fontSize: 12,
+//                                             ),
+//                                             border: InputBorder.none,
+//                                           ),
+//                                           onChanged: (value) {
+//                                             data[index]['description'] = value;
 
-                                                      print(
-                                                          'material id in screen on change: ${selectedMaterial.id}');
-                                                    }
-                                                  });
-                                                },
-                                                items: editController
-                                                    .materialList
-                                                    .map((material) {
-                                                  return DropdownMenuItem<
-                                                      String>(
-                                                    value: material.name,
-                                                    child: Text(material.name),
-                                                  );
-                                                }).toList(),
-                                              ),
-                                            );
-                                          } else {
-                                            // Return a placeholder widget if materialList is empty
-                                            return const Text(
-                                                'No items available');
-                                          }
-                                        }
-                                      }),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 10),
-                                Row(
-                                  children: [
-                                    SizedBox(
-                                      width: size.width * 0.15,
-                                      child: TextFormField(
-                                        // controller: unitController,
-                                        controller: unitControllers[index],
-                                        readOnly: true,
-                                        decoration: InputDecoration(
-                                          labelText: 'الوحدة',
-                                        ),
-                                        onChanged: (value) {
-                                          // Ensure that the unit list has enough elements to accommodate the index
-                                          if (index <
-                                              editController.unit.length) {
-                                            editController.unit[index] = value;
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    SizedBox(width: 20),
-                                    SizedBox(
-                                      width: size.width * 0.1,
-                                      child: Form(
-                                        key: _formKey2,
-                                        child: TextFormField(
-                                          keyboardType: TextInputType.number,
-                                          controller:
-                                              quantityControllers[index],
-                                          decoration: InputDecoration(
-                                            labelText: 'الكمية',
-                                          ),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'الكمية مطلوبة';
-                                            }
-                                            return null;
-                                          },
-                                          onChanged: (value) {
-                                            updateTotalPrice(index);
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 20),
-                                    SizedBox(
-                                      width: size.width * 0.15,
-                                      child: TextFormField(
-                                        keyboardType: TextInputType.number,
-                                        controller: priceControllers[index],
-                                        readOnly: true,
-                                        decoration: InputDecoration(
-                                          labelText: 'سعر الوحدة',
-                                        ),
-                                        onChanged: (value) {
-                                          updateTotalPrice(index);
-                                        },
-                                      ),
-                                    ),
-                                    SizedBox(width: 20),
-                                    SizedBox(
-                                      width: size.width * 0.15,
-                                      child: TextFormField(
-                                        controller:
-                                            totalpriceControllers[index],
-                                        readOnly: true,
-                                        decoration: InputDecoration(
-                                          labelText: 'السعر الكلي',
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () => _pickImage(index),
-                                    child: Container(
-                                      width:
-                                          300, // Specify the width of the container
-                                      height:
-                                          200, // Specify the height of the container
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        image: DecorationImage(
-                                          fit: BoxFit.cover,
-                                          image: selectedImages[index]
-                                                      ?.isLocal ??
-                                                  false
-                                              ? FileImage(
-                                                      File(
-                                                          selectedImages[index]!
-                                                              .filePath!))
-                                                  as ImageProvider
-                                              : selectedImages[index]
-                                                          ?.isNetwork ??
-                                                      false
-                                                  ? NetworkImage(
-                                                      selectedImages[index]!
-                                                          .networkUrl!)
-                                                  : NetworkImage(
-                                                      "https://cityway.boomuae.com/reports_cityway_backend/public/default.png"),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                  onPressed: () => _deleteItem(index),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                            onPressed:
-                                _addNewItem, // We'll implement this method in the next step
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                            ),
-                            child: const Icon(
-                              Icons.add,
-                              color: AppColorManger.white,
-                            )),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey1.currentState!.validate() &&
-                                _formKey2.currentState!.validate()) {
-                              List<JobDescription> jobDescriptions = [];
-                              for (int i = 0; i < desControllers.length; i++) {
-                                String description = desControllers[i].text;
-                                int quantity =
-                                    int.tryParse(quantityControllers[i].text) ??
-                                        0;
-                                int price =
-                                    int.tryParse(priceControllers[i].text) ?? 0;
-                                int materialId =
-                                    selectedMaterials[i]['id'] ?? 0;
-                                // String? desImgPath = selectedImages[i]
-                                //     ?.filePath; // Path of the image
-                                String? desImgPath;
-                                if (selectedImages[i]?.isLocal ?? false) {
-                                  // New image picked by the user
-                                  desImgPath = selectedImages[i]?.filePath;
-                                } else if (selectedImages[i]?.isNetwork ??
-                                    false) {
-                                  // Existing image from the server
-                                  desImgPath = selectedImages[i]?.networkUrl;
-                                }
-                                print('image in screen: $desImgPath');
-                                // Assuming `JobDescription` constructor can handle all these fields...
-                                JobDescription jobDescription = JobDescription(
-                                  description: description,
-                                  quantity: quantity,
-                                  price: price,
-                                  materialId: materialId,
-                                  desImg: desImgPath,
-                                  // Add any new fields here
-                                );
-                                jobDescriptions.add(jobDescription);
-                              }
-                              // Call the edit method of the controller and pass the jobDescriptions list
-                              EasyLoading.show(
-                                  status: 'loading...', dismissOnTap: true);
-                              await editController.edit(jobDescriptions);
-                              if (editController.editStatus) {
-                                EasyLoading.showSuccess(editController.message,
-                                    duration: const Duration(seconds: 2));
-                                final reportListController =
-                                    Get.find<ReportListController>();
-                                reportListController.fetchReports();
+//                                             if (index <
+//                                                 editController
+//                                                     .jobDescription.length) {
+//                                               editController
+//                                                   .jobDescription[index]
+//                                                   .description = value;
+//                                             } else {
+//                                               // Handle adding a new description logic here, if necessary
+//                                             }
+//                                           },
+//                                         );
+//                                       },
+//                                     ),
+//                                     Row(
+//                                       children: [
+//                                         SizedBox(
+//                                           width: size.width * 0.25,
+//                                           child: TextFormField(
+//                                             onChanged: (value) {
+//                                               data[index]['unit'] = value;
+//                                               if (index <
+//                                                   reportController
+//                                                       .reportDescription
+//                                                       .length) {
+//                                                 reportController
+//                                                     .reportDescription[index]
+//                                                     .note = value;
+//                                               }
+//                                             },
+//                                             decoration: const InputDecoration(
+//                                               labelText: 'الوحدة',
+//                                               labelStyle: TextStyle(
+//                                                 color: AppColorManager
+//                                                     .greyAppColor,
+//                                                 fontSize: 12,
+//                                               ),
+//                                               border: InputBorder.none,
+//                                             ),
+//                                           ),
+//                                         ),
+//                                         SizedBox(
+//                                           width: size.width * 0.25,
+//                                           child: TextFormField(
+//                                             onChanged: (value) {
+//                                               data[index]['quantity'] = value;
+//                                               if (index <
+//                                                   editController
+//                                                       .jobDescription.length) {
+//                                                 editController
+//                                                     .reportDescription[index]
+//                                                     .note = value;
+//                                               }
+//                                             },
+//                                             decoration: const InputDecoration(
+//                                               labelText: 'الكمية',
+//                                               labelStyle: TextStyle(
+//                                                 color: AppColorManager
+//                                                     .greyAppColor,
+//                                                 fontSize: 12,
+//                                               ),
+//                                               border: InputBorder.none,
+//                                             ),
+//                                           ),
+//                                         ),
+//                                         SizedBox(
+//                                           width: size.width * 0.25,
+//                                           child: TextFormField(
+//                                             onChanged: (value) {
+//                                               data[index]['price'] = value;
+//                                               if (index <
+//                                                   reportController
+//                                                       .reportDescription
+//                                                       .length) {
+//                                                 reportController
+//                                                     .reportDescription[index]
+//                                                     .note = value;
+//                                               }
+//                                             },
+//                                             decoration: const InputDecoration(
+//                                               labelText: 'السعر',
+//                                               labelStyle: TextStyle(
+//                                                 color: AppColorManager
+//                                                     .greyAppColor,
+//                                                 fontSize: 12,
+//                                               ),
+//                                               border: InputBorder.none,
+//                                             ),
+//                                           ),
+//                                         ),
+//                                       ],
+//                                     ),
+//                                     Row(
+//                                       mainAxisAlignment:
+//                                           MainAxisAlignment.spaceBetween,
+//                                       children: [
+//                                         GestureDetector(
+//                                           onTap: () async =>
+//                                               await _pickImage(index),
+//                                           child: Padding(
+//                                             padding: const EdgeInsets.symmetric(
+//                                                 vertical: 8),
+//                                             child: data[index]
+//                                                         ['descriptionImage'] ==
+//                                                     null
+//                                                 ? const Icon(Icons.add_a_photo)
+//                                                 : Image.file(
+//                                                     data[index]
+//                                                         ['descriptionImage'],
+//                                                     width: 150,
+//                                                     height: 150,
+//                                                     fit: BoxFit.cover,
+//                                                   ),
+//                                           ),
+//                                         ),
+//                                         IconButton(
+//                                           icon: const Icon(
+//                                             Icons.remove,
+//                                             color: AppColorManager.mainAppColor,
+//                                             size: 30,
+//                                           ),
+//                                           onPressed: () => removeRow(index),
+//                                         ),
+//                                       ],
+//                                     ),
+//                                   ],
+//                                 ),
+//                               ),
+//                             );
+//                           },
+//                         ),
+//                       );
+//                     }),
+//                     const SizedBox(height: 16.0),
+//                     const SizedBox(height: 20),
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         GestureDetector(
+//                           onTap: addRow,
+//                           child: Container(
+//                             height: 35,
+//                             width: 35,
+//                             decoration: const BoxDecoration(
+//                               shape: BoxShape.circle,
+//                               color: Colors.green,
+//                             ),
+//                             child: const Icon(
+//                               Icons.add,
+//                               color: AppColorManager.white,
+//                             ),
+//                           ),
+//                         ),
+//                         SizedBox(
+//                           width: 10,
+//                         ),
+//                         ElevatedButton(
+//                           onPressed: () async {
+//                             print('edit');
+//                             // List<ReportJobDescription> reportJobDescriptions =
+//                             //     [];
+//                             for (int i = 0; i < desControllers.length; i++) {
+//                               int jobDescriptionId =
+//                                   editController.jobDescription[i].id!;
+//                               print("jobDescriptionId: $jobDescriptionId");
+//                               print(
+//                                   "jobDescription : ${editController.jobDescription[i].description}");
+//                               int quantity =
+//                                   int.tryParse(quantityControllers[i].text) ??
+//                                       0;
+//                               int price =
+//                                   int.tryParse(priceControllers[i].text) ?? 0;
+//                               String? desImgPath = selectedImages[i]
+//                                   ?.filePath; // Path of the image
+//                               if (selectedImages[i]?.isLocal ?? false) {
+//                                 // New image picked by the user
+//                                 desImgPath = selectedImages[i]?.filePath;
+//                               } else if (selectedImages[i]?.isNetwork ??
+//                                   false) {
+//                                 // Existing image from the server
+//                                 desImgPath = selectedImages[i]?.networkUrl;
+//                               }
+//                               print('image in screen: $desImgPath');
+//                               // Assuming `JobDescription` constructor can handle all these fields...
+//                               ReportJobDescription reportJobDescription =
+//                                   ReportJobDescription(
+//                                 jobDescriptionId: jobDescriptionId,
+//                                 quantity: quantity,
+//                                 price: price,
+//                                 desImg: desImgPath,
+//                               );
+//                               // reportJobDescriptions.add(reportJobDescription);
+//                             }
+//                             // Call the edit method of the controller and pass the jobDescriptions list
+//                             // EasyLoading.show(
+//                             //     status: 'loading...', dismissOnTap: true);
+//                             // await editController.edit(reportJobDescriptions);
+//                             // if (editController.editStatus) {
+//                             //   EasyLoading.showSuccess(editController.message,
+//                             //       duration: const Duration(seconds: 2));
+//                             //   final reportListController =
+//                             //       Get.find<ReportListController>();
+//                             //   reportListController.fetchReports();
 
-                                Get.offNamed('home');
-                              } else {
-                                EasyLoading.showError(editController.message);
-                                print("error edit report");
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColorManger.mainAppColor,
-                          ),
-                          child: Text("تعديـل",
-                              style: TextStyle(color: AppColorManger.white)),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+//                             //   Get.offNamed('home');
+//                             // } else {
+//                             //   EasyLoading.showError(editController.message);
+//                             //   print("error edit report");
+//                             // }
+//                           },
+//                           style: ElevatedButton.styleFrom(
+//                             backgroundColor: AppColorManager.mainAppColor,
+//                           ),
+//                           child: Text("تعديـل",
+//                               style: TextStyle(color: AppColorManager.white)),
+//                         ),
+//                       ],
+//                     )
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
-class ImageSourceWrapper {
-  String? filePath;
-  String? networkUrl;
+// class ImageSourceWrapper {
+//   String? filePath;
+//   String? networkUrl;
 
-  ImageSourceWrapper({this.filePath, this.networkUrl});
+//   ImageSourceWrapper({this.filePath, this.networkUrl});
 
-  bool get isLocal => filePath != null;
-  bool get isNetwork => networkUrl != null;
-}
+//   bool get isLocal => filePath != null;
+//   bool get isNetwork => networkUrl != null;
+// }

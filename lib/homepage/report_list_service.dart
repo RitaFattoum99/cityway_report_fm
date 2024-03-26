@@ -16,9 +16,6 @@ class ReportListService {
       'Accept': 'application/json'
     });
     if (response.statusCode == 200) {
-      print('response.statusCode: ${response.statusCode} report list');
-      print("response.body: ${response.body}");
-      print("token $token");
       var jsonResponse = jsonDecode(response.body);
       var reportList = Allreports.fromJson(jsonResponse);
 

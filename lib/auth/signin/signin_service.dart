@@ -18,16 +18,22 @@ class SignInService {
   Future<bool> signIn(UserData user) async {
     print("signIn");
 
-    var response = await http.post(url, headers: {}, body: {
+    var response = await http.post(url, headers: {
+      'User-Agent': 'PostmanRuntime/7.37.0',
+      'Accept': 'application/json',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Connection': 'keep-alive'
+    }, body: {
       'email': user.email,
       'password': user.password,
     });
 
     print(response.statusCode);
     print(response.body);
+    var jsonresponse = jsonDecode(response.body);
+    message = jsonresponse['message'];
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      var jsonresponse = jsonDecode(response.body);
       token = jsonresponse['data']['token'];
       role = jsonresponse['data']['roles'][0];
       userID = jsonresponse['data']['id'];
@@ -36,23 +42,24 @@ class SignInService {
       print("token $token");
 
       Information.TOKEN = token;
+      Information.role = role;
+      Information.userId = userID;
       SecureStorage secureStorage = SecureStorage();
       await secureStorage.save("token", Information.TOKEN);
       await secureStorage.save("role", Information.role);
-      Information.role = role;
-      Information.userId = userID;
       await secureStorage.saveInt("id", Information.userId);
       Get.offNamed('home');
 
-      message = "You are logged in successfully";
+      // message = "You are logged in successfully";
       print(message);
       return true;
     } else if (response.statusCode == 422 || response.statusCode == 500) {
-      message = "please verify your information";
+      // message = "please verify your information";
+
       print(message);
       return false;
     } else {
-      message = "there is error..";
+      // message = "there is error..";
       print(message);
       return false;
     }

@@ -36,21 +36,21 @@ class ComplaintParty {
 
 class DataComplaintParty {
   int id;
-  String name;
+  String username;
 
   DataComplaintParty({
     required this.id,
-    required this.name,
+    required this.username,
   });
 
   factory DataComplaintParty.fromJson(Map<String, dynamic> json) =>
       DataComplaintParty(
         id: json["id"],
-        name: json["name"],
+        username: json["username"] ?? '',
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "name": name,
+        "username": username,
       };
 }

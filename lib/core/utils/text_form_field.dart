@@ -33,13 +33,13 @@ class _TextFormFieldWidgetState extends State<TextFormFieldWidget> {
       decoration: InputDecoration(
         labelText: widget.label,
         labelStyle:
-            const TextStyle(color: AppColorManger.greyAppColor, fontSize: 12),
+            const TextStyle(color: AppColorManager.greyAppColor, fontSize: 12),
         hintText: widget.hintText,
         hintStyle:
-            const TextStyle(color: AppColorManger.greyAppColor, fontSize: 10),
+            const TextStyle(color: AppColorManager.greyAppColor, fontSize: 10),
         prefixIcon: Icon(
           widget.icon,
-          color: AppColorManger.mainAppColor,
+          color: AppColorManager.mainAppColor,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),

@@ -1,5 +1,5 @@
 import '/core/resource/color_manager.dart';
-import '/core/resource/size_manger.dart';
+import 'core/resource/size_manager.dart';
 import '/homepage/allreport_model.dart';
 import 'package:flutter/material.dart';
 
@@ -53,9 +53,9 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.only(
-          top: AppPaddingManger.p50,
-          right: AppPaddingManger.p18,
-          left: AppPaddingManger.p18,
+          top: AppPaddingManager.p50,
+          right: AppPaddingManager.p18,
+          left: AppPaddingManager.p18,
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -72,9 +72,9 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                 height: size.height * 0.04,
               ),
               Text(
-                ' رقم البلاغ: ${widget.report.reportNumber}',
+                ' رقم البلاغ: ${widget.report.complaintNumber}',
                 style: const TextStyle(
-                  color: AppColorManger.mainAppColor,
+                  color: AppColorManager.mainAppColor,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -83,14 +83,14 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
               Text(
                 'اسم المشروع : ${widget.report.project}',
                 style: const TextStyle(
-                  color: AppColorManger.secondaryAppColor,
+                  color: AppColorManager.secondaryAppColor,
                   fontSize: 16,
                 ),
               ),
               Text(
                 'الحالة: ${widget.report.location}',
                 style: const TextStyle(
-                  color: AppColorManger.secondaryAppColor,
+                  color: AppColorManager.secondaryAppColor,
                   fontSize: 16,
                 ),
               ),
@@ -101,7 +101,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                   const Text(
                     "وصف الأعمال:",
                     style: TextStyle(
-                        color: AppColorManger.mainAppColor,
+                        color: AppColorManager.mainAppColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 18),
                   ),
@@ -120,7 +120,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                               Text(
                                 desList[index],
                                 style: const TextStyle(
-                                  color: AppColorManger.secondaryAppColor,
+                                  color: AppColorManager.secondaryAppColor,
                                   fontSize: 16,
                                 ),
                               ),
@@ -159,7 +159,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                         const Text(
                           "وصف الأعمال:",
                           style: TextStyle(
-                              color: AppColorManger.mainAppColor,
+                              color: AppColorManager.mainAppColor,
                               fontWeight: FontWeight.bold,
                               fontSize: 18),
                         ),
@@ -186,7 +186,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                                         desList[index],
                                         style: const TextStyle(
                                           color:
-                                              AppColorManger.secondaryAppColor,
+                                              AppColorManager.secondaryAppColor,
                                           fontSize: 16,
                                         ),
                                       ),
@@ -197,7 +197,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                                       const SizedBox(height: 10),
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: AppColorManger.white,
+                                          color: AppColorManager.white,
                                           borderRadius:
                                               BorderRadius.circular(10),
                                         ),

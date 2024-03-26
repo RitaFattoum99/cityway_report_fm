@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       theme: ThemeData(
         colorScheme:
-            ColorScheme.fromSeed(seedColor: AppColorManger.mainAppColor),
+            ColorScheme.fromSeed(seedColor: AppColorManager.mainAppColor),
         useMaterial3: true,
       ),
       localizationsDelegates: const [
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
             binding: SigninBindings()),
         GetPage(
           name: '/home',
-          page: () => const TabBarWithListView(),
+          page: () => TabBarWithListView(),
           binding: ReportListBindings(),
         ),
         GetPage(

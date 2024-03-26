@@ -1,171 +1,202 @@
-import 'package:cityway_report_fm/core/config/information.dart';
-import 'package:cityway_report_fm/core/native_service/secure_storage.dart';
-
-import '/core/resource/color_manager.dart';
-import '/edit_report_fm/edit_screen.dart';
-import '/homepage/reoport_list_controller.dart';
+import 'package:cityway_report_fm/edit_report_fm/test_edit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '/core/config/information.dart';
+import '/core/native_service/secure_storage.dart';
+import '/core/resource/color_manager.dart';
 import '/homepage/allreport_model.dart';
+import 'reoport_list_controller.dart';
 
-class TabBarWithListView extends StatefulWidget {
-  const TabBarWithListView({Key? key}) : super(key: key);
+class TabBarWithListView extends StatelessWidget {
+  TabBarWithListView({Key? key}) : super(key: key);
+
+  final ReportListController controller = Get.put(ReportListController());
 
   @override
-  // ignore: library_private_types_in_public_api
-  _TabBarWithListViewState createState() => _TabBarWithListViewState();
-}
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      // Number of tabs
+      length: 2,
+      child: Scaffold(
+        appBar: _buildAppBar(context),
+        body: TabBarView(
+          children: [
+            _buildReportList(all: true),
+            // Pass a flag to filter for urgent
+            _buildReportList(all: false),
+          ],
+        ),
+        floatingActionButton: _buildAddReportButton(context),
+      ),
+    );
+  }
 
-class _TabBarWithListViewState extends State<TabBarWithListView> {
-  ReportListController controller = Get.put(ReportListController());
-  Future<void> _showLogoutConfirmationDialog() async {
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      title: const Text('التقاريـر'),
+      bottom: const TabBar(
+        tabs: [
+          Tab(text: 'كل التقاريـر'),
+          Tab(text: 'التقاريـر العاجلة'),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () => _showLogoutConfirmationDialog(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReportList({required bool all}) {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      } else {
+        List<DataAllReport> reports = all
+            ? controller.reportList
+            : controller.reportList
+                .where((report) => report.statusClient == 'Urgent')
+                .toList();
+
+        if (reports.isEmpty) {
+          return _buildEmptyListAnimation();
+        } else {
+          return ListView.builder(
+            itemCount: reports.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                  onTap: () {
+                    Get.to(() => EditReportScreen(report: reports[index]));
+                  },
+                  child: _buildReportItem(reports[index]));
+            },
+          );
+        }
+      }
+    });
+  }
+
+  Widget _buildEmptyListAnimation() {
+    return const AnimatedOpacity(
+      opacity: 1.0, // Fully visible
+      duration: Duration(seconds: 2), // Duration of the animation
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(Icons.report_problem, size: 80, color: Colors.grey),
+            Text('ما من بلاغات مقدمة بعد..',
+                style: TextStyle(fontSize: 24, color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReportItem(DataAllReport report) {
+    Color statusColor = _getStatusColor(report.statusClient);
+    String statusValue = _getStatusValue(report.statusClient);
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Container(
+            decoration: _itemDecoration(statusColor),
+            child: ListTile(
+              title: _buildTitle(report),
+              subtitle: Text("حالة المشروع: $statusValue",
+                  style: TextStyle(
+                      color: statusColor, fontWeight: FontWeight.w500)),
+              leading:
+                  Icon(Icons.stacked_bar_chart, color: statusColor, size: 25),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  BoxDecoration _itemDecoration(Color statusColor) {
+    return BoxDecoration(
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: statusColor.withOpacity(0.5),
+          spreadRadius: 3,
+          blurRadius: 4,
+          offset: const Offset(0, 1),
+        ),
+      ],
+      borderRadius: BorderRadius.circular(10),
+    );
+  }
+
+  Column _buildTitle(DataAllReport report) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(report.project,
+            style: const TextStyle(
+                color: AppColorManager.secondaryAppColor,
+                fontWeight: FontWeight.bold)),
+        Text("موقع المشروع: ${report.location}",
+            style: const TextStyle(color: AppColorManager.secondaryAppColor)),
+      ],
+    );
+  }
+
+  FloatingActionButton _buildAddReportButton(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () async {
+        var result = await Get.toNamed('create');
+        if (result == true) {
+          controller.fetchReports();
+        }
+      },
+      backgroundColor: AppColorManager.mainAppColor,
+      child: const Icon(Icons.add, color: AppColorManager.white),
+    );
+  }
+
+  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     final confirmLogout = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('تسجيل خروج'),
-          content: Text('هل أنت متأكد؟'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('إلغاء'),
-              onPressed: () => Navigator.of(context)
-                  .pop(false), // Dismiss the dialog and return false
-            ),
-            TextButton(
-              child: Text('تأكيد'),
-              onPressed: () => Navigator.of(context)
-                  .pop(true), // Dismiss the dialog and return true
-            ),
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: const Text('تسجيل خروج'),
+        content: const Text('هل أنت متأكد؟'),
+        actions: <Widget>[
+          TextButton(
+              child: const Text('إلغاء'),
+              onPressed: () => Navigator.of(context).pop(false)),
+          TextButton(
+              child: const Text('تأكيد'),
+              onPressed: () => Navigator.of(context).pop(true)),
+        ],
+      ),
     );
 
-    // If the user confirmed logout, proceed with the logout logic
     if (confirmLogout == true) {
       _logout();
     }
   }
 
   void _logout() async {
-    // Assuming 'token' is the key for storing token in SecureStorage
     final secureStorage = SecureStorage();
-    await secureStorage.delete('token'); // Delete the token
-    Information.TOKEN = ''; // Clear token from the Information class if needed
-
-    // Navigate to login page, assuming 'login' is the route name for your login screen
+    await secureStorage.delete('token');
+    Information.TOKEN = '';
     Get.offAllNamed('/signin');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('التقاريـر'),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.logout),
-              onPressed:
-                  _showLogoutConfirmationDialog, // Show confirmation dialog
-            ),
-          ],
-        ),
-        body: Obx(
-          () => controller.isLoading.value
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  itemCount: controller.reportList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    DataAllReport report = controller.reportList[index];
-                    Color statusColor = _getStatusColor(report.statusClient!);
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: 15,
-                            left: 10,
-                            right: 10,
-                            bottom: 10,
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.to(() => EditReportScreen(report: report));
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: statusColor.withOpacity(0.5),
-                                    spreadRadius: 3,
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: ListTile(
-                                title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "اسم المشروع: ${report.project}",
-                                      style: const TextStyle(
-                                        color: AppColorManger.secondaryAppColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      "موقع المشروع: ${report.location}",
-                                      style: const TextStyle(
-                                        color: AppColorManger.secondaryAppColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Text(
-                                  "حالة المشروع: ${report.statusClient}",
-                                  style: TextStyle(
-                                    color: statusColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                leading: SizedBox(
-                                  width: 30,
-                                  height: 30,
-                                  child: Icon(
-                                    Icons.stacked_bar_chart,
-                                    color: statusColor,
-                                    size: 25,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Get.toNamed('create');
-          },
-          backgroundColor: AppColorManger.mainAppColor,
-          child: const Icon(
-            Icons.add,
-            color: AppColorManger.white,
-          ),
-        ));
   }
 
   Color _getStatusColor(String status) {
     switch (status) {
+      case 'Urgent':
+        return Colors.red;
       case 'Complete':
         return Colors.green;
       case 'Rejected':
-        return Colors.red;
+        return Colors.pink;
       case 'In-Progress':
         return Colors.blue;
       case 'Pending':
@@ -174,6 +205,25 @@ class _TabBarWithListViewState extends State<TabBarWithListView> {
         return Colors.yellow[700]!;
       default:
         return Colors.purple;
+    }
+  }
+
+  String _getStatusValue(String status) {
+    switch (status) {
+      case 'Urgent':
+        return 'عاجل';
+      case 'Complete':
+        return 'مكتمل';
+      case 'Rejected':
+        return 'مرفوض';
+      case 'In-Progress':
+        return 'قيد التطوير';
+      case 'Pending':
+        return 'قيد الانتظار';
+      case 'Done':
+        return 'منتهي';
+      default:
+        return '';
     }
   }
 }

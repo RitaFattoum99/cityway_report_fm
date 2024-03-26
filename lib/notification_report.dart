@@ -119,7 +119,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
       ),
       body: ListView.separated(
         separatorBuilder: (context, index) => const Divider(
-          color: AppColorManger.babyGreyAppColor,
+          color: AppColorManager.babyGreyAppColor,
           endIndent: 10,
         ),
         itemCount: notifications.length,
@@ -130,11 +130,11 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
               width: 40,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColorManger.babyGreyAppColor,
+                color: AppColorManager.babyGreyAppColor,
               ),
               child: const Icon(
                 Icons.notifications_active,
-                color: AppColorManger.mainAppColor,
+                color: AppColorManager.mainAppColor,
               ),
             ),
             title: Row(
@@ -142,12 +142,12 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
               children: [
                 Text('البلاغ ${notifications[index].reportNumber}',
                     style: const TextStyle(
-                        color: AppColorManger.mainAppColor,
+                        color: AppColorManager.mainAppColor,
                         fontWeight: FontWeight.bold)),
                 Text(
                   DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
                   style: const TextStyle(
-                      color: AppColorManger.secondaryAppColor, fontSize: 10),
+                      color: AppColorManager.secondaryAppColor, fontSize: 10),
                 ),
               ],
             ),
@@ -156,11 +156,11 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
               children: [
                 Text('اسم المشروع: ${notifications[index].reportParty}',
                     style: const TextStyle(
-                        color: AppColorManger.secondaryAppColor,
+                        color: AppColorManager.secondaryAppColor,
                         fontWeight: FontWeight.w700)),
                 Text('الحالة : ${notifications[index].location}',
                     style: const TextStyle(
-                        color: AppColorManger.secondaryAppColor,
+                        color: AppColorManager.secondaryAppColor,
                         fontWeight: FontWeight.bold)),
               ],
             ),

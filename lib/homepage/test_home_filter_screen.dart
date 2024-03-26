@@ -103,7 +103,7 @@ class _TabBarWithListViewState extends State<TabBarWithListView> {
                   top: 15, left: 10, right: 10, bottom: 10),
               child: Container(
                 decoration: BoxDecoration(
-                    color: AppColorManger.white,
+                    color: AppColorManager.white,
                     boxShadow: [
                       BoxShadow(
                         color: statusColor.withOpacity(0.5),
@@ -120,13 +120,13 @@ class _TabBarWithListViewState extends State<TabBarWithListView> {
                       Text(
                         "اسم المشروع: ${report.projectName}",
                         style: const TextStyle(
-                            color: AppColorManger.secondaryAppColor,
+                            color: AppColorManager.secondaryAppColor,
                             fontWeight: FontWeight.bold),
                       ),
                       Text(
                         "موقع المشروع: ${report.location}",
                         style: const TextStyle(
-                          color: AppColorManger.secondaryAppColor,
+                          color: AppColorManager.secondaryAppColor,
                         ),
                       ),
                     ],
@@ -134,7 +134,7 @@ class _TabBarWithListViewState extends State<TabBarWithListView> {
                   subtitle: Text(
                     "حالة المشروع: ${report.status}",
                     style: const TextStyle(
-                        color: AppColorManger.secondaryAppColor,
+                        color: AppColorManager.secondaryAppColor,
                         fontWeight: FontWeight.w500),
                   ),
                   leading: SizedBox(

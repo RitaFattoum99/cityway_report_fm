@@ -3,7 +3,7 @@
 // ignore: depend_on_referenced_packages
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-class AppPaddingManger {
+class AppPaddingManager {
   static const double p2 = 2;
   static const double p3 = 3;
   static const double p5 = 5;
@@ -25,7 +25,7 @@ class AppPaddingManger {
 }
 
 //Radius Manager Through Width Of Screen
-class AppRadiusManger {
+class AppRadiusManager {
   static double r1 = 1.w;
   static double r2 = 2.w;
   static double r3 = 3.w;
@@ -35,7 +35,7 @@ class AppRadiusManger {
 }
 
 //Size Manager For Responsive Size Of Icons Through Width Of Screen
-class AppIconSizeManger {
+class AppIconSizeManager {
   static double s01 = 0.1.w;
   static double s02 = 0.2.w;
   static double s03 = 0.3.w;
@@ -56,7 +56,7 @@ class AppIconSizeManger {
 
 //Responsive Calculated Width Of Device Screen
 //For Example 20.w Mean 20% Of Screen Device Width
-class AppWidthManger {
+class AppWidthManager {
   static double w0point5 = 0.5.w;
   static double w1 = 1.w;
   static double w1Point2 = 1.2.w;
@@ -118,7 +118,7 @@ class AppWidthManger {
 
 //Responsive Calculated Height Of Device Screen
 //For Example 20.h Mean 20% Of Screen Device Height
-class AppHeightManger {
+class AppHeightManager {
   static double h001 = 0.01.h;
   static double h01 = 0.1.h;
   static double h04 = 0.4.h;
