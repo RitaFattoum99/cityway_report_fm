@@ -49,10 +49,15 @@ class _EditReportScreenState extends State<EditReportScreen> {
     super.initState();
     editController.reportId = widget.report.id;
 
-    // Example of initializing jobCards with existing report data
-    // This assumes `report` has a `jobDescriptions` list to iterate over
-    // You need to adjust based on your actual data structure
+    // initializing jobCards with existing report data
     jobCards = widget.report.reportJobDescription.map((repjobDescription) {
+      // Ensure to convert desImg from String to File if desImg is not null
+      // Check if desImg is a URL or a path to a local file
+      final imagePath = repjobDescription.desImg!;
+      final isImageUrl =
+          imagePath.startsWith('http://') || imagePath.startsWith('https://');
+      final image = isImageUrl ? imagePath : File(imagePath);
+
       print("description:  ${repjobDescription.jobDescription!.description}");
       return {
         'description': TextEditingController(
@@ -62,8 +67,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
         'quantity':
             TextEditingController(text: repjobDescription.quantity.toString()),
         'note': TextEditingController(text: repjobDescription.note),
-        'image': repjobDescription
-            .desImg, // This assumes you have a way to convert saved image paths to File objects or similar
+        // 'image': repjobDescription.desImg,
+        // 'image': repjobDescription.desImg != null
+        //     ? File(repjobDescription.desImg!)
+        //     : null,
+        // 'image': imageFile, // Use the converted File object
+        'image': image, // This could now be a String (URL) or File
+
         'unit':
             TextEditingController(text: repjobDescription.jobDescription!.unit),
         'jobDescriptionId': repjobDescription.id,
@@ -120,12 +130,75 @@ class _EditReportScreenState extends State<EditReportScreen> {
     });
   }
 
-  Future<void> _pickImage(Map<String, dynamic> cardData) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+  // Future<void> _pickImage(Map<String, dynamic> cardData) async {
+  //   final picker = ImagePicker();
+  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       cardData['image'] = File(pickedFile.path);
+  //     });
+  //   }
+  // }
+
+  Future<void> _pickImage(int index) async {
+    final option = await showDialog<ImageSource>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('اختر مصدر الصورة',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColorManager.mainAppColor,
+                ),
+                onPressed: () => Navigator.pop(context, ImageSource.camera),
+                child: const Text(
+                  'الكاميرا',
+                  style: TextStyle(color: AppColorManager.white),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColorManager.mainAppColor,
+                ),
+                onPressed: () => Navigator.pop(context, ImageSource.gallery),
+                child: const Text('المعرض',
+                    style: TextStyle(color: AppColorManager.white)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (option == null) return;
+
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: option);
+
+    if (image != null) {
       setState(() {
-        cardData['image'] = File(pickedFile.path);
+        if (index < jobCards.length) {
+          jobCards[index]['image'] = File(image.path);
+          print(jobCards[index]['image']);
+        }
+        if (index < editController.reportJobDescription.length) {
+          editController.reportJobDescription[index].desImg = image.path;
+        } else {
+          // Ensure that the jobDescription list is long enough to add a new item
+          for (int i = editController.reportJobDescription.length;
+              i <= index;
+              i++) {
+            editController.reportJobDescription.add(ReportJobDescription(
+                jobDescription: JobDescription(description: '')));
+          }
+          editController.reportJobDescription[index].desImg = image.path;
+        }
+        print(
+            "img in controller in _pickImage function: ${editController.reportJobDescription[index].desImg}");
       });
     }
   }
@@ -381,13 +454,14 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                     borderRadius: BorderRadius.circular(8),
                                     child: Image.network(
                                       getFullImageUrl(widget.report
-                                          .reportDescription[index].desImg),
+                                          .reportDescription[index].desImg!),
                                       fit: BoxFit.cover,
                                       loadingBuilder: (BuildContext context,
                                           Widget child,
                                           ImageChunkEvent? loadingProgress) {
                                         if (loadingProgress == null) {
-                                          return child; // Image is fully loaded
+                                          // Image is fully loaded
+                                          return child;
                                         }
                                         // While the image is loading, return a loader widget
                                         return Center(
@@ -576,9 +650,46 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      IconButton(
-                                          onPressed: () => _pickImage(data),
-                                          icon: Icon(Icons.camera_enhance)),
+                                      GestureDetector(
+                                        onTap: () async =>
+                                            await _pickImage(index),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8),
+                                          child: jobCards[index]['image'] ==
+                                                  null
+                                              ? const Icon(Icons.add_a_photo)
+                                              : jobCards[index]['image'] is File
+                                                  ? Image.file(
+                                                      jobCards[index]['image'],
+                                                      width: 150,
+                                                      height: 150,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.network(
+                                                      jobCards[index]['image'],
+                                                      width: 150,
+                                                      height: 150,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                        ),
+                                      ),
+                                      // GestureDetector(
+                                      //   onTap: () async =>
+                                      //       await _pickImage(index),
+                                      //   child: Padding(
+                                      //       padding: const EdgeInsets.symmetric(
+                                      //           vertical: 8),
+                                      //       child: jobCards[index]['image'] ==
+                                      //               null
+                                      //           ? const Icon(Icons.add_a_photo)
+                                      //           : Image.file(
+                                      //               jobCards[index]['image'],
+                                      //               width: 150,
+                                      //               height: 150,
+                                      //               fit: BoxFit.cover,
+                                      //             )),
+                                      // ),
                                       GestureDetector(
                                         onTap: () {
                                           _removeJobCard(index);
@@ -598,10 +709,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                       ),
                                     ],
                                   ),
-                                  // Display the selected image if available
-                                  // if (data['image'] != null)
-                                  //   Image.file(File(data[
-                                  //       'image'])), // Wrap the string path with File()
                                 ],
                               ),
                             ),
@@ -643,9 +750,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                           note: card['note'].text,
                           price: int.tryParse(card['price'].text) ?? 0,
                           quantity: int.tryParse(card['quantity'].text) ?? 0,
-
-                          desImg: card[
-                              'image'], // Assuming you handle File to String conversion in the controller
+                          desImg: card['image'].path,
                           jobDescriptionId: card['jobDescriptionId'],
                         );
                       }).toList();

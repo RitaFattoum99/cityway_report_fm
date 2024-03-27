@@ -234,8 +234,8 @@ class ReportJobDescription {
   int id;
   int reportId;
   int jobDescriptionId;
-  String desImg;
-  String afterDesImg;
+  File desImg;
+  File afterDesImg;
   int price;
   int quantity;
   dynamic note;

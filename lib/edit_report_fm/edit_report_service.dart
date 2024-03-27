@@ -39,19 +39,19 @@ class EditReportService {
         request.fields['report_job_description[$i][note]'] =
             reportJobDescription[i].note.toString();
 
-        // if (jobDescriptions[i].desImg != null) {
-        //   var imageFile = File(jobDescriptions[i].desImg!);
-        //   var stream = http.ByteStream(imageFile.openRead())..cast<List<int>>();
-        //   var length = await imageFile.length();
-        //   var multipartFile = http.MultipartFile(
-        //     'job_descriptions[$i][des_img]',
-        //     stream,
-        //     length,
-        //     filename: basename(imageFile.path),
-        //   );
-        //   request.files.add(multipartFile);
-        //   print("multipartFile: $multipartFile");
-        // }
+        if (reportJobDescription[i].desImg != null) {
+          var imageFile = File(reportJobDescription[i].desImg!);
+          var stream = http.ByteStream(imageFile.openRead())..cast<List<int>>();
+          var length = await imageFile.length();
+          var multipartFile = http.MultipartFile(
+            'report_job_description[$i][des_img]',
+            stream,
+            length,
+            filename: basename(imageFile.path),
+          );
+          request.files.add(multipartFile);
+          print("multipartFile: $multipartFile");
+        }
       }
       // Print the entire request just before sending
       print('Final Request: ${request.fields}');
