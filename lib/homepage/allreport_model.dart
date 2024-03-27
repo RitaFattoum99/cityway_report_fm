@@ -42,7 +42,7 @@ class DataAllReport {
   String googleMapLocation;
   int complaintPartyId;
   String complaintNumber;
-  DateTime complaintDate;
+  DateTime? complaintDate;
   DateTime? reportDate;
   String typeOfWork;
   dynamic contractNumber;
@@ -87,13 +87,15 @@ class DataAllReport {
 
   factory DataAllReport.fromJson(Map<String, dynamic> json) => DataAllReport(
         id: json["id"],
-        qrCode: json["qr_code"],
+        qrCode: json["qr_code"] ?? '',
         project: json["project"],
         location: json["location"],
         googleMapLocation: json["google_map_location"],
         complaintPartyId: json["complaint_party_id"],
         complaintNumber: json["complaint_number"],
-        complaintDate: DateTime.parse(json["complaint_date"]),
+        complaintDate: json["complaint_date"] == null
+            ? null
+            : DateTime.parse(json["complaint_date"]),
         reportDate: json["report_date"] == null
             ? null
             : DateTime.parse(json["report_date"]),
@@ -107,8 +109,8 @@ class DataAllReport {
             : DateTime.parse(json["finishing_date_of_work"]),
         statusClient: json["status_client"],
         statusAdmin: json["status_admin"],
-        urgent: json["urgent"],
-        budget: json["budget"],
+        urgent: json["urgent"]?? 0,
+        budget: json["budget"]?? 0,
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
         complaintParty: json["complaint_party"],
@@ -131,7 +133,7 @@ class DataAllReport {
         "complaint_party_id": complaintPartyId,
         "complaint_number": complaintNumber,
         "complaint_date":
-            "${complaintDate.year.toString().padLeft(4, '0')}-${complaintDate.month.toString().padLeft(2, '0')}-${complaintDate.day.toString().padLeft(2, '0')}",
+            "${complaintDate!.year.toString().padLeft(4, '0')}-${complaintDate!.month.toString().padLeft(2, '0')}-${complaintDate!.day.toString().padLeft(2, '0')}",
         "report_date":
             "${reportDate!.year.toString().padLeft(4, '0')}-${reportDate!.month.toString().padLeft(2, '0')}-${reportDate!.day.toString().padLeft(2, '0')}",
         "type_of_work": typeOfWork,

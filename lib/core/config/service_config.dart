@@ -1,9 +1,9 @@
 class ServiceConfig {
   //local wifi: 'http://192.168.1.106:8000/api/'
-  //local rita: 'http://192.168.172.20:8000/api/'
+  //local rita: 'http://192.168.80.1:8000/api/'
   //remote: 'https://cityway.boomuae.com/api/'
-  static const domainNameServer = 'http://192.168.1.106:8000/api/';
-  static String baseUrl = 'http://192.168.1.106:8000';
+  static const domainNameServer = 'https://cityway-reports.katbi.net/api/';
+  static String baseUrl = 'https://cityway-reports.katbi.net/';
 
 //! Auth
   static const signIn = 'login';

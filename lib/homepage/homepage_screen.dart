@@ -1,4 +1,4 @@
-import 'package:cityway_report_fm/edit_report_fm/test_edit.dart';
+import 'package:cityway_report_fm/edit_report_fm/edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '/core/config/information.dart';

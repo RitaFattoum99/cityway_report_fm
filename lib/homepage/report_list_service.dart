@@ -1,4 +1,3 @@
-
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
@@ -22,7 +21,8 @@ class ReportListService {
       // Access the list of reports
       var reports = reportList.data;
       for (var report in reports) {
-        print(report.id); // Print the 'id' property of each report
+        // Print the 'id' property of each report
+        print(report.id);
       }
 
       return reports;
@@ -30,7 +30,7 @@ class ReportListService {
       print("token $token");
       print(response.statusCode);
       print(response.body);
-      throw Exception('Failed to load order list');
+      throw Exception('Failed to load list');
     }
   }
 }

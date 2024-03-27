@@ -24,7 +24,7 @@ class ReportService {
       ..fields['type_of_work'] = report.typeOfWork!
       ..fields['urgent'] = report.urgent.toString()
       ..fields['budget'] = report.budget.toString();
-      
+
     final List<String?> contactInfo =
         report.contactInfo!.map((e) => e.name).toList();
 
@@ -36,8 +36,9 @@ class ReportService {
           info.position.toString();
     }
 
-    final List<String?> jobDescriptions =
-        report.reportDescription!.map((jobDesc) => jobDesc.description).toList();
+    final List<String?> jobDescriptions = report.reportDescription!
+        .map((jobDesc) => jobDesc.description)
+        .toList();
 
     for (int i = 0; i < jobDescriptions.length; i++) {
       final jobDesc = report.reportDescription![i];
@@ -147,6 +148,7 @@ class ReportService {
       return complaintList.data;
     } else {
       print("Failed to load ComplaintParty list");
+      print(response.body);
       throw Exception('Failed to load ComplaintParty list');
     }
   }
