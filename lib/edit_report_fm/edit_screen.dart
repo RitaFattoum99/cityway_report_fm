@@ -28,10 +28,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
   final List<TextEditingController> controllers = [];
 
   final _formKey = GlobalKey<FormState>();
-  final _formKey1 = GlobalKey<FormState>();
-  final _formKey2 = GlobalKey<FormState>();
-  final _formKey3 = GlobalKey<FormState>();
-  final _formKey4 = GlobalKey<FormState>();
 
   late List<Map<String, dynamic>> jobCards = [
     {
@@ -417,7 +413,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         separatorBuilder: (context, index) =>
                             SizedBox(width: 20),
                         scrollDirection: Axis.horizontal,
-                        physics: const NeverScrollableScrollPhysics(),
                         itemCount: widget.report.reportDescription.length,
                         itemBuilder: (BuildContext context, int index) {
                           return Column(
@@ -806,11 +801,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         print("تعديل");
-                        // Iterate through jobCards to update editController data
                         var updatedJobDescriptions = jobCards.map((card) {
-                          // Check if card['image'] is null and provide a default value or handle accordingly
-                          // This will be null if card['image'] is null
-                          // String? imagePath = card['image'];
                           String? imagePath;
                           if (card['image'] is File) {
                             imagePath = (card['image'] as File).path;
