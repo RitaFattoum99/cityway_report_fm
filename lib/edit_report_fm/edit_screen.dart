@@ -730,8 +730,9 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                                                 ImageChunkEvent?
                                                                     loadingProgress) {
                                                           if (loadingProgress ==
-                                                              null)
+                                                              null) {
                                                             return child; // If the image is fully loaded, display it
+                                                          }
                                                           return Center(
                                                             child:
                                                                 CircularProgressIndicator(
