@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
 import 'dart:io';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/config/service_config.dart';
@@ -41,6 +42,40 @@ class _EditReportScreenState extends State<EditReportScreen> {
     }
   ];
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   editController.reportId = widget.report.id;
+
+  //   // initializing jobCards with existing report data
+  //   jobCards = widget.report.reportJobDescription.map((repjobDescription) {
+  //     // Ensure to convert desImg from String to File if desImg is not null
+  //     // Check if desImg is a URL or a path to a local file
+  //     final imagePath = repjobDescription.desImg!;
+  //     final isImageUrl =
+  //         imagePath.startsWith('http://') || imagePath.startsWith('https://');
+  //     final image = isImageUrl ? imagePath : File(imagePath);
+
+  //     return {
+  //       'description': TextEditingController(
+  //           text: repjobDescription.jobDescription?.description ?? ''),
+
+  //       // TextEditingController(
+  //       //     text: repjobDescription.jobDescription!.description.toString()),
+  //       'price':
+  //           TextEditingController(text: repjobDescription.price.toString()),
+  //       'quantity':
+  //           TextEditingController(text: repjobDescription.quantity.toString()),
+  //       'note': TextEditingController(text: repjobDescription.note),
+  //       // This could be a String (URL) or File
+  //       'image': image,
+  //       'unit':
+  //           TextEditingController(text: repjobDescription.jobDescription!.unit),
+  //       'jobDescriptionId': repjobDescription.id,
+  //     };
+  //   }).toList();
+  // }
+
   @override
   void initState() {
     super.initState();
@@ -48,26 +83,22 @@ class _EditReportScreenState extends State<EditReportScreen> {
 
     // initializing jobCards with existing report data
     jobCards = widget.report.reportJobDescription.map((repjobDescription) {
-      // Ensure to convert desImg from String to File if desImg is not null
-      // Check if desImg is a URL or a path to a local file
       final imagePath = repjobDescription.desImg!;
       final isImageUrl =
           imagePath.startsWith('http://') || imagePath.startsWith('https://');
-      final image = isImageUrl ? imagePath : File(imagePath);
+      final image =
+          isImageUrl ? imagePath : File(imagePath); // No change for local files
 
       return {
         'description': TextEditingController(
             text: repjobDescription.jobDescription?.description ?? ''),
-
-        // TextEditingController(
-        //     text: repjobDescription.jobDescription!.description.toString()),
         'price':
             TextEditingController(text: repjobDescription.price.toString()),
         'quantity':
             TextEditingController(text: repjobDescription.quantity.toString()),
         'note': TextEditingController(text: repjobDescription.note),
-        // This could be a String (URL) or File
-        'image': image,
+        'image':
+            image, // This will now correctly be either a String (URL) or File
         'unit':
             TextEditingController(text: repjobDescription.jobDescription!.unit),
         'jobDescriptionId': repjobDescription.id,
@@ -212,23 +243,33 @@ class _EditReportScreenState extends State<EditReportScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(''), // Customize with your screen title
+        title: const Text(
+          'إضافة وصف الأعمال',
+          style: TextStyle(color: AppColorManager.white),
+        ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: AppColorManager.mainAppColor,
+            color: AppColorManager.white,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: <Widget>[
-          IconButton(
-            icon: Image.asset("assets/images/logo.png"),
-            onPressed: () {
-              print('Image icon pressed');
-            },
-          ),
-        ],
-        // backgroundColor: AppColorManager.white,
+        // actions: <Widget>[
+        // Container(
+        //   decoration: BoxDecoration(
+        //       color: AppColorManager.white, shape: BoxShape.circle),
+        //   child: Padding(
+        //     padding: const EdgeInsets.all(8.0),
+        //     child: IconButton(
+        //       icon: Image.asset("assets/images/logo.png"),
+        //       onPressed: () {
+        //         print('Image icon pressed');
+        //       },
+        //     ),
+        //   ),
+        // ),
+        // ],
+        backgroundColor: AppColorManager.mainAppColor,
       ),
       body: Padding(
         padding: const EdgeInsets.only(
@@ -878,5 +919,39 @@ class _EditReportScreenState extends State<EditReportScreen> {
         ),
       ),
     );
+  }
+}
+
+Widget displayImage(dynamic image) {
+  if (image is String &&
+      (image.startsWith('http://') || image.startsWith('https://'))) {
+    // It's a URL
+    return Image.network(
+      image,
+      fit: BoxFit.cover,
+      loadingBuilder: (BuildContext context, Widget child,
+          ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+            child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null));
+      },
+      errorBuilder:
+          (BuildContext context, Object error, StackTrace? stackTrace) {
+        return Center(child: Icon(Icons.error));
+      },
+    );
+  } else if (image is File) {
+    // It's a local file
+    return Image.file(
+      image,
+      fit: BoxFit.cover,
+    );
+  } else {
+    // Placeholder in case of null or unsupported type
+    return Icon(Icons.broken_image);
   }
 }

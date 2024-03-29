@@ -200,10 +200,25 @@ class _CreateReportState extends State<CreateReport> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'إنشاء تقرير',
+          style: TextStyle(color: AppColorManager.white),
+        ), // Customize with your screen title
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: AppColorManager.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+
+        backgroundColor: AppColorManager.mainAppColor,
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(
-              top: AppPaddingManager.p60,
+              top: AppPaddingManager.p20,
               left: AppPaddingManager.p12,
               right: AppPaddingManager.p12,
               bottom: AppPaddingManager.p12),
@@ -213,13 +228,13 @@ class _CreateReportState extends State<CreateReport> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: SizedBox(
-                    height: size.height * 0.1,
-                    child: Image.asset('assets/images/logo.png'),
-                  ),
-                ),
-                const SizedBox(height: 10),
+                // Center(
+                //   child: SizedBox(
+                //     height: size.height * 0.1,
+                //     child: Image.asset('assets/images/logo.png'),
+                //   ),
+                // ),
+                // const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -336,6 +351,8 @@ class _CreateReportState extends State<CreateReport> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 10.0),
+
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -553,11 +570,10 @@ class _CreateReportState extends State<CreateReport> {
                 ),
                 Obx(() {
                   final descriptionSuggestions = reportController.desList
-                      .map((des) => des
-                          .description) // Assuming your model has a 'description' field
+                      .map((des) => des.description)
                       .toList();
                   return SizedBox(
-                   width: double.infinity,
+                    width: double.infinity,
                     child: ListView.builder(
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,

@@ -60,14 +60,14 @@ class SignUpService {
         print("token : $token");
         print("email : $email");
         Information.TOKEN = token;
-        SecureStorage secureStorage = SecureStorage();
-        await secureStorage.save("token", Information.TOKEN);
-        await secureStorage.save("username", Information.username);
-        await secureStorage.save("email", Information.email);
         Information.role = role;
         Information.userId = userID;
         Information.username = username;
         Information.email = email;
+        SecureStorage secureStorage = SecureStorage();
+        await secureStorage.save("token", Information.TOKEN);
+        await secureStorage.save("username", Information.username);
+        await secureStorage.save("email", Information.email);
         await secureStorage.saveInt("id", Information.userId);
         Get.offNamed('home');
 

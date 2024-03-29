@@ -13,102 +13,110 @@ class ReportService {
   var message;
   var url = Uri.parse(ServiceConfig.domainNameServer + ServiceConfig.create);
   Future<bool> create(Data report, String token) async {
-    print("create");
-    final request = http.MultipartRequest('POST', url)
-      ..fields['google_map_location'] =
-          "https://maps.app.goo.gl/C192Q5MHTATT45SRA"
-      ..fields['project'] = report.project!
-      ..fields['location'] = report.location!
-      ..fields['complaint_number'] = report.complaintNumber!
-      ..fields['complaint_party_id'] = report.complaintPartyId.toString()
-      ..fields['type_of_work'] = report.typeOfWork!
-      ..fields['urgent'] = report.urgent.toString()
-      ..fields['budget'] = report.budget.toString();
+    try {
+      print("create");
+      final request = http.MultipartRequest('POST', url)
+        ..fields['google_map_location'] =
+            "https://maps.app.goo.gl/C192Q5MHTATT45SRA"
+        ..fields['project'] = report.project!
+        ..fields['location'] = report.location!
+        ..fields['complaint_number'] = report.complaintNumber!
+        ..fields['complaint_party_id'] = report.complaintPartyId.toString()
+        ..fields['type_of_work'] = report.typeOfWork!
+        ..fields['urgent'] = report.urgent.toString()
+        ..fields['budget'] = report.budget.toString();
 
-    final List<String?> contactInfo =
-        report.contactInfo!.map((e) => e.name).toList();
+      final List<String?> contactInfo =
+          report.contactInfo!.map((e) => e.name).toList();
 
-    for (int i = 0; i < contactInfo.length; i++) {
-      final info = report.contactInfo![i];
-      request.fields['report_contact_info[$i][name]'] = info.name.toString();
-      request.fields['report_contact_info[$i][phone]'] = info.phone.toString();
-      request.fields['report_contact_info[$i][position]'] =
-          info.position.toString();
-    }
+      for (int i = 0; i < contactInfo.length; i++) {
+        final info = report.contactInfo![i];
+        request.fields['report_contact_info[$i][name]'] = info.name.toString();
+        request.fields['report_contact_info[$i][phone]'] =
+            info.phone.toString();
+        request.fields['report_contact_info[$i][position]'] =
+            info.position.toString();
+      }
 
-    final List<String?> jobDescriptions = report.reportDescription!
-        .map((jobDesc) => jobDesc.description)
-        .toList();
+      final List<String?> jobDescriptions = report.reportDescription!
+          .map((jobDesc) => jobDesc.description)
+          .toList();
 
-    for (int i = 0; i < jobDescriptions.length; i++) {
-      final jobDesc = report.reportDescription![i];
-      request.fields['report_descriptions[$i][description]'] =
-          jobDesc.description.toString();
-      request.fields['report_descriptions[$i][note]'] = jobDesc.note.toString();
+      for (int i = 0; i < jobDescriptions.length; i++) {
+        final jobDesc = report.reportDescription![i];
+        request.fields['report_descriptions[$i][description]'] =
+            jobDesc.description.toString();
+        request.fields['report_descriptions[$i][note]'] =
+            jobDesc.note.toString();
 
-      if (jobDesc.desImg != null) {
         if (jobDesc.desImg != null) {
-          // Convert image to base64
-          final bytes = await File(jobDesc.desImg!.path).readAsBytes();
-          String imageName = File(jobDesc.desImg!.path).path.split("/").last;
+          if (jobDesc.desImg != null) {
+            // Convert image to base64
+            final bytes = await File(jobDesc.desImg!.path).readAsBytes();
+            String imageName = File(jobDesc.desImg!.path).path.split("/").last;
 
-          // Add base64-encoded image to the request
-          request.fields['report_descriptions[$i][des_img]'] = imageName;
+            // Add base64-encoded image to the request
+            request.fields['report_descriptions[$i][des_img]'] = imageName;
 
-          // Add image as a file to the request
-          request.files.add(http.MultipartFile.fromBytes(
-            'report_descriptions[$i][des_img]',
-            bytes,
-            filename: imageName,
-          ));
+            // Add image as a file to the request
+            request.files.add(http.MultipartFile.fromBytes(
+              'report_descriptions[$i][des_img]',
+              bytes,
+              filename: imageName,
+            ));
+          }
         }
       }
-    }
 
-    // Print the entire request just before sending
-    print('Final Request: ${request.fields}');
-    print('Files: ${request.files}');
-    print(request.fields);
+      // Print the entire request just before sending
+      print('Final Request: ${request.fields}');
+      print('Files: ${request.files}');
+      print(request.fields);
 
-    request.headers.addAll({
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token',
-      'Connection': 'keep-alive',
-      'User-Agent': 'PostmanRuntime/7.36.3',
-    });
-    print("request.fields");
+      request.headers.addAll({
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Connection': 'keep-alive',
+        'User-Agent': 'PostmanRuntime/7.36.3',
+      });
+      print("request.fields");
 
-    final response = await request.send();
+      final response = await request.send();
 
-    final Map<String, dynamic> jsonResponse =
-        json.decode(await response.stream.bytesToString());
-    print("Response: $jsonResponse");
-    print("Status Code: ${response.statusCode}");
-    print("message: ${jsonEncode(message)}");
-    if (jsonResponse.containsKey('message')) {
-      message = jsonResponse['message'];
-      print(message);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        print(response.statusCode);
-        return true;
-      } else {
+      final Map<String, dynamic> jsonResponse =
+          json.decode(await response.stream.bytesToString());
+      print("Response: $jsonResponse");
+      print("Status Code: ${response.statusCode}");
+      print("message: ${jsonEncode(message)}");
+      if (jsonResponse.containsKey('message')) {
+        message = jsonResponse['message'];
         print(message);
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          print(response.statusCode);
+          message = jsonResponse['message'] ?? "Report Edited Successfully";
+          print("message: ${jsonEncode(message)}");
+          return true;
+        }
+        print(response.statusCode);
+        print(message);
+        return true;
+      } else if (response.statusCode == 422) {
+        print(response.statusCode);
+        message = jsonResponse['message'] ?? "Failed to edit report";
+        print(message);
+        return false;
+      } else if (response.statusCode == 500) {
+        print(response.statusCode);
+        print(message);
+        return false;
+      } else {
+        print(response.statusCode);
+        print(message);
+        return false;
       }
-      print(response.statusCode);
-      print(message);
-      return true;
-    } else if (response.statusCode == 422) {
-      print(response.statusCode);
-      print(message);
-      return false;
-    } else if (response.statusCode == 500) {
-      print(response.statusCode);
-      print(message);
-      return false;
-    } else {
-      print(response.statusCode);
-      print(message);
+    } catch (e) {
+      message = 'Exception caught: $e';
       return false;
     }
   }
