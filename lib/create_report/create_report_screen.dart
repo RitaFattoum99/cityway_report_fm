@@ -794,6 +794,8 @@ class _CreateReportState extends State<CreateReport> {
                           for (int i = 0; i < data.length; i++) {
                             reportController.reportDescription[i].description =
                                 data[i]['description'];
+                            // reportController.reportDescription[i].description = data[i]['description']['someKey'];
+
                             String noteText;
                             if (data[i]['note'] is TextEditingController) {
                               noteText = data[i]['note'].text;

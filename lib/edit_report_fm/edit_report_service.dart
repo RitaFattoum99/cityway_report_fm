@@ -40,7 +40,7 @@ class EditReportService {
             reportJobDescription[i].note.toString();
 
         if (reportJobDescription[i].desImg != null) {
-          var imageFile = File(reportJobDescription[i].desImg!);
+          File imageFile = await downloadImage(reportJobDescription[i].desImg!);
           var stream = http.ByteStream(imageFile.openRead())..cast<List<int>>();
           var length = await imageFile.length();
           var multipartFile = http.MultipartFile(
@@ -91,7 +91,6 @@ class EditReportService {
     final documentDirectory = await getApplicationDocumentsDirectory();
     final fileName = basename(url);
     final file = File('${documentDirectory.path}/$fileName');
-
     await file.writeAsBytes(response.bodyBytes);
     return file;
   }
