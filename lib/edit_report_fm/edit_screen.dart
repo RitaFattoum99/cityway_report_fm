@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
 import 'dart:io';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/config/service_config.dart';
@@ -830,14 +829,17 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         if (editController.editStatus) {
                           print("editStatus: ${editController.editStatus}");
                           EasyLoading.showSuccess(editController.message,
-                              duration: const Duration(seconds: 2));
+                              duration: const Duration(seconds: 3));
+                          print(editController.message);
+
                           final reportListController =
                               Get.find<ReportListController>();
                           reportListController.fetchReports();
                           Get.offNamed('home');
                         } else {
-                          EasyLoading.showError(reportController.message);
-                          print("error edit report");
+                          EasyLoading.showError(editController.message,
+                              duration: const Duration(seconds: 3));
+                          print(editController.message);
                         }
                       }
                     },

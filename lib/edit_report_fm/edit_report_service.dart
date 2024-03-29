@@ -77,7 +77,7 @@ class EditReportService {
         print("Response: $jsonResponse");
         print("Status Code: ${response.statusCode}");
         print("message: ${jsonEncode(message)}");
-        message = jsonResponse['error'] ?? "Failed to edit report";
+        message = jsonResponse['message'] ?? "Failed to edit report";
         return false;
       }
     } catch (e) {
