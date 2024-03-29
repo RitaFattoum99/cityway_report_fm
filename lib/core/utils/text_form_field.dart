@@ -8,7 +8,7 @@ class TextFormFieldWidget extends StatefulWidget {
   IconData icon;
   String label;
   String hintText;
-  String valedate;
+  final String? Function(String?)? validator; // Add validator
   final Function(String?) onChanged;
   TextFormFieldWidget(
       {super.key,
@@ -16,7 +16,7 @@ class TextFormFieldWidget extends StatefulWidget {
       required this.controller,
       required this.label,
       required this.hintText,
-      required this.valedate,
+      required this.validator,
       required this.onChanged});
 
   @override
@@ -46,12 +46,8 @@ class _TextFormFieldWidgetState extends State<TextFormFieldWidget> {
         ),
         contentPadding: const EdgeInsets.all(12.0),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return widget.valedate;
-        }
-        return null;
-      },
+      validator: widget.validator,
+      
     );
   }
 }

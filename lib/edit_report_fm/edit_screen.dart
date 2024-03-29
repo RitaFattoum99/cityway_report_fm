@@ -27,6 +27,8 @@ class _EditReportScreenState extends State<EditReportScreen> {
   final ReportController reportController = Get.put(ReportController());
   final List<TextEditingController> controllers = [];
 
+  // final _formKey = GlobalKey<FormState>();
+
   late List<Map<String, dynamic>> jobCards = [
     {
       'description': TextEditingController(),
@@ -480,17 +482,15 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                                         .cumulativeBytesLoaded /
                                                     loadingProgress
                                                         .expectedTotalBytes!
-                                                : null, // Progress indicator
+                                                : null,
                                           ),
                                         );
                                       },
                                       errorBuilder: (BuildContext context,
                                           Object error,
                                           StackTrace? stackTrace) {
-                                        // Optionally handle errors, e.g., display a placeholder image
                                         return Center(
-                                          child: Icon(Icons
-                                              .error), // Example error icon
+                                          child: Icon(Icons.error),
                                         );
                                       },
                                     ),
@@ -525,211 +525,200 @@ class _EditReportScreenState extends State<EditReportScreen> {
                             margin: const EdgeInsets.all(8.0),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  // Display and edit fields here, similar to JobCard's build method
-                                  Autocomplete<DataAllDes>(
-                                    displayStringForOption:
-                                        (DataAllDes option) =>
-                                            option.description,
-                                    optionsBuilder:
-                                        (TextEditingValue textEditingValue) {
-                                      if (textEditingValue.text == '') {
-                                        return const Iterable<
-                                            DataAllDes>.empty();
-                                      }
-                                      return reportController.desList
-                                          .where((DataAllDes item) {
-                                        return item.description
-                                            .toLowerCase()
-                                            .contains(textEditingValue.text
-                                                .toLowerCase());
-                                      });
-                                    },
-                                    optionsViewBuilder: (BuildContext context,
-                                        AutocompleteOnSelected<DataAllDes>
-                                            onSelected,
-                                        Iterable<DataAllDes> options) {
-                                      return Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Material(
-                                          child: SizedBox(
-                                            width: 300,
-                                            child: ListView.builder(
-                                              itemCount: options.length,
-                                              itemBuilder:
-                                                  (BuildContext context,
-                                                      int index) {
-                                                final DataAllDes option =
-                                                    options.elementAt(index);
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    onSelected(option);
-                                                  },
-                                                  child: ListTile(
-                                                    title: Text(
-                                                        option.description),
-                                                    subtitle: Text(
-                                                        "السعر: ${option.price}, الوحدة: ${option.unit}"),
-                                                  ),
-                                                );
-                                              },
+                              child: Form(
+                                // key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    // Display and edit fields here, similar to JobCard's build method
+                                    Autocomplete<DataAllDes>(
+                                      displayStringForOption:
+                                          (DataAllDes option) =>
+                                              option.description,
+                                      optionsBuilder:
+                                          (TextEditingValue textEditingValue) {
+                                        if (textEditingValue.text == '') {
+                                          return const Iterable<
+                                              DataAllDes>.empty();
+                                        }
+                                        return reportController.desList
+                                            .where((DataAllDes item) {
+                                          return item.description
+                                              .toLowerCase()
+                                              .contains(textEditingValue.text
+                                                  .toLowerCase());
+                                        });
+                                      },
+                                      optionsViewBuilder: (BuildContext context,
+                                          AutocompleteOnSelected<DataAllDes>
+                                              onSelected,
+                                          Iterable<DataAllDes> options) {
+                                        return Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Material(
+                                            child: SizedBox(
+                                              width: 300,
+                                              child: ListView.builder(
+                                                itemCount: options.length,
+                                                itemBuilder:
+                                                    (BuildContext context,
+                                                        int index) {
+                                                  final DataAllDes option =
+                                                      options.elementAt(index);
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      onSelected(option);
+                                                    },
+                                                    child: ListTile(
+                                                      title: Text(
+                                                          option.description),
+                                                      subtitle: Text(
+                                                          "السعر: ${option.price}, الوحدة: ${option.unit}"),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      onSelected: (DataAllDes selection) =>
+                                          _onAutocompleteSelected(
+                                              selection, data),
+                                      fieldViewBuilder: (
+                                        BuildContext context,
+                                        TextEditingController
+                                            fieldTextEditingController,
+                                        FocusNode fieldFocusNode,
+                                        VoidCallback onFieldSubmitted,
+                                      ) {
+                                        // Safely obtain the initial value using the function
+                                        String? initialValue =
+                                            getJobDescriptionAt(index);
+
+                                        // Set the initial value only if the controller's text is empty
+                                        if (fieldTextEditingController
+                                                .text.isEmpty &&
+                                            initialValue!.isNotEmpty) {
+                                          fieldTextEditingController.text =
+                                              initialValue;
+                                        }
+                                        return TextFormField(
+                                          controller:
+                                              fieldTextEditingController,
+                                          focusNode: fieldFocusNode,
+                                          decoration: const InputDecoration(
+                                              labelText: 'الوصف'),
+                                          // onChanged is not needed if the text is directly bound to the state,
+                                          // but consider providing a way to update the state if the text changes
+                                          onChanged: (value) => setState(() =>
+                                              data['description'].text = value),
+                                        );
+                                      },
+                                    ),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextFormField(
+                                            controller: data['unit'],
+                                            decoration: const InputDecoration(
+                                                labelText: 'الوحدة'),
+                                            onChanged: (value) => setState(() =>
+                                                data['unit'].text = value),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: TextFormField(
+                                            controller: data['price'],
+                                            decoration: const InputDecoration(
+                                                labelText: 'السعر'),
+                                            keyboardType: TextInputType.number,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                data['price'].text = value;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: TextFormField(
+                                            controller: data['quantity'],
+                                            decoration: const InputDecoration(
+                                                labelText: 'الكمية'),
+                                            keyboardType: TextInputType.number,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                data['quantity'].text = value;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    TextFormField(
+                                      controller: data['note'],
+                                      decoration: const InputDecoration(
+                                          labelText: 'ملاحظات'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          // Make sure to convert the int to String before assigning
+                                          data['note'].text =
+                                              value; // Corrected
+                                        });
+                                      },
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () async =>
+                                              await _pickImage(index),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8),
+                                            child: jobCards[index]['image'] ==
+                                                    null
+                                                ? const Icon(Icons.add_a_photo)
+                                                : jobCards[index]['image']
+                                                        is File
+                                                    ? Image.file(
+                                                        jobCards[index]
+                                                            ['image'],
+                                                        width: 150,
+                                                        height: 150,
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : Image.network(
+                                                        jobCards[index]
+                                                            ['image'],
+                                                        width: 150,
+                                                        height: 150,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            _removeJobCard(index);
+                                          },
+                                          child: Container(
+                                            height: 35,
+                                            width: 35,
+                                            decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.red,
+                                            ),
+                                            child: const Icon(
+                                              Icons.remove,
+                                              color: AppColorManager.white,
                                             ),
                                           ),
                                         ),
-                                      );
-                                    },
-                                    onSelected: (DataAllDes selection) =>
-                                        _onAutocompleteSelected(
-                                            selection, data),
-                                    fieldViewBuilder: (
-                                      BuildContext context,
-                                      TextEditingController
-                                          fieldTextEditingController,
-                                      FocusNode fieldFocusNode,
-                                      VoidCallback onFieldSubmitted,
-                                    ) {
-                                      // Safely obtain the initial value using the function
-                                      String? initialValue =
-                                          getJobDescriptionAt(index);
-
-                                      // Set the initial value only if the controller's text is empty
-                                      if (fieldTextEditingController
-                                              .text.isEmpty &&
-                                          initialValue!.isNotEmpty) {
-                                        fieldTextEditingController.text =
-                                            initialValue;
-                                      }
-                                      return TextFormField(
-                                        controller: fieldTextEditingController,
-                                        focusNode: fieldFocusNode,
-                                        decoration: const InputDecoration(
-                                            labelText: 'الوصف'),
-                                        // onChanged is not needed if the text is directly bound to the state,
-                                        // but consider providing a way to update the state if the text changes
-                                      );
-                                    },
-
-                                    /*  fieldViewBuilder: (
-                                      BuildContext context,
-                                      TextEditingController
-                                          fieldTextEditingController,
-                                      FocusNode fieldFocusNode,
-                                      VoidCallback onFieldSubmitted,
-                                    ) {
-                                      return TextFormField(
-                                        //controller: fieldTextEditingController,
-                                        controller: data['description'],
-                                        focusNode: fieldFocusNode,
-                                        decoration: const InputDecoration(
-                                            labelText: 'الوصف'),
-                                        onChanged: (value) {
-                                          // Update the state based on manual entry
-                                          setState(() =>
-                                              data['description'].text = value);
-                                        },
-                                      );
-                                    },*/
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: data['unit'],
-                                          decoration: const InputDecoration(
-                                              labelText: 'الوحدة'),
-                                          onChanged: (value) => setState(
-                                              () => data['unit'].text = value),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: data['price'],
-                                          decoration: const InputDecoration(
-                                              labelText: 'السعر'),
-                                          keyboardType: TextInputType.number,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              data['price'].text = value;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: data['quantity'],
-                                          decoration: const InputDecoration(
-                                              labelText: 'الكمية'),
-                                          keyboardType: TextInputType.number,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              data['quantity'].text = value;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  TextFormField(
-                                    controller: data['note'],
-                                    decoration: const InputDecoration(
-                                        labelText: 'ملاحظات'),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        // Make sure to convert the int to String before assigning
-                                        data['note'].text = value; // Corrected
-                                      });
-                                    },
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () async =>
-                                            await _pickImage(index),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 8),
-                                          child: jobCards[index]['image'] ==
-                                                  null
-                                              ? const Icon(Icons.add_a_photo)
-                                              : jobCards[index]['image'] is File
-                                                  ? Image.file(
-                                                      jobCards[index]['image'],
-                                                      width: 150,
-                                                      height: 150,
-                                                      fit: BoxFit.cover,
-                                                    )
-                                                  : Image.network(
-                                                      jobCards[index]['image'],
-                                                      width: 150,
-                                                      height: 150,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          _removeJobCard(index);
-                                        },
-                                        child: Container(
-                                          height: 35,
-                                          width: 35,
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.red,
-                                          ),
-                                          child: const Icon(
-                                            Icons.remove,
-                                            color: AppColorManager.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -760,13 +749,20 @@ class _EditReportScreenState extends State<EditReportScreen> {
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
+                      // if (_formKey.currentState!.validate())
+
                       print("تعديل");
                       // Iterate through jobCards to update editController data
                       var updatedJobDescriptions = jobCards.map((card) {
                         // Check if card['image'] is null and provide a default value or handle accordingly
-                        String? imagePath = card['image']
-                            ?.path; // This will be null if card['image'] is null
-
+                        // This will be null if card['image'] is null
+                        // String? imagePath = card['image'];
+                        String? imagePath;
+                        if (card['image'] is File) {
+                          imagePath = (card['image'] as File).path;
+                        } else if (card['image'] is String) {
+                          imagePath = card['image'];
+                        }
                         return ReportJobDescription(
                           jobDescription: JobDescription(
                               description: card['description'].text,
@@ -774,10 +770,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                           note: card['note'].text,
                           price: int.tryParse(card['price'].text) ?? 0,
                           quantity: int.tryParse(card['quantity'].text) ?? 0,
-                          //desImg: card['image'].path,
-                          desImg:
-                              imagePath, // Use the safely obtained imagePath
-
+                          desImg: imagePath,
                           jobDescriptionId: card['jobDescriptionId'],
                         );
                       }).toList();
@@ -806,7 +799,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                       backgroundColor: AppColorManager.mainAppColor,
                     ),
                     child: const Text(
-                      'تعديـل',
+                      'إرسال',
                       style: TextStyle(
                           color: AppColorManager.white,
                           fontWeight: FontWeight.bold),

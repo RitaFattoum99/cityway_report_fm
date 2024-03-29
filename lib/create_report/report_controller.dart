@@ -79,7 +79,7 @@ class ReportController extends GetxController {
     );
     String? token = await secureStorage.read("token");
     createStatus = await service.create(report, token!);
-    //message = service.message;
+    message = service.message;
   }
 
   void fetchDes() async {

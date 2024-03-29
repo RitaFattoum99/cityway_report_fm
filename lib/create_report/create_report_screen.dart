@@ -1,12 +1,11 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
 
-import 'package:cityway_report_fm/create_report/complaint_party_model.dart';
 import 'package:cityway_report_fm/create_report/report_model.dart';
-import 'package:cityway_report_fm/homepage/reoport_list_controller.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../core/native_service/secure_storage.dart';
+import '../homepage/reoport_list_controller.dart';
 import '/core/resource/color_manager.dart';
 import '/core/resource/size_manager.dart';
 import '/core/utils/text_form_field.dart';
@@ -15,6 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'complaint_party_model.dart';
 
 class CreateReport extends StatefulWidget {
   const CreateReport({super.key});
@@ -33,7 +34,8 @@ class _CreateReportState extends State<CreateReport> {
   final TextEditingController _budgetController = TextEditingController();
   bool _isBudgetFieldVisible = false;
 
-  final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
+  final _formKey1 = GlobalKey<FormBuilderState>();
+
   late SecureStorage secureStorage = SecureStorage();
   // Placeholder for user name
   String userName = "";
@@ -103,14 +105,6 @@ class _CreateReportState extends State<CreateReport> {
     }
   }
 
-  // final List<String> descriptionSuggestions = [
-  //   'Broken Light',
-  //   'Pothole',
-  //   'Graffiti',
-  //   'Leaking Water Pipe',
-  //   'Downed Tree',
-  //   // Add more descriptions as needed
-  // ];
   Future<void> _pickImage(int rowIndex) async {
     final option = await showDialog<ImageSource>(
       context: context,
@@ -214,7 +208,7 @@ class _CreateReportState extends State<CreateReport> {
               right: AppPaddingManager.p12,
               bottom: AppPaddingManager.p12),
           child: FormBuilder(
-            key: _formKey,
+            key: _formKey1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,8 +289,14 @@ class _CreateReportState extends State<CreateReport> {
                   onChanged: (value) {
                     reportController.project = value!;
                   },
-                  valedate: 'اسم المشروع مطلوب',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'الرجاء إدخال اسم المشروع ';
+                    }
+                    return null;
+                  },
                 ),
+
                 const SizedBox(height: 10.0),
                 Row(
                   children: [
@@ -309,7 +309,12 @@ class _CreateReportState extends State<CreateReport> {
                         onChanged: (value) {
                           reportController.location = value!;
                         },
-                        valedate: 'موقع المشروع مطلوب',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'الرجاء إدخال موقع المشروع ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -322,7 +327,12 @@ class _CreateReportState extends State<CreateReport> {
                         onChanged: (value) {
                           reportController.complaintNumber = value!;
                         },
-                        valedate: 'رقم البلاغ مطلوب',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'الرجاء إدخال رقم البلاغ ';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -355,6 +365,12 @@ class _CreateReportState extends State<CreateReport> {
                                           reportController
                                               .contactInfo[index].name = value;
                                         }
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'الرجاء إدخال اسم المسؤول'; // 'Please enter the name of the responsible person';
+                                        }
+                                        return null;
                                       },
                                       decoration: InputDecoration(
                                         labelText: "اسم المسؤول",
@@ -391,6 +407,12 @@ class _CreateReportState extends State<CreateReport> {
                                           reportController
                                               .contactInfo[index].name = value;
                                         }
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'الرجاء إدخال منصب المسؤول';
+                                        }
+                                        return null;
                                       },
                                       decoration: InputDecoration(
                                         labelText: "منصبه",
@@ -430,6 +452,16 @@ class _CreateReportState extends State<CreateReport> {
                                           reportController
                                               .contactInfo[index].phone = value;
                                         }
+                                      },
+                                      validator: (value) {
+                                        String pattern = r'^\+971[0-9]{9}$';
+                                        RegExp regex = RegExp(pattern);
+                                        if (value == null || value.isEmpty) {
+                                          return 'الرجاء إدخال رقم المسؤول'; // 'Please enter the responsible person\'s number';
+                                        } else if (!regex.hasMatch(value)) {
+                                          return 'الرجاء إدخال رقم صحيح بالشكل +971XXXXXXXXX'; // 'Please enter a valid number in the format +971XXXXXXXXX';
+                                        }
+                                        return null;
                                       },
                                       decoration: InputDecoration(
                                         labelText: "رقم المسؤول",
@@ -561,8 +593,6 @@ class _CreateReportState extends State<CreateReport> {
                                       reportController.reportDescription[index]
                                           .description = selection;
                                     }
-                                    // // Update the corresponding TextEditingController's text to reflect the selection
-                                    // controllers[index].text = selection;
                                   },
                                   fieldViewBuilder: (
                                     BuildContext context,
@@ -595,6 +625,12 @@ class _CreateReportState extends State<CreateReport> {
                                               .add(ReportDescription(
                                                   description: value));
                                         }
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'الرجاء إدخال وصف البلاغ '; // 'Please enter the name of the responsible person';
+                                        }
+                                        return null;
                                       },
                                     );
                                   },
@@ -736,74 +772,62 @@ class _CreateReportState extends State<CreateReport> {
                     width: size.width * 0.5,
                     child: ElevatedButton(
                       onPressed: () async {
-                        print("إرسال");
-                        print("project: ${reportController.project}");
-                        print("location: ${reportController.location}");
-                        print(
-                            "complaintNumber: ${reportController.complaintNumber}");
-                        print("type of work: ${reportController.typeOfWork}");
-                        print("urgent: ${reportController.urgent}");
-                        print("budget: ${reportController.budget}");
-                        for (int i = 0; i < data.length; i++) {
-                          reportController.reportDescription[i].description =
-                              data[i]['description'];
-                          reportController.reportDescription[i].note =
-                              data[i]['note'];
-                          reportController.reportDescription[i].desImg =
-                              data[i]['descriptionImage'];
-                          print(
-                              "description: ${reportController.reportDescription[i].description}");
-                          print(
-                              "note: ${reportController.reportDescription[i].note}");
-                          print(
-                              "img: ${reportController.reportDescription[i].desImg}");
-                        }
+                        if (_formKey1.currentState!.validate()) {
+                          print("إرسال");
 
-                        for (int i = 0; i < datacontactInfo.length; i++) {
-                          if (i < reportController.contactInfo.length) {
+                          for (int i = 0; i < data.length; i++) {
+                            reportController.reportDescription[i].description =
+                                data[i]['description'];
+                            reportController.reportDescription[i].note =
+                                data[i]['note'].text;
+                            reportController.reportDescription[i].desImg =
+                                data[i]['descriptionImage'];
+                          }
+                          for (int i = 0; i < datacontactInfo.length; i++) {
+                            if (i < reportController.contactInfo.length) {
+                              reportController.contactInfo[i].name =
+                                  datacontactInfo[i]['name'];
+                            } else {
+                              var newContact = ContactInfo(
+                                  name: datacontactInfo[i]['name'],
+                                  phone: datacontactInfo[i]['phone'],
+                                  position: datacontactInfo[i]['position']);
+                              reportController.contactInfo.add(newContact);
+                            }
+
                             reportController.contactInfo[i].name =
                                 datacontactInfo[i]['name'];
-                          } else {
-                            // Handle the case where i is out of bounds, e.g., add a new ContactInfo
-                            var newContact = ContactInfo(
-                                name: datacontactInfo[i]['name'],
-                                phone: datacontactInfo[i]['phone'],
-                                position: datacontactInfo[i][
-                                    'position']); // Adjust based on your ContactInfo class
-                            reportController.contactInfo.add(newContact);
+                            reportController.contactInfo[i].phone =
+                                datacontactInfo[i]['phone'];
+                            reportController.contactInfo[i].position =
+                                datacontactInfo[i]['position'];
+
+                            print(
+                                "name: ${reportController.contactInfo[i].name}");
+                            print(
+                                "phone: ${reportController.contactInfo[i].phone}");
+                            print(
+                                "position: ${reportController.contactInfo[i].position}");
                           }
 
-                          reportController.contactInfo[i].name =
-                              datacontactInfo[i]['name'];
-                          reportController.contactInfo[i].phone =
-                              datacontactInfo[i]['phone'];
-                          reportController.contactInfo[i].position =
-                              datacontactInfo[i]['position'];
+                          EasyLoading.show(
+                              status: 'loading...', dismissOnTap: true);
+                          await reportController.create();
+                          if (reportController.createStatus) {
+                            print(
+                                "createStatus: ${reportController.createStatus}");
+                            EasyLoading.showSuccess(reportController.message,
+                                duration: const Duration(seconds: 2));
+                            final reportListController =
+                                Get.find<ReportListController>();
+                            reportListController.fetchReports();
 
-                          print(
-                              "name: ${reportController.contactInfo[i].name}");
-                          print(
-                              "phone: ${reportController.contactInfo[i].phone}");
-                          print(
-                              "position: ${reportController.contactInfo[i].position}");
-                        }
-
-                        EasyLoading.show(
-                            status: 'loading...', dismissOnTap: true);
-                        await reportController.create();
-                        if (reportController.createStatus) {
-                          print(
-                              "createStatus: ${reportController.createStatus}");
-                          EasyLoading.showSuccess(reportController.message,
-                              duration: const Duration(seconds: 2));
-                          final reportListController =
-                              Get.find<ReportListController>();
-                          reportListController.fetchReports();
-
-                          Get.offNamed('home');
-                        } else {
-                          EasyLoading.showError(reportController.message);
-                          print("error create report");
+                            Get.offNamed('home');
+                          } else {
+                            EasyLoading.showError(reportController.message);
+                            Get.offNamed('create');
+                            print("error create report");
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(

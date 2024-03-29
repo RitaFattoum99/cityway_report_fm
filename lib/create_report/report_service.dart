@@ -74,7 +74,6 @@ class ReportService {
       'Accept': 'application/json',
       'Authorization': 'Bearer $token',
       'Connection': 'keep-alive',
-      'Accept-Encoding': 'gzip, deflate, br',
       'User-Agent': 'PostmanRuntime/7.36.3',
     });
     print("request.fields");

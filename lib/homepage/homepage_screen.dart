@@ -63,15 +63,21 @@ class TabBarWithListView extends StatelessWidget {
         if (reports.isEmpty) {
           return _buildEmptyListAnimation();
         } else {
-          return ListView.builder(
-            itemCount: reports.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                  onTap: () {
-                    Get.to(() => EditReportScreen(report: reports[index]));
-                  },
-                  child: _buildReportItem(reports[index]));
+          return RefreshIndicator(
+            onRefresh: () async {
+              // Call your function to refresh the data here
+              controller.fetchReports();
             },
+            child: ListView.builder(
+              itemCount: reports.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                    onTap: () {
+                      Get.to(() => EditReportScreen(report: reports[index]));
+                    },
+                    child: _buildReportItem(reports[index]));
+              },
+            ),
           );
         }
       }

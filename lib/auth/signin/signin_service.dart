@@ -21,7 +21,6 @@ class SignInService {
     var response = await http.post(url, headers: {
       'User-Agent': 'PostmanRuntime/7.37.0',
       'Accept': 'application/json',
-      'Accept-Encoding': 'gzip, deflate, br',
       'Connection': 'keep-alive'
     }, body: {
       'email': user.email,
