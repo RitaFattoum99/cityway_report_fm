@@ -671,7 +671,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        GestureDetector(
+                                        /*GestureDetector(
                                           onTap: () async =>
                                               await _pickImage(index),
                                           child: Padding(
@@ -695,6 +695,57 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                                         width: 150,
                                                         height: 150,
                                                         fit: BoxFit.cover,
+                                                      ),
+                                          ),
+                                        ),
+                                        */
+                                        GestureDetector(
+                                          onTap: () async =>
+                                              await _pickImage(index),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8),
+                                            child: jobCards[index]['image'] ==
+                                                    null
+                                                ? const Icon(Icons.add_a_photo)
+                                                : jobCards[index]['image']
+                                                        is File
+                                                    ? Image.file(
+                                                        jobCards[index]['image']
+                                                            as File, // Cast to File for clarity
+                                                        width: 150,
+                                                        height: 150,
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : Image.network(
+                                                        jobCards[index]['image']
+                                                            as String, // Cast to String for clarity
+                                                        width: 150,
+                                                        height: 150,
+                                                        fit: BoxFit.cover,
+                                                        loadingBuilder:
+                                                            (BuildContext
+                                                                    context,
+                                                                Widget child,
+                                                                ImageChunkEvent?
+                                                                    loadingProgress) {
+                                                          if (loadingProgress ==
+                                                              null)
+                                                            return child; // If the image is fully loaded, display it
+                                                          return Center(
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                              value: loadingProgress
+                                                                          .expectedTotalBytes !=
+                                                                      null
+                                                                  ? loadingProgress
+                                                                          .cumulativeBytesLoaded /
+                                                                      loadingProgress
+                                                                          .expectedTotalBytes!
+                                                                  : null,
+                                                            ),
+                                                          );
+                                                        },
                                                       ),
                                           ),
                                         ),
