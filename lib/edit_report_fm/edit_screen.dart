@@ -27,6 +27,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
   final ReportController reportController = Get.put(ReportController());
   final List<TextEditingController> controllers = [];
 
+  final _formKey = GlobalKey<FormState>();
   final _formKey1 = GlobalKey<FormState>();
   final _formKey2 = GlobalKey<FormState>();
   final _formKey3 = GlobalKey<FormState>();
@@ -518,17 +519,17 @@ class _EditReportScreenState extends State<EditReportScreen> {
                     SizedBox(height: 10),
                     SizedBox(
                       height: 400,
-                      child: ListView.builder(
-                        itemCount: jobCards.length,
-                        itemBuilder: (context, index) {
-                          final data = jobCards[index];
-                          return Card(
-                            elevation: 4.0,
-                            margin: const EdgeInsets.all(8.0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Form(
-                                // key: _formKey,
+                      child: Form(
+                        key: _formKey,
+                        child: ListView.builder(
+                          itemCount: jobCards.length,
+                          itemBuilder: (context, index) {
+                            final data = jobCards[index];
+                            return Card(
+                              elevation: 4.0,
+                              margin: const EdgeInsets.all(8.0),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
@@ -605,20 +606,23 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                           fieldTextEditingController.text =
                                               initialValue;
                                         }
-                                        return Form(
-                                          // key: _formKey1,
-                                          child: TextFormField(
-                                            controller:
-                                                fieldTextEditingController,
-                                            focusNode: fieldFocusNode,
-                                            decoration: const InputDecoration(
-                                                labelText: 'الوصف'),
-                                            // onChanged is not needed if the text is directly bound to the state,
-                                            // but consider providing a way to update the state if the text changes
-                                            onChanged: (value) => setState(() =>
-                                                data['description'].text =
-                                                    value),
-                                          ),
+                                        return TextFormField(
+                                          controller:
+                                              fieldTextEditingController,
+                                          focusNode: fieldFocusNode,
+                                          decoration: const InputDecoration(
+                                              labelText: 'الوصف'),
+                                          // onChanged is not needed if the text is directly bound to the state,
+                                          // but consider providing a way to update the state if the text changes
+                                          onChanged: (value) => setState(() =>
+                                              data['description'].text = value),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'ادخل الوصف';
+                                            }
+                                            return null;
+                                          },
                                         );
                                       },
                                     ),
@@ -634,7 +638,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                             validator: (value) {
                                               if (value == null ||
                                                   value.isEmpty) {
-                                                return 'الرجاء إدخال الوحدة';
+                                                return 'ادخل الوحدة';
                                               }
                                               return null;
                                             },
@@ -654,7 +658,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                             validator: (value) {
                                               if (value == null ||
                                                   value.isEmpty) {
-                                                return 'الرجاء إدخال السعر';
+                                                return 'إدخال السعر';
                                               }
                                               return null;
                                             },
@@ -674,7 +678,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                             validator: (value) {
                                               if (value == null ||
                                                   value.isEmpty) {
-                                                return 'الرجاء إدخال الكمية';
+                                                return 'ادخل الكمية';
                                               }
                                               return null;
                                             },
@@ -771,9 +775,9 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                   ],
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -800,50 +804,51 @@ class _EditReportScreenState extends State<EditReportScreen> {
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      // if (_formKey.currentState!.validate())
+                      if (_formKey.currentState!.validate()) {
+                        print("تعديل");
+                        // Iterate through jobCards to update editController data
+                        var updatedJobDescriptions = jobCards.map((card) {
+                          // Check if card['image'] is null and provide a default value or handle accordingly
+                          // This will be null if card['image'] is null
+                          // String? imagePath = card['image'];
+                          String? imagePath;
+                          if (card['image'] is File) {
+                            imagePath = (card['image'] as File).path;
+                          } else if (card['image'] is String) {
+                            imagePath = card['image'];
+                          }
+                          return ReportJobDescription(
+                            jobDescription: JobDescription(
+                                description: card['description'].text,
+                                unit: card['unit'].text),
+                            note: card['note'].text,
+                            price: int.tryParse(card['price'].text) ?? 0,
+                            quantity: int.tryParse(card['quantity'].text) ?? 0,
+                            desImg: imagePath,
+                            jobDescriptionId: card['jobDescriptionId'],
+                          );
+                        }).toList();
+                        print(
+                            "updatedJobDescriptions: $updatedJobDescriptions");
+                        // Now, update editController with the new list
+                        editController.updateReportJobDescriptions(
+                            updatedJobDescriptions);
 
-                      print("تعديل");
-                      // Iterate through jobCards to update editController data
-                      var updatedJobDescriptions = jobCards.map((card) {
-                        // Check if card['image'] is null and provide a default value or handle accordingly
-                        // This will be null if card['image'] is null
-                        // String? imagePath = card['image'];
-                        String? imagePath;
-                        if (card['image'] is File) {
-                          imagePath = (card['image'] as File).path;
-                        } else if (card['image'] is String) {
-                          imagePath = card['image'];
+                        EasyLoading.show(
+                            status: 'loading...', dismissOnTap: true);
+                        await editController.edit(updatedJobDescriptions);
+                        if (editController.editStatus) {
+                          print("editStatus: ${editController.editStatus}");
+                          EasyLoading.showSuccess(editController.message,
+                              duration: const Duration(seconds: 2));
+                          final reportListController =
+                              Get.find<ReportListController>();
+                          reportListController.fetchReports();
+                          Get.offNamed('home');
+                        } else {
+                          EasyLoading.showError(reportController.message);
+                          print("error edit report");
                         }
-                        return ReportJobDescription(
-                          jobDescription: JobDescription(
-                              description: card['description'].text,
-                              unit: card['unit'].text),
-                          note: card['note'].text,
-                          price: int.tryParse(card['price'].text) ?? 0,
-                          quantity: int.tryParse(card['quantity'].text) ?? 0,
-                          desImg: imagePath,
-                          jobDescriptionId: card['jobDescriptionId'],
-                        );
-                      }).toList();
-                      print("updatedJobDescriptions: $updatedJobDescriptions");
-                      // Now, update editController with the new list
-                      editController
-                          .updateReportJobDescriptions(updatedJobDescriptions);
-
-                      EasyLoading.show(
-                          status: 'loading...', dismissOnTap: true);
-                      await editController.edit(updatedJobDescriptions);
-                      if (editController.editStatus) {
-                        print("editStatus: ${editController.editStatus}");
-                        EasyLoading.showSuccess(editController.message,
-                            duration: const Duration(seconds: 2));
-                        final reportListController =
-                            Get.find<ReportListController>();
-                        reportListController.fetchReports();
-                        Get.offNamed('home');
-                      } else {
-                        EasyLoading.showError(reportController.message);
-                        print("error edit report");
                       }
                     },
                     style: ElevatedButton.styleFrom(
