@@ -211,9 +211,27 @@ class _EditReportScreenState extends State<EditReportScreen> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(''), // Customize with your screen title
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: AppColorManager.mainAppColor,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Image.asset("assets/images/logo.png"),
+            onPressed: () {
+              print('Image icon pressed');
+            },
+          ),
+        ],
+        // backgroundColor: AppColorManager.white,
+      ),
       body: Padding(
         padding: const EdgeInsets.only(
-          top: AppPaddingManager.p50,
           right: AppPaddingManager.p18,
           left: AppPaddingManager.p18,
         ),
@@ -221,13 +239,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
-              Center(
-                child: SizedBox(
-                  height: size.height * 0.1,
-                  child: Image.asset('assets/images/logo.png'),
-                ),
-              ),
+              // const SizedBox(height: 20),
+              // Center(
+              //   child: SizedBox(
+              //     height: size.height * 0.1,
+              //     child: Image.asset('assets/images/logo.png'),
+              //   ),
+              // ),
               SizedBox(
                 height: size.height * 0.02,
               ),
@@ -709,14 +727,14 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                               : jobCards[index]['image'] is File
                                                   ? Image.file(
                                                       jobCards[index]['image']
-                                                          as File, // Cast to File for clarity
+                                                          as File,
                                                       width: 150,
                                                       height: 150,
                                                       fit: BoxFit.cover,
                                                     )
                                                   : Image.network(
                                                       jobCards[index]['image']
-                                                          as String, // Cast to String for clarity
+                                                          as String,
                                                       width: 150,
                                                       height: 150,
                                                       fit: BoxFit.cover,
@@ -727,7 +745,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                                               loadingProgress) {
                                                         if (loadingProgress ==
                                                             null) {
-                                                          return child; // If the image is fully loaded, display it
+                                                          return child;
                                                         }
                                                         return Center(
                                                           child:

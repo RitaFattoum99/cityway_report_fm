@@ -341,11 +341,11 @@ class _CreateReportState extends State<CreateReport> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Flexible(
+                      // height: 200,
                       // Use Flexible here to allow the ListView to size itself appropriately within the Column.
                       child: ListView.builder(
                         // Make ListView itself to determine its own height
                         shrinkWrap: true,
-                        // Use this to disable scrolling within the ListView
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: datacontactInfo.length,
                         itemBuilder: (context, index) {
@@ -557,9 +557,9 @@ class _CreateReportState extends State<CreateReport> {
                           .description) // Assuming your model has a 'description' field
                       .toList();
                   return SizedBox(
-                    width: double.infinity,
+                   width: double.infinity,
                     child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
+                      scrollDirection: Axis.vertical,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: data.length,

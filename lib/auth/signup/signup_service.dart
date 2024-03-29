@@ -50,6 +50,7 @@ class SignUpService {
         role = jsonresponse['data']['roles'][0];
         userID = jsonresponse['data']['id'][0];
         username = jsonresponse['data']['username'];
+        email = jsonresponse['data']['email'];
         print(response.statusCode);
         print(response.body);
         print(message);
@@ -57,11 +58,16 @@ class SignUpService {
         print("role: $role");
         print("user name: $username");
         print("token : $token");
+        print("email : $email");
         Information.TOKEN = token;
         SecureStorage secureStorage = SecureStorage();
         await secureStorage.save("token", Information.TOKEN);
+        await secureStorage.save("username", Information.username);
+        await secureStorage.save("email", Information.email);
         Information.role = role;
         Information.userId = userID;
+        Information.username = username;
+        Information.email = email;
         await secureStorage.saveInt("id", Information.userId);
         Get.offNamed('home');
 

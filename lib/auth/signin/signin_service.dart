@@ -14,11 +14,12 @@ class SignInService {
   var token = '';
   var role = '';
   var userID = 0;
+  var username = '';
+  var email = '';
   var url = Uri.parse(ServiceConfig.domainNameServer + ServiceConfig.signIn);
   Future<bool> signIn(UserData user) async {
     try {
       print("signIn");
-
 
       var response = await http.post(url, headers: {
         'User-Agent': 'PostmanRuntime/7.37.0',
@@ -41,16 +42,24 @@ class SignInService {
           token = jsonresponse['data']['token'];
           role = jsonresponse['data']['roles'][0];
           userID = jsonresponse['data']['id'];
+          username = jsonresponse['data']['username'];
+          email = jsonresponse['data']['email'];
           print('user id : $userID');
           print("role: $role");
           print("token $token");
+          print("user $username");
 
           Information.TOKEN = token;
           Information.role = role;
           Information.userId = userID;
+          Information.username = username;
+          Information.email = email;
+
           SecureStorage secureStorage = SecureStorage();
           await secureStorage.save("token", Information.TOKEN);
           await secureStorage.save("role", Information.role);
+          await secureStorage.save("username", Information.username);
+          await secureStorage.save("email", Information.email);
           await secureStorage.saveInt("id", Information.userId);
           Get.offNamed('home');
 

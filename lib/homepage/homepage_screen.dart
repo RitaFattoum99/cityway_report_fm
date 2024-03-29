@@ -19,6 +19,8 @@ class TabBarWithListView extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: _buildAppBar(context),
+        drawer: _buildDrawer(context), // Add the drawer here
+
         body: TabBarView(
           children: [
             _buildReportList(all: true),
@@ -33,19 +35,71 @@ class TabBarWithListView extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text('التقاريـر'),
+      title: const Text(
+        'التقاريـر',
+        style: TextStyle(color: AppColorManager.white),
+      ),
       bottom: const TabBar(
+        labelColor: AppColorManager.babyGreyAppColor,
+        unselectedLabelColor: AppColorManager.white,
         tabs: [
-          Tab(text: 'كل التقاريـر'),
+          Tab(
+            text: 'كل التقاريـر',
+          ),
           Tab(text: 'التقاريـر العاجلة'),
         ],
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () => _showLogoutConfirmationDialog(context),
-        ),
-      ],
+      backgroundColor: AppColorManager.mainAppColor,
+    );
+  }
+
+  Drawer _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          UserAccountsDrawerHeader(
+            accountName: Text(Information.username),
+            accountEmail: Text(Information.email),
+            currentAccountPicture: CircleAvatar(
+                backgroundColor: AppColorManager.white,
+                child: Image.asset("assets/images/logo.png")
+                // Text("U", style: TextStyle(fontSize: 40.0)),
+                ),
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.home,
+              color: AppColorManager.secondaryAppColor,
+            ),
+            title: const Text(
+              'الصفحة الرئيسية',
+              style: TextStyle(
+                  color: AppColorManager.secondaryAppColor,
+                  fontWeight: FontWeight.bold),
+            ),
+            onTap: () {
+              // Update the state of the app
+              // ...
+              // Then close the drawer
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.logout,
+              color: AppColorManager.secondaryAppColor,
+            ),
+            title: const Text(
+              'تسجيل خروج',
+              style: TextStyle(
+                  color: AppColorManager.secondaryAppColor,
+                  fontWeight: FontWeight.bold),
+            ),
+            onTap: () => _showLogoutConfirmationDialog(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -170,8 +224,18 @@ class TabBarWithListView extends StatelessWidget {
     final confirmLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تسجيل خروج'),
-        content: const Text('هل أنت متأكد؟'),
+        title: const Text(
+          'تسجيل خروج',
+          style: TextStyle(
+              color: AppColorManager.secondaryAppColor,
+              fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'هل أنت متأكد؟',
+          style: TextStyle(
+            color: AppColorManager.secondaryAppColor,
+          ),
+        ),
         actions: <Widget>[
           TextButton(
               child: const Text('إلغاء'),

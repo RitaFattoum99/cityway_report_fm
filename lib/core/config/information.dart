@@ -4,4 +4,6 @@ class Information {
   static String TOKEN = '';
   static String role = '';
   static int userId = 0;
+  static String username = '';
+  static String email = '';
 }
