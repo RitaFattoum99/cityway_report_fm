@@ -27,7 +27,10 @@ class _EditReportScreenState extends State<EditReportScreen> {
   final ReportController reportController = Get.put(ReportController());
   final List<TextEditingController> controllers = [];
 
-  // final _formKey = GlobalKey<FormState>();
+  final _formKey1 = GlobalKey<FormState>();
+  final _formKey2 = GlobalKey<FormState>();
+  final _formKey3 = GlobalKey<FormState>();
+  final _formKey4 = GlobalKey<FormState>();
 
   late List<Map<String, dynamic>> jobCards = [
     {
@@ -428,14 +431,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                       : widget.report.reportDescription[index]
                                                   .description!.length >
                                               50
-                                          ? "${widget.report.reportDescription[index].description!.substring(0, 50)}..."
+                                          ? "${widget.report.reportDescription[index].description!.substring(0, 40)}..."
                                           : widget
                                               .report
                                               .reportDescription[index]
                                               .description!,
                                   style: const TextStyle(
-                                    color: Colors
-                                        .black, // Replace with your actual color
+                                    color: Colors.black,
                                     fontSize: 16,
                                   ),
                                 ),
@@ -603,16 +605,20 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                           fieldTextEditingController.text =
                                               initialValue;
                                         }
-                                        return TextFormField(
-                                          controller:
-                                              fieldTextEditingController,
-                                          focusNode: fieldFocusNode,
-                                          decoration: const InputDecoration(
-                                              labelText: 'الوصف'),
-                                          // onChanged is not needed if the text is directly bound to the state,
-                                          // but consider providing a way to update the state if the text changes
-                                          onChanged: (value) => setState(() =>
-                                              data['description'].text = value),
+                                        return Form(
+                                          // key: _formKey1,
+                                          child: TextFormField(
+                                            controller:
+                                                fieldTextEditingController,
+                                            focusNode: fieldFocusNode,
+                                            decoration: const InputDecoration(
+                                                labelText: 'الوصف'),
+                                            // onChanged is not needed if the text is directly bound to the state,
+                                            // but consider providing a way to update the state if the text changes
+                                            onChanged: (value) => setState(() =>
+                                                data['description'].text =
+                                                    value),
+                                          ),
                                         );
                                       },
                                     ),
@@ -625,6 +631,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                                 labelText: 'الوحدة'),
                                             onChanged: (value) => setState(() =>
                                                 data['unit'].text = value),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return 'الرجاء إدخال الوحدة';
+                                              }
+                                              return null;
+                                            },
                                           ),
                                         ),
                                         Expanded(
@@ -638,6 +651,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                                 data['price'].text = value;
                                               });
                                             },
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return 'الرجاء إدخال السعر';
+                                              }
+                                              return null;
+                                            },
                                           ),
                                         ),
                                         Expanded(
@@ -650,6 +670,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                               setState(() {
                                                 data['quantity'].text = value;
                                               });
+                                            },
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return 'الرجاء إدخال الكمية';
+                                              }
+                                              return null;
                                             },
                                           ),
                                         ),
@@ -671,34 +698,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        /*GestureDetector(
-                                          onTap: () async =>
-                                              await _pickImage(index),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 8),
-                                            child: jobCards[index]['image'] ==
-                                                    null
-                                                ? const Icon(Icons.add_a_photo)
-                                                : jobCards[index]['image']
-                                                        is File
-                                                    ? Image.file(
-                                                        jobCards[index]
-                                                            ['image'],
-                                                        width: 150,
-                                                        height: 150,
-                                                        fit: BoxFit.cover,
-                                                      )
-                                                    : Image.network(
-                                                        jobCards[index]
-                                                            ['image'],
-                                                        width: 150,
-                                                        height: 150,
-                                                        fit: BoxFit.cover,
-                                                      ),
-                                          ),
-                                        ),
-                                        */
                                         GestureDetector(
                                           onTap: () async =>
                                               await _pickImage(index),
