@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
 import 'dart:io';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/config/service_config.dart';
@@ -42,40 +41,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
     }
   ];
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   editController.reportId = widget.report.id;
-
-  //   // initializing jobCards with existing report data
-  //   jobCards = widget.report.reportJobDescription.map((repjobDescription) {
-  //     // Ensure to convert desImg from String to File if desImg is not null
-  //     // Check if desImg is a URL or a path to a local file
-  //     final imagePath = repjobDescription.desImg!;
-  //     final isImageUrl =
-  //         imagePath.startsWith('http://') || imagePath.startsWith('https://');
-  //     final image = isImageUrl ? imagePath : File(imagePath);
-
-  //     return {
-  //       'description': TextEditingController(
-  //           text: repjobDescription.jobDescription?.description ?? ''),
-
-  //       // TextEditingController(
-  //       //     text: repjobDescription.jobDescription!.description.toString()),
-  //       'price':
-  //           TextEditingController(text: repjobDescription.price.toString()),
-  //       'quantity':
-  //           TextEditingController(text: repjobDescription.quantity.toString()),
-  //       'note': TextEditingController(text: repjobDescription.note),
-  //       // This could be a String (URL) or File
-  //       'image': image,
-  //       'unit':
-  //           TextEditingController(text: repjobDescription.jobDescription!.unit),
-  //       'jobDescriptionId': repjobDescription.id,
-  //     };
-  //   }).toList();
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -101,7 +66,8 @@ class _EditReportScreenState extends State<EditReportScreen> {
             image, // This will now correctly be either a String (URL) or File
         'unit':
             TextEditingController(text: repjobDescription.jobDescription!.unit),
-        'jobDescriptionId': repjobDescription.id,
+        // 'jobDescriptionId': repjobDescription.id,
+        'jobDescriptionId': repjobDescription.jobDescriptionId,
       };
     }).toList();
   }

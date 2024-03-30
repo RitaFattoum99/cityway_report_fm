@@ -802,13 +802,10 @@ class _CreateReportState extends State<CreateReport> {
                             } else if (data[i]['note'] is String) {
                               noteText = data[i]['note'];
                             } else {
-                              // Handle unexpected data types, possibly log an error or assign a default value
-                              noteText = ""; // Default or error value
+                              noteText = "";
                             }
                             reportController.reportDescription[i].note =
                                 noteText;
-                            // reportController.reportDescription[i].note =
-                            //     data[i]['note'].text;
                             reportController.reportDescription[i].desImg =
                                 data[i]['descriptionImage'];
                           }
