@@ -29,6 +29,9 @@ dependencies:
   http: ^1.2.1
   http_parser: ^4.0.2
   flutter_secure_storage: ^9.0.0
+  pdf: ^3.10.8
+  open_file: ^3.3.2
+  printing: ^5.12.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -47,7 +50,22 @@ flutter:
   assets:
     - assets/images/
   #   - images/a_dot_ham.jpeg
-
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/font/Cairo-Light.ttf
+          weight: 300
+        - asset: assets/font/Cairo-Regular.otf
+          weight: 400
+        - asset: assets/font/Cairo-SemiBold.ttf
+          weight: 600
+        - asset: assets/font/Cairo-Bold.ttf
+          weight: 700
+    - family: Amiri
+      fonts:
+        - asset: assets/font/Amiri-Regular.ttf
+        - asset: assets/font/Amiri-Bold.ttf
+          weight: 700
   # fonts:
   #   - family: Schyler
   #     fonts:

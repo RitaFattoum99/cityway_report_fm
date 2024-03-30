@@ -21,8 +21,24 @@ class ReportListController extends GetxController {
     String? token = await secureStorage.read("token");
     if (token != null) {
       var fetchedReports = await _service.getReportList(token);
-      reportList.assignAll(fetchedReports); // This will automatically update any listeners
+      reportList.assignAll(
+          fetchedReports); // This will automatically update any listeners
     }
     isLoading.value = false;
+  }
+
+  // Getter for reportStatuses
+  Map<String, int> get reportStatuses {
+    final Map<String, int> statusCounts = {};
+    for (var report in reportList) {
+      statusCounts[report.statusClient] =
+          (statusCounts[report.statusClient] ?? 0) + 1;
+    }
+    return statusCounts;
+  }
+
+  // Method to filter reports by status
+  List<DataAllReport> filteredReports(String status) {
+    return reportList.where((report) => report.statusClient == status).toList();
   }
 }

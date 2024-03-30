@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
             binding: SigninBindings()),
         GetPage(
           name: '/home',
-          page: () => TabBarWithListView(),
+          page: () => DynamicTabBarWithReports(),
           binding: ReportListBindings(),
         ),
         GetPage(

@@ -66,7 +66,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
             image, // This will now correctly be either a String (URL) or File
         'unit':
             TextEditingController(text: repjobDescription.jobDescription!.unit),
-        // 'jobDescriptionId': repjobDescription.id,
         'jobDescriptionId': repjobDescription.jobDescriptionId,
       };
     }).toList();

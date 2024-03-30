@@ -40,7 +40,7 @@ class EditReportService {
             reportJobDescription[i].note.toString();
 
         if (reportJobDescription[i].desImg != null) {
-          File imageFile = await downloadImage(reportJobDescription[i].desImg!);
+          File imageFile = await processImage(reportJobDescription[i].desImg!);
           var stream = http.ByteStream(imageFile.openRead())..cast<List<int>>();
           var length = await imageFile.length();
           var multipartFile = http.MultipartFile(
@@ -83,6 +83,19 @@ class EditReportService {
     } catch (e) {
       message = 'Exception caught: $e';
       return false;
+    }
+  }
+
+  Future<File> processImage(String imagePath) async {
+    Uri imageUri = Uri.parse(imagePath);
+
+    // Check if the URI is a file path or a network URL
+    if (imageUri.scheme.contains('http')) {
+      // It's a URL, download the image
+      return await downloadImage(imageUri.toString());
+    } else {
+      // It's a local file path, no need to download
+      return File(imagePath);
     }
   }
 
