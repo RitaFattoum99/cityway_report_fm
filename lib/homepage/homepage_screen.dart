@@ -7,10 +7,10 @@ import '/core/native_service/secure_storage.dart';
 import '/core/resource/color_manager.dart';
 import '/homepage/allreport_model.dart';
 import 'reoport_list_controller.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter/services.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+// import 'package:http/http.dart' as http;
+// import 'package:flutter/services.dart';
+// import 'package:pdf/widgets.dart' as pw;
+// import 'package:printing/printing.dart';
 
 class DynamicTabBarWithReports extends StatelessWidget {
   DynamicTabBarWithReports({Key? key}) : super(key: key);
@@ -77,19 +77,19 @@ class DynamicTabBarWithReports extends StatelessWidget {
         .length;
   }
 
-  AppBar _buildAppBar(BuildContext context, List<Widget> tabs) {
-    return AppBar(
-      title: const Text('التقاريـر',
-          style: TextStyle(color: AppColorManager.white)),
-      bottom: TabBar(
-        isScrollable: true, // Enable scrolling if too many tabs
-        labelColor: AppColorManager.babyGreyAppColor,
-        unselectedLabelColor: AppColorManager.white,
-        tabs: tabs,
-      ),
-      backgroundColor: AppColorManager.mainAppColor,
-    );
-  }
+  // AppBar _buildAppBar(BuildContext context, List<Widget> tabs) {
+  //   return AppBar(
+  //     title: const Text('التقاريـر',
+  //         style: TextStyle(color: AppColorManager.white)),
+  //     bottom: TabBar(
+  //       isScrollable: true, // Enable scrolling if too many tabs
+  //       labelColor: AppColorManager.babyGreyAppColor,
+  //       unselectedLabelColor: AppColorManager.white,
+  //       tabs: tabs,
+  //     ),
+  //     backgroundColor: AppColorManager.mainAppColor,
+  //   );
+  // }
 
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
@@ -277,7 +277,7 @@ class DynamicTabBarWithReports extends StatelessWidget {
               leading:
                   Icon(Icons.stacked_bar_chart, color: statusColor, size: 25),
               trailing: IconButton(
-                icon: Icon(Icons.edit, color: Colors.green),
+                icon: const Icon(Icons.edit, color: Colors.green),
                 onPressed: () {
                   // Navigate to the edit report screen
                   Get.to(() => EditReportScreen(report: report));
@@ -409,100 +409,100 @@ class DynamicTabBarWithReports extends StatelessWidget {
     }
   }
 
-  Future<Uint8List> fetchImage(String url) async {
-    final response = await http.get(Uri.parse(url));
-    return response.bodyBytes;
-  }
+  // Future<Uint8List> fetchImage(String url) async {
+  //   final response = await http.get(Uri.parse(url));
+  //   return response.bodyBytes;
+  // }
 
-  Future<pw.Font> loadCustomFont() async {
-    final fontData = await rootBundle.load("assets/font/Amiri-Regular.ttf");
-    final font = pw.Font.ttf(fontData);
-    return font;
-  }
+  // Future<pw.Font> loadCustomFont() async {
+  //   final fontData = await rootBundle.load("assets/font/Amiri-Regular.ttf");
+  //   final font = pw.Font.ttf(fontData);
+  //   return font;
+  // }
 
-  Future<void> _generateAndSavePDF(DataAllReport report) async {
-    final pdf = pw.Document();
+  // Future<void> _generateAndSavePDF(DataAllReport report) async {
+//     final pdf = pw.Document();
 
-// This list will hold both text and images as widgets.
-    final contentWidgets = <pw.Widget>[];
-    // Load your custom font
-    final customFont = await loadCustomFont();
+// // This list will hold both text and images as widgets.
+//     final contentWidgets = <pw.Widget>[];
+//     // Load your custom font
+//     final customFont = await loadCustomFont();
 
-    final textDetails = [
-      pw.Text('رقم البلاغ: ${report.complaintNumber}',
-          style: pw.TextStyle(font: customFont)),
-      pw.Text('مقدم البلاغ: ${report.complaintParty}',
-          style: pw.TextStyle(font: customFont)),
-      pw.Text('اسم المشروع: ${report.project}',
-          style: pw.TextStyle(font: customFont)),
-      pw.Text('موقع المشروع: ${report.location}',
-          style: pw.TextStyle(font: customFont)),
-      pw.Text('الحالة: ${report.statusClient}',
-          style: pw.TextStyle(font: customFont)),
-    ];
-    contentWidgets.addAll(textDetails);
+//     final textDetails = [
+//       pw.Text('رقم البلاغ: ${report.complaintNumber}',
+//           style: pw.TextStyle(font: customFont)),
+//       pw.Text('مقدم البلاغ: ${report.complaintParty}',
+//           style: pw.TextStyle(font: customFont)),
+//       pw.Text('اسم المشروع: ${report.project}',
+//           style: pw.TextStyle(font: customFont)),
+//       pw.Text('موقع المشروع: ${report.location}',
+//           style: pw.TextStyle(font: customFont)),
+//       pw.Text('الحالة: ${report.statusClient}',
+//           style: pw.TextStyle(font: customFont)),
+//     ];
+//     contentWidgets.addAll(textDetails);
 
-// Iterate over contactInfo and add details to the PDF
-    for (final contact in report.contactInfo) {
-      contentWidgets.add(
-        pw.Text(
-          "الاسم: ${contact.name}, المنصب: ${contact.position}, الرقم: ${contact.phone}",
-          style: pw.TextStyle(fontSize: 12, font: customFont),
-        ),
-      );
-    }
+// // Iterate over contactInfo and add details to the PDF
+//     for (final contact in report.contactInfo) {
+//       contentWidgets.add(
+//         pw.Text(
+//           "الاسم: ${contact.name}, المنصب: ${contact.position}, الرقم: ${contact.phone}",
+//           style: pw.TextStyle(fontSize: 12, font: customFont),
+//         ),
+//       );
+//     }
 
-    // Prepare to add images from ReportDescription
-    for (final description in report.reportDescription) {
-      if (description.description != null) {
-        contentWidgets.add(pw.Text("وصف البلاغ: ${description.description!}",
-            style: pw.TextStyle(font: customFont)));
-      }
-      if (description.desImg != null && description.desImg!.isNotEmpty) {
-        final imageBytes = await fetchImage(description.desImg!);
-        final image = pw.MemoryImage(imageBytes);
+//     // Prepare to add images from ReportDescription
+//     for (final description in report.reportDescription) {
+//       if (description.description != null) {
+//         contentWidgets.add(pw.Text("وصف البلاغ: ${description.description!}",
+//             style: pw.TextStyle(font: customFont)));
+//       }
+//       if (description.desImg != null && description.desImg!.isNotEmpty) {
+//         final imageBytes = await fetchImage(description.desImg!);
+//         final image = pw.MemoryImage(imageBytes);
 
-        contentWidgets.add(pw.Image(image, height: 50, width: 50));
-      }
-    }
-    for (final jobDesc in report.reportJobDescription) {
-      // Include job description text
-      if (jobDesc.jobDescription != null &&
-          jobDesc.jobDescription!.description != null) {
-        contentWidgets.add(pw.Text(
-            "وصف الأعمال: ${jobDesc.jobDescription!.description}",
-            style: pw.TextStyle(font: customFont)));
-      }
-      // Include job description image (if exists)
-      if (jobDesc.desImg != null && jobDesc.desImg!.isNotEmpty) {
-        final jobImageBytes = await fetchImage(jobDesc.desImg!);
-        final jobImage = pw.MemoryImage(jobImageBytes);
-        contentWidgets.add(pw.Image(jobImage, height: 50, width: 50));
-      }
-    }
+//         contentWidgets.add(pw.Image(image, height: 50, width: 50));
+//       }
+//     }
+//     for (final jobDesc in report.reportJobDescription) {
+//       // Include job description text
+//       if (jobDesc.jobDescription != null &&
+//           jobDesc.jobDescription!.description != null) {
+//         contentWidgets.add(pw.Text(
+//             "وصف الأعمال: ${jobDesc.jobDescription!.description}",
+//             style: pw.TextStyle(font: customFont)));
+//       }
+//       // Include job description image (if exists)
+//       if (jobDesc.desImg != null && jobDesc.desImg!.isNotEmpty) {
+//         final jobImageBytes = await fetchImage(jobDesc.desImg!);
+//         final jobImage = pw.MemoryImage(jobImageBytes);
+//         contentWidgets.add(pw.Image(jobImage, height: 50, width: 50));
+//       }
+//     }
 
-    pdf.addPage(
-      pw.Page(
-        build: (context) {
-          return pw.Container(
-            alignment: pw.Alignment.topRight, // Align text to the right
-            child: pw.Column(
-              children: contentWidgets,
-            ),
-          );
-        },
-      ),
-    );
-    // pdf.addPage(
-    //   pw.Page(
-    //     build: (pw.Context context) => pw.Column(
-    //       children: contentWidgets,
-    //     ),
-    //   ),
-    // );
-    // Save the document
-    await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: 'تقرير إنجاز الأعمال ${report.complaintNumber}.pdf');
-  }
+//     pdf.addPage(
+//       pw.Page(
+//         build: (context) {
+//           return pw.Container(
+//             alignment: pw.Alignment.topRight, // Align text to the right
+//             child: pw.Column(
+//               children: contentWidgets,
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//     // pdf.addPage(
+//     //   pw.Page(
+//     //     build: (pw.Context context) => pw.Column(
+//     //       children: contentWidgets,
+//     //     ),
+//     //   ),
+//     // );
+//     // Save the document
+//     await Printing.sharePdf(
+//         bytes: await pdf.save(),
+//         filename: 'تقرير إنجاز الأعمال ${report.complaintNumber}.pdf');
+//   }
 }
