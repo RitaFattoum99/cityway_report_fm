@@ -94,7 +94,7 @@ class ReportService {
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           print(response.statusCode);
-          message = jsonResponse['message'] ?? "Report Edited Successfully";
+          message = jsonResponse['message'] ?? "بانتظار موافقة مقدم البلاغ";
           print("message: ${jsonEncode(message)}");
           return true;
         }
@@ -103,7 +103,7 @@ class ReportService {
         return true;
       } else if (response.statusCode == 422) {
         print(response.statusCode);
-        message = jsonResponse['message'] ?? "Failed to edit report";
+        message = jsonResponse['message'] ?? "حدث خطأ في إتمام العملية";
         print(message);
         return false;
       } else if (response.statusCode == 500) {
@@ -136,7 +136,7 @@ class ReportService {
       print("token $token");
       print(response.statusCode);
       print(response.body);
-      throw Exception('Failed to load order list');
+      throw Exception('Failed to load list');
     }
   }
 

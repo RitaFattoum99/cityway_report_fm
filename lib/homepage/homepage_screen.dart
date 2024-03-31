@@ -12,10 +12,22 @@ import 'reoport_list_controller.dart';
 // import 'package:pdf/widgets.dart' as pw;
 // import 'package:printing/printing.dart';
 
-class DynamicTabBarWithReports extends StatelessWidget {
+class DynamicTabBarWithReports extends StatefulWidget {
   DynamicTabBarWithReports({Key? key}) : super(key: key);
 
+  @override
+  State<DynamicTabBarWithReports> createState() =>
+      _DynamicTabBarWithReportsState();
+}
+
+class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
   final ReportListController controller = Get.put(ReportListController());
+
+  late SecureStorage secureStorage = SecureStorage();
+
+  String userName = "";
+
+  String email = "";
 
   @override
   @override
@@ -63,7 +75,7 @@ class DynamicTabBarWithReports extends StatelessWidget {
                 .map((status) => _buildReportList(status: status))
                 .toList(),
           ),
-          drawer: _buildDrawer(context), // Drawer widget
+          drawer: _buildDrawer(context, userName, email), // Drawer widget
           floatingActionButton:
               _buildAddReportButton(context), // Floating action button
         ),
@@ -78,27 +90,14 @@ class DynamicTabBarWithReports extends StatelessWidget {
   }
 
   // AppBar _buildAppBar(BuildContext context, List<Widget> tabs) {
-  //   return AppBar(
-  //     title: const Text('التقاريـر',
-  //         style: TextStyle(color: AppColorManager.white)),
-  //     bottom: TabBar(
-  //       isScrollable: true, // Enable scrolling if too many tabs
-  //       labelColor: AppColorManager.babyGreyAppColor,
-  //       unselectedLabelColor: AppColorManager.white,
-  //       tabs: tabs,
-  //     ),
-  //     backgroundColor: AppColorManager.mainAppColor,
-  //   );
-  // }
-
-  Drawer _buildDrawer(BuildContext context) {
+  Drawer _buildDrawer(BuildContext context, String userName, String email) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text(Information.username),
-            accountEmail: Text(Information.email),
+            accountName: Text(userName),
+            accountEmail: Text(email),
             currentAccountPicture: CircleAvatar(
                 backgroundColor: AppColorManager.white,
                 child: Image.asset("assets/images/logo.png")),
@@ -330,100 +329,31 @@ class DynamicTabBarWithReports extends StatelessWidget {
     }
   }
 
-  // Future<Uint8List> fetchImage(String url) async {
-  //   final response = await http.get(Uri.parse(url));
-  //   return response.bodyBytes;
-  // }
+  @override
+  void initState() {
+    super.initState();
+    // Fetch user name on widget initialization
+    fetchUserName();
+  }
 
-  // Future<pw.Font> loadCustomFont() async {
-  //   final fontData = await rootBundle.load("assets/font/Amiri-Regular.ttf");
-  //   final font = pw.Font.ttf(fontData);
-  //   return font;
-  // }
-
-  // Future<void> _generateAndSavePDF(DataAllReport report) async {
-//     final pdf = pw.Document();
-
-// // This list will hold both text and images as widgets.
-//     final contentWidgets = <pw.Widget>[];
-//     // Load your custom font
-//     final customFont = await loadCustomFont();
-
-//     final textDetails = [
-//       pw.Text('رقم البلاغ: ${report.complaintNumber}',
-//           style: pw.TextStyle(font: customFont)),
-//       pw.Text('مقدم البلاغ: ${report.complaintParty}',
-//           style: pw.TextStyle(font: customFont)),
-//       pw.Text('اسم المشروع: ${report.project}',
-//           style: pw.TextStyle(font: customFont)),
-//       pw.Text('موقع المشروع: ${report.location}',
-//           style: pw.TextStyle(font: customFont)),
-//       pw.Text('الحالة: ${report.statusClient}',
-//           style: pw.TextStyle(font: customFont)),
-//     ];
-//     contentWidgets.addAll(textDetails);
-
-// // Iterate over contactInfo and add details to the PDF
-//     for (final contact in report.contactInfo) {
-//       contentWidgets.add(
-//         pw.Text(
-//           "الاسم: ${contact.name}, المنصب: ${contact.position}, الرقم: ${contact.phone}",
-//           style: pw.TextStyle(fontSize: 12, font: customFont),
-//         ),
-//       );
-//     }
-
-//     // Prepare to add images from ReportDescription
-//     for (final description in report.reportDescription) {
-//       if (description.description != null) {
-//         contentWidgets.add(pw.Text("وصف البلاغ: ${description.description!}",
-//             style: pw.TextStyle(font: customFont)));
-//       }
-//       if (description.desImg != null && description.desImg!.isNotEmpty) {
-//         final imageBytes = await fetchImage(description.desImg!);
-//         final image = pw.MemoryImage(imageBytes);
-
-//         contentWidgets.add(pw.Image(image, height: 50, width: 50));
-//       }
-//     }
-//     for (final jobDesc in report.reportJobDescription) {
-//       // Include job description text
-//       if (jobDesc.jobDescription != null &&
-//           jobDesc.jobDescription!.description != null) {
-//         contentWidgets.add(pw.Text(
-//             "وصف الأعمال: ${jobDesc.jobDescription!.description}",
-//             style: pw.TextStyle(font: customFont)));
-//       }
-//       // Include job description image (if exists)
-//       if (jobDesc.desImg != null && jobDesc.desImg!.isNotEmpty) {
-//         final jobImageBytes = await fetchImage(jobDesc.desImg!);
-//         final jobImage = pw.MemoryImage(jobImageBytes);
-//         contentWidgets.add(pw.Image(jobImage, height: 50, width: 50));
-//       }
-//     }
-
-//     pdf.addPage(
-//       pw.Page(
-//         build: (context) {
-//           return pw.Container(
-//             alignment: pw.Alignment.topRight, // Align text to the right
-//             child: pw.Column(
-//               children: contentWidgets,
-//             ),
-//           );
-//         },
-//       ),
-//     );
-//     // pdf.addPage(
-//     //   pw.Page(
-//     //     build: (pw.Context context) => pw.Column(
-//     //       children: contentWidgets,
-//     //     ),
-//     //   ),
-//     // );
-//     // Save the document
-//     await Printing.sharePdf(
-//         bytes: await pdf.save(),
-//         filename: 'تقرير إنجاز الأعمال ${report.complaintNumber}.pdf');
-//   }
+  Future<void> fetchUserName() async {
+    secureStorage = SecureStorage();
+    String? name = await secureStorage.read("username");
+    String? myEmail = await secureStorage.read("email");
+    print('username : $name');
+    print('myEmail : $myEmail');
+    // Fetch user name using the key
+    if (name != null) {
+      setState(() {
+        userName = name; // Set the user name if found
+        print("username in drawer: $userName");
+      });
+    }
+    if (myEmail != null) {
+      setState(() {
+        email = myEmail; // Set the user name if found
+        print("email in drawer: $email");
+      });
+    }
+  }
 }
