@@ -18,32 +18,63 @@ class DynamicTabBarWithReports extends StatelessWidget {
   final ReportListController controller = Get.put(ReportListController());
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.isLoading.value) {
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
-      }
+      // Fixed list of report statuses
+      var statusList = [
+        'Urgent',
+        'Done',
+        'Pending',
+        'In-Progress',
+        'Complete',
+        'Rejected'
+      ];
 
-      // Generating tabs based on report statuses and their counts
-      final tabs = controller.reportStatuses.entries.map((entry) {
-        return Tab(text: '${_getStatusValue(entry.key)} (${entry.value})');
-      }).toList();
+      // Generating tabs with report status and count
+      var tabs = statusList
+          .map((status) => Tab(
+              text:
+                  '${_getStatusValue(status)} (${_getReportCountByStatus(status)})'))
+          .toList();
 
       return DefaultTabController(
-        length: tabs.length, // Dynamic number of tabs
+        length: statusList.length, // Set the number of tabs
         child: Scaffold(
-          appBar: _buildAppBar(context, tabs),
-          drawer: _buildDrawer(context),
-          body: TabBarView(
-            children: controller.reportStatuses.keys.map((status) {
-              // For each status, build a report list
-              return _buildReportList(status);
-            }).toList(),
+          appBar: AppBar(
+            title: const Text(
+              'التقاريـر',
+              style: TextStyle(color: AppColorManager.white),
+            ),
+            bottom: TabBar(
+              isScrollable: true, // Enable scrolling for tabs
+              labelColor:
+                  AppColorManager.babyGreyAppColor, // Selected tab label color
+              unselectedLabelColor:
+                  AppColorManager.white, // Unselected tab label color
+              tabs: tabs, // List of tabs
+            ),
+            backgroundColor:
+                AppColorManager.mainAppColor, // AppBar background color
           ),
-          floatingActionButton: _buildAddReportButton(context),
+          body: TabBarView(
+            // Generate a tab for each report status
+            children: statusList
+                .map((status) => _buildReportList(status: status))
+                .toList(),
+          ),
+          drawer: _buildDrawer(context), // Drawer widget
+          floatingActionButton:
+              _buildAddReportButton(context), // Floating action button
         ),
       );
     });
+  }
+
+  int _getReportCountByStatus(String status) {
+    return controller.reportList
+        .where((report) => report.statusClient == status)
+        .length;
   }
 
   AppBar _buildAppBar(BuildContext context, List<Widget> tabs) {
@@ -105,83 +136,186 @@ class DynamicTabBarWithReports extends StatelessWidget {
     );
   }
 
-  Widget _buildReportList(String status) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        // Refresh logic here
-        controller.fetchReports();
-      },
-      child: ListView.builder(
-        itemCount: controller.filteredReports(status).length,
-        itemBuilder: (context, index) {
-          final report = controller.filteredReports(status)[index];
-          return _buildReportItem(context, report);
-        },
+  // Widget _buildReportList(String status) {
+  //   return RefreshIndicator(
+  //     onRefresh: () async {
+  //       // Refresh logic here
+  //       controller.fetchReports();
+  //     },
+  //     child: ListView.builder(
+  //       itemCount: controller.filteredReports(status).length,
+  //       itemBuilder: (context, index) {
+  //         final report = controller.filteredReports(status)[index];
+  //         return _buildReportItem(context, report);
+  //       },
+  //     ),
+  //   );
+  // }
+  Widget _buildReportList({required String status}) {
+    if (controller.isLoading.value) {
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      var reports = controller.reportList
+          .where((report) => report.statusClient == status)
+          .toList();
+
+      if (reports.isEmpty) {
+        return _buildEmptyListAnimation();
+      } else {
+        return RefreshIndicator(
+          onRefresh: () async {
+            controller.fetchReports();
+          },
+          child: ListView.builder(
+            itemCount: reports.length,
+            itemBuilder: (context, index) => GestureDetector(
+                onTap: () {
+                  Get.to(() => ReportDetailsScreen(report: reports[index]));
+                },
+                child: _buildReportItem(reports[index])),
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildEmptyListAnimation() {
+    return const AnimatedOpacity(
+      opacity: 1.0, // Fully visible
+      duration: Duration(seconds: 2), // Duration of the animation
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(Icons.report_problem, size: 80, color: Colors.grey),
+            Text('ما من بلاغات مقدمة بعد..',
+                style: TextStyle(fontSize: 24, color: Colors.grey)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildReportItem(BuildContext context, DataAllReport report) {
+  // Widget _buildReportItem(BuildContext context, DataAllReport report) {
+  //   Color statusColor = _getStatusColor(report.statusClient);
+  //   return Padding(
+  //     padding: const EdgeInsets.all(10),
+  //     child: Container(
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: statusColor.withOpacity(0.5),
+  //             spreadRadius: 3,
+  //             blurRadius: 4,
+  //             offset: const Offset(0, 1),
+  //           ),
+  //         ],
+  //         borderRadius: BorderRadius.circular(10),
+  //       ),
+  //       child: ListTile(
+  //         onTap: () => Get.to(() => ReportDetailsScreen(report: report)),
+  //         title: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(report.project,
+  //                 style: const TextStyle(
+  //                     color: AppColorManager.secondaryAppColor,
+  //                     fontWeight: FontWeight.bold)),
+  //             Text("موقع المشروع: ${report.location}",
+  //                 style: const TextStyle(
+  //                     color: AppColorManager.secondaryAppColor)),
+  //           ],
+  //         ),
+  //         subtitle: Text(
+  //             "حالة المشروع: ${_getStatusValue(report.statusClient)}",
+  //             style:
+  //                 TextStyle(color: statusColor, fontWeight: FontWeight.w500)),
+  //         leading: Icon(Icons.stacked_bar_chart, color: statusColor, size: 25),
+  //         trailing: Row(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             IconButton(
+  //               icon: const Icon(
+  //                 Icons.edit,
+  //                 color: Colors.green,
+  //               ),
+  //               onPressed: () => Get.to(() => EditReportScreen(report: report)),
+  //             ),
+  //             IconButton(
+  //               icon: const Icon(
+  //                 Icons.picture_as_pdf,
+  //                 color: AppColorManager.pdfIconColor,
+  //               ),
+  //               onPressed: () async {
+  //                 // Logic to export the report
+  //                 // Assuming ReportDetailsScreen has a method to generate and save PDF
+  //                 _generateAndSavePDF(report);
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  Widget _buildReportItem(DataAllReport report) {
     Color statusColor = _getStatusColor(report.statusClient);
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: statusColor.withOpacity(0.5),
-              spreadRadius: 3,
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            ),
-          ],
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: ListTile(
-          onTap: () => Get.to(() => ReportDetailsScreen(report: report)),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(report.project,
-                  style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontWeight: FontWeight.bold)),
-              Text("موقع المشروع: ${report.location}",
-                  style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor)),
-            ],
-          ),
-          subtitle: Text(
-              "حالة المشروع: ${_getStatusValue(report.statusClient)}",
-              style:
-                  TextStyle(color: statusColor, fontWeight: FontWeight.w500)),
-          leading: Icon(Icons.stacked_bar_chart, color: statusColor, size: 25),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.edit,
-                  color: Colors.green,
-                ),
-                onPressed: () => Get.to(() => EditReportScreen(report: report)),
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.picture_as_pdf,
-                  color: AppColorManager.pdfIconColor,
-                ),
-                onPressed: () async {
-                  // Logic to export the report
-                  // Assuming ReportDetailsScreen has a method to generate and save PDF
-                  _generateAndSavePDF(report);
+    String statusValue = _getStatusValue(report.statusClient);
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Container(
+            decoration: _itemDecoration(statusColor),
+            child: ListTile(
+              title: _buildTitle(report),
+              subtitle: Text("حالة المشروع: $statusValue",
+                  style: TextStyle(
+                      color: statusColor, fontWeight: FontWeight.w500)),
+              leading:
+                  Icon(Icons.stacked_bar_chart, color: statusColor, size: 25),
+              trailing: IconButton(
+                icon: Icon(Icons.edit, color: Colors.green),
+                onPressed: () {
+                  // Navigate to the edit report screen
+                  Get.to(() => EditReportScreen(report: report));
                 },
               ),
-            ],
+            ),
           ),
         ),
-      ),
+      ],
+    );
+  }
+
+  Column _buildTitle(DataAllReport report) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(report.project,
+            style: const TextStyle(
+                color: AppColorManager.secondaryAppColor,
+                fontWeight: FontWeight.bold)),
+        Text("موقع المشروع: ${report.location}",
+            style: const TextStyle(color: AppColorManager.secondaryAppColor)),
+      ],
+    );
+  }
+
+  BoxDecoration _itemDecoration(Color statusColor) {
+    return BoxDecoration(
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: statusColor.withOpacity(0.5),
+          spreadRadius: 3,
+          blurRadius: 4,
+          offset: const Offset(0, 1),
+        ),
+      ],
+      borderRadius: BorderRadius.circular(10),
     );
   }
 
@@ -328,7 +462,7 @@ class DynamicTabBarWithReports extends StatelessWidget {
         final imageBytes = await fetchImage(description.desImg!);
         final image = pw.MemoryImage(imageBytes);
 
-        contentWidgets.add(pw.Image(image,height: 50,width: 50));
+        contentWidgets.add(pw.Image(image, height: 50, width: 50));
       }
     }
     for (final jobDesc in report.reportJobDescription) {
@@ -343,7 +477,7 @@ class DynamicTabBarWithReports extends StatelessWidget {
       if (jobDesc.desImg != null && jobDesc.desImg!.isNotEmpty) {
         final jobImageBytes = await fetchImage(jobDesc.desImg!);
         final jobImage = pw.MemoryImage(jobImageBytes);
-        contentWidgets.add(pw.Image(jobImage,height: 50,width: 50));
+        contentWidgets.add(pw.Image(jobImage, height: 50, width: 50));
       }
     }
 
