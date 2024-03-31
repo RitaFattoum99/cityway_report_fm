@@ -730,7 +730,7 @@ class _CreateReportState extends State<CreateReport> {
                 // Checkbox to show/hide the budget field
                 CheckboxListTile(
                   title: const Text(
-                    'تحديد الميزانية؟',
+                    'هل تريد تقديم تقرير مستعجل؟',
                     style: TextStyle(
                         color: AppColorManager.secondaryAppColor,
                         fontWeight: FontWeight.bold),

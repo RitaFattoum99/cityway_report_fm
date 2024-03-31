@@ -136,21 +136,6 @@ class DynamicTabBarWithReports extends StatelessWidget {
     );
   }
 
-  // Widget _buildReportList(String status) {
-  //   return RefreshIndicator(
-  //     onRefresh: () async {
-  //       // Refresh logic here
-  //       controller.fetchReports();
-  //     },
-  //     child: ListView.builder(
-  //       itemCount: controller.filteredReports(status).length,
-  //       itemBuilder: (context, index) {
-  //         final report = controller.filteredReports(status)[index];
-  //         return _buildReportItem(context, report);
-  //       },
-  //     ),
-  //   );
-  // }
   Widget _buildReportList({required String status}) {
     if (controller.isLoading.value) {
       return const Center(child: CircularProgressIndicator());
@@ -195,70 +180,6 @@ class DynamicTabBarWithReports extends StatelessWidget {
       ),
     );
   }
-
-  // Widget _buildReportItem(BuildContext context, DataAllReport report) {
-  //   Color statusColor = _getStatusColor(report.statusClient);
-  //   return Padding(
-  //     padding: const EdgeInsets.all(10),
-  //     child: Container(
-  //       decoration: BoxDecoration(
-  //         color: Colors.white,
-  //         boxShadow: [
-  //           BoxShadow(
-  //             color: statusColor.withOpacity(0.5),
-  //             spreadRadius: 3,
-  //             blurRadius: 4,
-  //             offset: const Offset(0, 1),
-  //           ),
-  //         ],
-  //         borderRadius: BorderRadius.circular(10),
-  //       ),
-  //       child: ListTile(
-  //         onTap: () => Get.to(() => ReportDetailsScreen(report: report)),
-  //         title: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Text(report.project,
-  //                 style: const TextStyle(
-  //                     color: AppColorManager.secondaryAppColor,
-  //                     fontWeight: FontWeight.bold)),
-  //             Text("موقع المشروع: ${report.location}",
-  //                 style: const TextStyle(
-  //                     color: AppColorManager.secondaryAppColor)),
-  //           ],
-  //         ),
-  //         subtitle: Text(
-  //             "حالة المشروع: ${_getStatusValue(report.statusClient)}",
-  //             style:
-  //                 TextStyle(color: statusColor, fontWeight: FontWeight.w500)),
-  //         leading: Icon(Icons.stacked_bar_chart, color: statusColor, size: 25),
-  //         trailing: Row(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             IconButton(
-  //               icon: const Icon(
-  //                 Icons.edit,
-  //                 color: Colors.green,
-  //               ),
-  //               onPressed: () => Get.to(() => EditReportScreen(report: report)),
-  //             ),
-  //             IconButton(
-  //               icon: const Icon(
-  //                 Icons.picture_as_pdf,
-  //                 color: AppColorManager.pdfIconColor,
-  //               ),
-  //               onPressed: () async {
-  //                 // Logic to export the report
-  //                 // Assuming ReportDetailsScreen has a method to generate and save PDF
-  //                 _generateAndSavePDF(report);
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildReportItem(DataAllReport report) {
     Color statusColor = _getStatusColor(report.statusClient);
