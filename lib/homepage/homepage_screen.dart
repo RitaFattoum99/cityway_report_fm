@@ -38,7 +38,8 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
         'Pending',
         'In-Progress',
         'Complete',
-        'Rejected'
+        'Rejected',
+        'Approved'
       ];
 
       // Generating tabs with report status and count
@@ -294,7 +295,7 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
       case 'Urgent':
         return Colors.red;
       case 'Complete':
-        return Colors.green;
+        return Colors.deepOrange;
       case 'Rejected':
         return Colors.pink;
       case 'In-Progress':
@@ -303,6 +304,8 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
         return Colors.grey;
       case 'Done':
         return Colors.yellow[700]!;
+      case 'Approved':
+        return Colors.green;
       default:
         return Colors.purple;
     }
@@ -322,6 +325,8 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
         return 'قيد الانتظار';
       case 'Done':
         return 'منتهي';
+      case 'Approved':
+        return 'مقبول';
       default:
         return '';
     }

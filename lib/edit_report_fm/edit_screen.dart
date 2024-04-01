@@ -173,16 +173,20 @@ class _EditReportScreenState extends State<EditReportScreen> {
         String imagePath = image.path;
         if (isAfterImage) {
           // Update after-image data
-          if (index < jobCards.length)
+          if (index < jobCards.length) {
             jobCards[index]['imagefter'] = File(imagePath);
-          if (index < editController.reportJobDescription.length)
+          }
+          if (index < editController.reportJobDescription.length) {
             editController.reportJobDescription[index].afterDesImg = imagePath;
+          }
         } else {
           // Update before-image data
-          if (index < jobCards.length)
+          if (index < jobCards.length) {
             jobCards[index]['image'] = File(imagePath);
-          if (index < editController.reportJobDescription.length)
+          }
+          if (index < editController.reportJobDescription.length) {
             editController.reportJobDescription[index].desImg = imagePath;
+          }
         }
       });
     }
