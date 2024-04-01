@@ -133,70 +133,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
     });
   }
 
-  // Future<void> _pickImage(int index) async {
-  //   final option = await showDialog<ImageSource>(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: const Text('اختر مصدر الصورة',
-  //             style: TextStyle(fontWeight: FontWeight.bold)),
-  //         content: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             ElevatedButton(
-  //               style: ElevatedButton.styleFrom(
-  //                 backgroundColor: AppColorManager.mainAppColor,
-  //               ),
-  //               onPressed: () => Navigator.pop(context, ImageSource.camera),
-  //               child: const Text(
-  //                 'الكاميرا',
-  //                 style: TextStyle(color: AppColorManager.white),
-  //               ),
-  //             ),
-  //             ElevatedButton(
-  //               style: ElevatedButton.styleFrom(
-  //                 backgroundColor: AppColorManager.mainAppColor,
-  //               ),
-  //               onPressed: () => Navigator.pop(context, ImageSource.gallery),
-  //               child: const Text('المعرض',
-  //                   style: TextStyle(color: AppColorManager.white)),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-
-  //   if (option == null) return;
-
-  //   final ImagePicker picker = ImagePicker();
-  //   final XFile? image = await picker.pickImage(source: option);
-
-  //   if (image != null) {
-  //     setState(() {
-
-  //       if (index < jobCards.length) {
-  //         jobCards[index]['image'] = File(image.path);
-  //         print(jobCards[index]['image']);
-  //       }
-  //       if (index < editController.reportJobDescription.length) {
-  //         editController.reportJobDescription[index].desImg = image.path;
-  //       } else {
-  //         // Ensure that the jobDescription list is long enough to add a new item
-  //         for (int i = editController.reportJobDescription.length;
-  //             i <= index;
-  //             i++) {
-  //           editController.reportJobDescription.add(ReportJobDescription(
-  //               jobDescription: JobDescription(description: '')));
-  //         }
-  //         editController.reportJobDescription[index].desImg = image.path;
-  //       }
-  //       print(
-  //           "img in controller in _pickImage function: ${editController.reportJobDescription[index].desImg}");
-  //     });
-  //   }
-  // }
-
   Future<void> _pickImage(int index, {required bool isAfterImage}) async {
     final option = await showDialog<ImageSource>(
       context: context,
@@ -208,11 +144,19 @@ class _EditReportScreenState extends State<EditReportScreen> {
           children: [
             ElevatedButton(
               onPressed: () => Navigator.pop(context, ImageSource.camera),
-              child: const Text('الكاميرا'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColorManager.mainAppColor,
+              ),
+              child: const Text('الكاميرا',
+                  style: TextStyle(color: AppColorManager.white)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, ImageSource.gallery),
-              child: const Text('المعرض'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColorManager.mainAppColor,
+              ),
+              child: const Text('المعرض',
+                  style: TextStyle(color: AppColorManager.white)),
             ),
           ],
         ),

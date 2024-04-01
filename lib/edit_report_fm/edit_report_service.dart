@@ -53,8 +53,9 @@ class EditReportService {
           print("multipartFile: $multipartFile");
         }
 
-         if (reportJobDescription[i].afterDesImg != null) {
-          File imageFile = await processImage(reportJobDescription[i].afterDesImg!);
+        if (reportJobDescription[i].afterDesImg != null) {
+          File imageFile =
+              await processImage(reportJobDescription[i].afterDesImg!);
           var stream = http.ByteStream(imageFile.openRead())..cast<List<int>>();
           var length = await imageFile.length();
           var multipartFile = http.MultipartFile(
@@ -81,7 +82,7 @@ class EditReportService {
       final jsonResponse = jsonDecode(responseBody);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        message = jsonResponse['message'] ?? "Report Edited Successfully";
+        message = jsonResponse['message'] ?? "بانتظار موافقة مقدم البلاغ";
         print("Response: $jsonResponse");
         print("Status Code: ${response.statusCode}");
         print("message: ${jsonEncode(message)}");
@@ -90,7 +91,7 @@ class EditReportService {
         print("Response: $jsonResponse");
         print("Status Code: ${response.statusCode}");
         print("message: ${jsonEncode(message)}");
-        message = jsonResponse['message'] ?? "Failed to edit report";
+        message = jsonResponse['message'] ?? "حدث خطـأ بالإرسال";
         return false;
       }
     } catch (e) {
