@@ -36,6 +36,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
       'quantity': TextEditingController(),
       'note': TextEditingController(),
       'image': null,
+      'imageafter': null,
       'unit': TextEditingController(),
       'jobDescriptionId': null,
     }
@@ -51,9 +52,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
       final imagePath = repjobDescription.desImg!;
       final isImageUrl =
           imagePath.startsWith('http://') || imagePath.startsWith('https://');
-      final image =
-          isImageUrl ? imagePath : File(imagePath); // No change for local files
+      final image = isImageUrl ? imagePath : File(imagePath);
 
+      final imagePathafter = repjobDescription.afterDesImg!;
+      final isImageUrlafter = imagePathafter.startsWith('http://') ||
+          imagePathafter.startsWith('https://');
+      final imageafter =
+          isImageUrlafter ? imagePathafter : File(imagePathafter);
       return {
         'description': TextEditingController(
             text: repjobDescription.jobDescription?.description ?? ''),
@@ -62,8 +67,8 @@ class _EditReportScreenState extends State<EditReportScreen> {
         'quantity':
             TextEditingController(text: repjobDescription.quantity.toString()),
         'note': TextEditingController(text: repjobDescription.note),
-        'image':
-            image, // This will now correctly be either a String (URL) or File
+        'image': image,
+        'imageafter': imageafter,
         'unit':
             TextEditingController(text: repjobDescription.jobDescription!.unit),
         'jobDescriptionId': repjobDescription.jobDescriptionId,
@@ -108,6 +113,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
         'quantity': TextEditingController(),
         'note': TextEditingController(),
         'image': null,
+        'imageafter': null,
         'unit': TextEditingController(),
         'jobDescriptionId': null,
       });
@@ -127,38 +133,90 @@ class _EditReportScreenState extends State<EditReportScreen> {
     });
   }
 
-  Future<void> _pickImage(int index) async {
+  // Future<void> _pickImage(int index) async {
+  //   final option = await showDialog<ImageSource>(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: const Text('اختر مصدر الصورة',
+  //             style: TextStyle(fontWeight: FontWeight.bold)),
+  //         content: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             ElevatedButton(
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: AppColorManager.mainAppColor,
+  //               ),
+  //               onPressed: () => Navigator.pop(context, ImageSource.camera),
+  //               child: const Text(
+  //                 'الكاميرا',
+  //                 style: TextStyle(color: AppColorManager.white),
+  //               ),
+  //             ),
+  //             ElevatedButton(
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: AppColorManager.mainAppColor,
+  //               ),
+  //               onPressed: () => Navigator.pop(context, ImageSource.gallery),
+  //               child: const Text('المعرض',
+  //                   style: TextStyle(color: AppColorManager.white)),
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+
+  //   if (option == null) return;
+
+  //   final ImagePicker picker = ImagePicker();
+  //   final XFile? image = await picker.pickImage(source: option);
+
+  //   if (image != null) {
+  //     setState(() {
+
+  //       if (index < jobCards.length) {
+  //         jobCards[index]['image'] = File(image.path);
+  //         print(jobCards[index]['image']);
+  //       }
+  //       if (index < editController.reportJobDescription.length) {
+  //         editController.reportJobDescription[index].desImg = image.path;
+  //       } else {
+  //         // Ensure that the jobDescription list is long enough to add a new item
+  //         for (int i = editController.reportJobDescription.length;
+  //             i <= index;
+  //             i++) {
+  //           editController.reportJobDescription.add(ReportJobDescription(
+  //               jobDescription: JobDescription(description: '')));
+  //         }
+  //         editController.reportJobDescription[index].desImg = image.path;
+  //       }
+  //       print(
+  //           "img in controller in _pickImage function: ${editController.reportJobDescription[index].desImg}");
+  //     });
+  //   }
+  // }
+
+  Future<void> _pickImage(int index, {required bool isAfterImage}) async {
     final option = await showDialog<ImageSource>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('اختر مصدر الصورة',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColorManager.mainAppColor,
-                ),
-                onPressed: () => Navigator.pop(context, ImageSource.camera),
-                child: const Text(
-                  'الكاميرا',
-                  style: TextStyle(color: AppColorManager.white),
-                ),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColorManager.mainAppColor,
-                ),
-                onPressed: () => Navigator.pop(context, ImageSource.gallery),
-                child: const Text('المعرض',
-                    style: TextStyle(color: AppColorManager.white)),
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: const Text('اختر مصدر الصورة',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, ImageSource.camera),
+              child: const Text('الكاميرا'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, ImageSource.gallery),
+              child: const Text('المعرض'),
+            ),
+          ],
+        ),
+      ),
     );
 
     if (option == null) return;
@@ -168,24 +226,20 @@ class _EditReportScreenState extends State<EditReportScreen> {
 
     if (image != null) {
       setState(() {
-        if (index < jobCards.length) {
-          jobCards[index]['image'] = File(image.path);
-          print(jobCards[index]['image']);
-        }
-        if (index < editController.reportJobDescription.length) {
-          editController.reportJobDescription[index].desImg = image.path;
+        String imagePath = image.path;
+        if (isAfterImage) {
+          // Update after-image data
+          if (index < jobCards.length)
+            jobCards[index]['imagefter'] = File(imagePath);
+          if (index < editController.reportJobDescription.length)
+            editController.reportJobDescription[index].afterDesImg = imagePath;
         } else {
-          // Ensure that the jobDescription list is long enough to add a new item
-          for (int i = editController.reportJobDescription.length;
-              i <= index;
-              i++) {
-            editController.reportJobDescription.add(ReportJobDescription(
-                jobDescription: JobDescription(description: '')));
-          }
-          editController.reportJobDescription[index].desImg = image.path;
+          // Update before-image data
+          if (index < jobCards.length)
+            jobCards[index]['image'] = File(imagePath);
+          if (index < editController.reportJobDescription.length)
+            editController.reportJobDescription[index].desImg = imagePath;
         }
-        print(
-            "img in controller in _pickImage function: ${editController.reportJobDescription[index].desImg}");
       });
     }
   }
@@ -219,21 +273,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        // actions: <Widget>[
-        // Container(
-        //   decoration: BoxDecoration(
-        //       color: AppColorManager.white, shape: BoxShape.circle),
-        //   child: Padding(
-        //     padding: const EdgeInsets.all(8.0),
-        //     child: IconButton(
-        //       icon: Image.asset("assets/images/logo.png"),
-        //       onPressed: () {
-        //         print('Image icon pressed');
-        //       },
-        //     ),
-        //   ),
-        // ),
-        // ],
         backgroundColor: AppColorManager.mainAppColor,
       ),
       body: Padding(
@@ -245,13 +284,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // const SizedBox(height: 20),
-              // Center(
-              //   child: SizedBox(
-              //     height: size.height * 0.1,
-              //     child: Image.asset('assets/images/logo.png'),
-              //   ),
-              // ),
               SizedBox(
                 height: size.height * 0.02,
               ),
@@ -719,56 +751,117 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                   ),
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      GestureDetector(
-                                        onTap: () async =>
-                                            await _pickImage(index),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 8),
-                                          child: jobCards[index]['image'] ==
-                                                  null
-                                              ? const Icon(Icons.add_a_photo)
-                                              : jobCards[index]['image'] is File
-                                                  ? Image.file(
-                                                      jobCards[index]['image']
-                                                          as File,
-                                                      width: 150,
-                                                      height: 150,
-                                                      fit: BoxFit.cover,
-                                                    )
-                                                  : Image.network(
-                                                      jobCards[index]['image']
-                                                          as String,
-                                                      width: 150,
-                                                      height: 150,
-                                                      fit: BoxFit.cover,
-                                                      loadingBuilder: (BuildContext
-                                                              context,
-                                                          Widget child,
-                                                          ImageChunkEvent?
-                                                              loadingProgress) {
-                                                        if (loadingProgress ==
-                                                            null) {
-                                                          return child;
-                                                        }
-                                                        return Center(
-                                                          child:
-                                                              CircularProgressIndicator(
-                                                            value: loadingProgress
-                                                                        .expectedTotalBytes !=
-                                                                    null
-                                                                ? loadingProgress
-                                                                        .cumulativeBytesLoaded /
-                                                                    loadingProgress
-                                                                        .expectedTotalBytes!
-                                                                : null,
-                                                          ),
-                                                        );
-                                                      },
-                                                    ),
-                                        ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: 10),
+                                          Text(
+                                            'صورة قبل:',
+                                            style: TextStyle(
+                                                color: AppColorManager
+                                                    .secondaryAppColor,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () async => await _pickImage(
+                                                index,
+                                                isAfterImage: false),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 8),
+                                              child: jobCards[index]['image'] ==
+                                                      null
+                                                  ? const Icon(
+                                                      Icons.add_a_photo)
+                                                  : jobCards[index]['image']
+                                                          is File
+                                                      ? Image.file(
+                                                          jobCards[index]
+                                                              ['image'] as File,
+                                                          width: 150,
+                                                          height: 150,
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : Image.network(
+                                                          jobCards[index]
+                                                                  ['image']
+                                                              as String,
+                                                          width: 150,
+                                                          height: 150,
+                                                          fit: BoxFit.cover,
+                                                          loadingBuilder:
+                                                              (BuildContext
+                                                                      context,
+                                                                  Widget child,
+                                                                  ImageChunkEvent?
+                                                                      loadingProgress) {
+                                                            if (loadingProgress ==
+                                                                null) {
+                                                              return child;
+                                                            }
+                                                            return Center(
+                                                              child:
+                                                                  CircularProgressIndicator(
+                                                                value: loadingProgress
+                                                                            .expectedTotalBytes !=
+                                                                        null
+                                                                    ? loadingProgress
+                                                                            .cumulativeBytesLoaded /
+                                                                        loadingProgress
+                                                                            .expectedTotalBytes!
+                                                                    : null,
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                            ),
+                                          ),
+                                          SizedBox(height: 10),
+                                          Text(
+                                            'صورة بعد:',
+                                            style: TextStyle(
+                                                color: AppColorManager
+                                                    .secondaryAppColor,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () async => await _pickImage(
+                                                index,
+                                                isAfterImage: true),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 8),
+                                              child: jobCards[index]
+                                                          ['imageafter'] ==
+                                                      null
+                                                  ? const Icon(
+                                                      Icons.add_a_photo)
+                                                  : jobCards[index]
+                                                          ['imageafter'] is File
+                                                      ? Image.file(
+                                                          jobCards[index]
+                                                                  ['imageafter']
+                                                              as File,
+                                                          width: 150,
+                                                          height: 150,
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : Image.network(
+                                                          jobCards[index]
+                                                                  ['imageafter']
+                                                              as String,
+                                                          width: 150,
+                                                          height: 150,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       GestureDetector(
                                         onTap: () {
@@ -830,6 +923,12 @@ class _EditReportScreenState extends State<EditReportScreen> {
                           } else if (card['image'] is String) {
                             imagePath = card['image'];
                           }
+                          String? afterImagePath;
+                          if (card['imageafter'] is File) {
+                            afterImagePath = (card['imageafter'] as File).path;
+                          } else if (card['imageafter'] is String) {
+                            afterImagePath = card['imageafter'];
+                          }
                           return ReportJobDescription(
                             jobDescription: JobDescription(
                                 description: card['description'].text,
@@ -838,6 +937,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                             price: int.tryParse(card['price'].text) ?? 0,
                             quantity: int.tryParse(card['quantity'].text) ?? 0,
                             desImg: imagePath,
+                            afterDesImg: afterImagePath,
                             jobDescriptionId: card['jobDescriptionId'],
                           );
                         }).toList();

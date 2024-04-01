@@ -109,8 +109,8 @@ class DataAllReport {
             : DateTime.parse(json["finishing_date_of_work"]),
         statusClient: json["status_client"],
         statusAdmin: json["status_admin"],
-        urgent: json["urgent"]?? 0,
-        budget: json["budget"]?? 0,
+        urgent: json["urgent"] ?? 0,
+        budget: json["budget"] ?? 0,
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
         complaintParty: json["complaint_party"],
@@ -289,7 +289,7 @@ class ReportJobDescription {
 
   @override
   String toString() {
-    return 'ReportJobDescription(jobDescription: $jobDescription, note: $note, price: $price, quantity: $quantity, desImg: $desImg, jobDescriptionId: $jobDescriptionId)';
+    return 'ReportJobDescription(jobDescription: $jobDescription, note: $note, price: $price, quantity: $quantity, desImg: $desImg, afterImg: $afterDesImg, jobDescriptionId: $jobDescriptionId)';
   }
 
   factory ReportJobDescription.fromJson(Map<String, dynamic> json) =>
