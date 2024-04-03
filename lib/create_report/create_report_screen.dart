@@ -470,12 +470,8 @@ class _CreateReportState extends State<CreateReport> {
                                         }
                                       },
                                       validator: (value) {
-                                        String pattern = r'^\+971[0-9]{9}$';
-                                        RegExp regex = RegExp(pattern);
                                         if (value == null || value.isEmpty) {
-                                          return 'الرجاء إدخال رقم المسؤول'; // 'Please enter the responsible person\'s number';
-                                        } else if (!regex.hasMatch(value)) {
-                                          return 'الرجاء إدخال رقم صحيح بالشكل +971XXXXXXXXX'; // 'Please enter a valid number in the format +971XXXXXXXXX';
+                                          return 'الرجاء إدخال رقم المسؤول';
                                         }
                                         return null;
                                       },

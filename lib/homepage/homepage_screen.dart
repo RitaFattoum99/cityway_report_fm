@@ -53,20 +53,24 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
         length: statusList.length, // Set the number of tabs
         child: Scaffold(
           appBar: AppBar(
+            iconTheme: const IconThemeData(
+              color: AppColorManager.white,
+            ),
             title: const Text(
               'التقاريـر',
               style: TextStyle(color: AppColorManager.white),
             ),
             bottom: TabBar(
-              isScrollable: true, // Enable scrolling for tabs
-              labelColor:
-                  AppColorManager.babyGreyAppColor, // Selected tab label color
-              unselectedLabelColor:
-                  AppColorManager.white, // Unselected tab label color
-              tabs: tabs, // List of tabs
+              // Enable scrolling for tabs
+              isScrollable: true,
+              // Selected tab label color
+              labelColor: AppColorManager.babyGreyAppColor,
+              // Unselected tab label color
+              unselectedLabelColor: AppColorManager.white,
+              indicatorColor: AppColorManager.babyGreyAppColor,
+              tabs: tabs,
             ),
-            backgroundColor:
-                AppColorManager.mainAppColor, // AppBar background color
+            backgroundColor: AppColorManager.mainAppColor,
           ),
           body: TabBarView(
             // Generate a tab for each report status

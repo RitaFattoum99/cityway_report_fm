@@ -26,6 +26,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
   final EditReportController editController = Get.put(EditReportController());
   final ReportController reportController = Get.put(ReportController());
   final List<TextEditingController> controllers = [];
+  final ScrollController _scrollController = ScrollController();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -237,64 +238,30 @@ class _EditReportScreenState extends State<EditReportScreen> {
               ),
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.numbers,
                     color: AppColorManager.mainAppColor,
                   ),
-                  SizedBox(width: 10),
                   Text(
-                    widget.report.complaintNumber,
+                    ' رقم البلاغ: ${widget.report.complaintNumber}',
                     style: const TextStyle(
                       color: AppColorManager.mainAppColor,
-                      fontSize: 16,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Row(
                 children: [
-                  Icon(
-                    Icons.file_copy,
-                    color: AppColorManager.secondaryAppColor,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    widget.report.project,
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    color: AppColorManager.secondaryAppColor,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    widget.report.location,
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
+                  const Icon(
                     Icons.person_2_rounded,
                     color: AppColorManager.secondaryAppColor,
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 6),
                   Text(
-                    widget.report.complaintParty,
+                    ' مقدم البلاغ: ${widget.report.complaintParty}',
                     style: const TextStyle(
                       color: AppColorManager.secondaryAppColor,
                       fontSize: 16,
@@ -302,113 +269,299 @@ class _EditReportScreenState extends State<EditReportScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 10),
-              Text(
-                'المسؤولين:',
-                style: const TextStyle(
-                    color: AppColorManager.mainAppColor,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.file_copy,
+                    color: AppColorManager.secondaryAppColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'اسم المشروع : ${widget.report.project}',
+                    style: const TextStyle(
+                      color: AppColorManager.secondaryAppColor,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.location_on,
+                    color: AppColorManager.secondaryAppColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'موقع المشروع : ${widget.report.location}',
+                    style: const TextStyle(
+                      color: AppColorManager.secondaryAppColor,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.stacked_bar_chart,
+                    color: AppColorManager.secondaryAppColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'الحالة: ${widget.report.location}',
+                    style: const TextStyle(
+                      color: AppColorManager.secondaryAppColor,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              const Divider(
+                color: AppColorManager.babyGreyAppColor,
+                endIndent: 10,
+              ),
+              const SizedBox(height: 5),
+              const Row(
+                children: [
+                  Icon(
+                    Icons.group,
+                    color: AppColorManager.mainAppColor,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    "المسـؤولين:",
+                    style: TextStyle(
+                        color: AppColorManager.mainAppColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18),
+                  ),
+                ],
+              ),
+              // SizedBox(
+              //   height: 120,
+              //   child: ListView.separated(
+              //     separatorBuilder: (context, index) => SizedBox(width: 10),
+              //     scrollDirection: Axis.horizontal,
+              //     itemCount: widget.report.contactInfo.length,
+              //     itemBuilder: (BuildContext context, int index) {
+              //       return Padding(
+              //         padding: const EdgeInsets.all(8.0),
+              //         child: Container(
+              //           decoration: BoxDecoration(
+              //             color: Colors.white,
+              //             boxShadow: [
+              //               BoxShadow(
+              //                 color: AppColorManager.secondaryAppColor
+              //                     .withOpacity(0.5),
+              //                 spreadRadius: 3,
+              //                 blurRadius: 4,
+              //                 offset: const Offset(0, 1),
+              //               ),
+              //             ],
+              //             borderRadius: BorderRadius.circular(10),
+              //           ),
+              //           child: Padding(
+              //             padding: const EdgeInsets.all(8.0),
+              //             child: Column(
+              //               crossAxisAlignment: CrossAxisAlignment.start,
+              //               children: [
+              //                 Row(
+              //                   children: [
+              //                     Icon(
+              //                       Icons.person_2_rounded,
+              //                       color: AppColorManager.secondaryAppColor,
+              //                     ),
+              //                     SizedBox(width: 10),
+              //                     Text(
+              //                       widget.report.contactInfo[index].name,
+              //                       style: const TextStyle(
+              //                         color: AppColorManager.secondaryAppColor,
+              //                         fontSize: 16,
+              //                       ),
+              //                     ),
+              //                   ],
+              //                 ),
+              //                 Row(
+              //                   children: [
+              //                     Icon(
+              //                       Icons.work_rounded,
+              //                       color: AppColorManager.secondaryAppColor,
+              //                     ),
+              //                     SizedBox(width: 10),
+              //                     Text(
+              //                       widget.report.contactInfo[index].position,
+              //                       style: const TextStyle(
+              //                         color: AppColorManager.secondaryAppColor,
+              //                         fontSize: 16,
+              //                       ),
+              //                     ),
+              //                   ],
+              //                 ),
+              //                 Row(
+              //                   children: [
+              //                     Icon(
+              //                       Icons.phone,
+              //                       color: AppColorManager.secondaryAppColor,
+              //                     ),
+              //                     SizedBox(width: 10),
+              //                     Text(
+              //                       widget.report.contactInfo[index].phone,
+              //                       style: const TextStyle(
+              //                         color: AppColorManager.secondaryAppColor,
+              //                         fontSize: 16,
+              //                       ),
+              //                     ),
+              //                   ],
+              //                 ),
+              //               ],
+              //             ),
+              //           ),
+              //         ),
+              //       );
+              //     },
+              //   ),
+              // ),
+
               SizedBox(
-                height: 120,
-                child: ListView.separated(
-                  separatorBuilder: (context, index) => SizedBox(width: 10),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: widget.report.contactInfo.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColorManager.secondaryAppColor
-                                  .withOpacity(0.5),
-                              spreadRadius: 3,
-                              blurRadius: 4,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                height: 100,
+                child: Stack(
+                  children: [
+                    ListView.builder(
+                      controller:
+                          _scrollController, // Use the ScrollController here
+                      scrollDirection: Axis.horizontal,
+                      itemCount: widget.report.contactInfo.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding:
+                              EdgeInsets.only(bottom: size.height * 0.0001),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.person_2_rounded,
-                                    color: AppColorManager.secondaryAppColor,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    widget.report.contactInfo[index].name,
-                                    style: const TextStyle(
+                              SizedBox(
+                                width: 325,
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.person_2_rounded,
                                       color: AppColorManager.secondaryAppColor,
-                                      fontSize: 16,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'المسؤول: ${widget.report.contactInfo[index].name}',
+                                      style: const TextStyle(
+                                        color:
+                                            AppColorManager.secondaryAppColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.work_rounded,
-                                    color: AppColorManager.secondaryAppColor,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    widget.report.contactInfo[index].position,
-                                    style: const TextStyle(
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                width: 300,
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.work,
                                       color: AppColorManager.secondaryAppColor,
-                                      fontSize: 16,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'المنصب: ${widget.report.contactInfo[index].position}',
+                                      style: const TextStyle(
+                                        color:
+                                            AppColorManager.secondaryAppColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.phone,
-                                    color: AppColorManager.secondaryAppColor,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    widget.report.contactInfo[index].phone,
-                                    style: const TextStyle(
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                width: 300,
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.phone,
                                       color: AppColorManager.secondaryAppColor,
-                                      fontSize: 16,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'الرقم: ${widget.report.contactInfo[index].phone}',
+                                      style: const TextStyle(
+                                        color:
+                                            AppColorManager.secondaryAppColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
+                        );
+                      },
+                    ),
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: InkWell(
+                          onTap: () {
+                            // Calculate the scroll amount for one item here if necessary
+                            _scrollController.animateTo(
+                              _scrollController.offset +
+                                  325, // Adjust the scroll amount based on your item width
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeIn,
+                            );
+                          },
+                          child: const Icon(
+                            Icons.arrow_forward_ios,
+                            color: AppColorManager.mainAppColor,
+                          ),
                         ),
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(
-                height: 10,
+              const SizedBox(height: 5),
+              const Divider(
+                color: AppColorManager.babyGreyAppColor,
+                endIndent: 10,
               ),
+              const SizedBox(height: 5),
+
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "وصف البلاغ:",
-                      style: TextStyle(
-                        color: AppColorManager.mainAppColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                    const Row(
+                      children: [
+                        Icon(
+                          Icons.description,
+                          color: AppColorManager.mainAppColor,
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          "وصف البلاغ:",
+                          style: TextStyle(
+                              color: AppColorManager.mainAppColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18),
+                        ),
+                      ],
                     ),
                     SizedBox(
                       height: 400,
@@ -454,6 +607,24 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                       color: Colors.blue, fontSize: 16),
                                 ),
                               ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.note_add,
+                                    color: AppColorManager.secondaryAppColor,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "ملاحظة: ${widget.report.reportDescription[index].note!}",
+                                    style: const TextStyle(
+                                      color: AppColorManager.secondaryAppColor,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
                               Expanded(
                                 child: Container(
                                   height: 200,
