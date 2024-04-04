@@ -1,8 +1,17 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
+import 'dart:io';
+
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+
 import '/core/resource/color_manager.dart';
 import '../core/config/service_config.dart';
 import '../core/resource/size_manager.dart';
 import '/homepage/allreport_model.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class ReportDetailsScreen extends StatefulWidget {
   final DataAllReport report;
@@ -18,6 +27,20 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
 
   bool isExpanded = false;
   bool isExpanded1 = false;
+
+  Future<String> downloadPDF(String url, String filename) async {
+    final response = await http.get(Uri.parse(url));
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/$filename');
+    await file.writeAsBytes(response.bodyBytes);
+    return file.path;
+  }
+
+  @override
+  void initState() {
+    print('file: ${widget.report.workOrder}');
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +77,14 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                     Icons.numbers,
                     color: AppColorManager.mainAppColor,
                   ),
-                  Text(
-                    ' رقم البلاغ: ${widget.report.complaintNumber}',
-                    style: const TextStyle(
-                      color: AppColorManager.mainAppColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      ' رقم البلاغ: ${widget.report.complaintNumber}',
+                      style: const TextStyle(
+                        color: AppColorManager.mainAppColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -72,11 +97,13 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                     color: AppColorManager.secondaryAppColor,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    ' مقدم البلاغ: ${widget.report.complaintParty}',
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
+                  Expanded(
+                    child: Text(
+                      ' مقدم البلاغ: ${widget.report.complaintParty}',
+                      style: const TextStyle(
+                        color: AppColorManager.secondaryAppColor,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -89,11 +116,13 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                     color: AppColorManager.secondaryAppColor,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    'اسم المشروع : ${widget.report.project}',
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
+                  Expanded(
+                    child: Text(
+                      'اسم المشروع : ${widget.report.project}',
+                      style: const TextStyle(
+                        color: AppColorManager.secondaryAppColor,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -106,28 +135,13 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                     color: AppColorManager.secondaryAppColor,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    'موقع المشروع : ${widget.report.location}',
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.stacked_bar_chart,
-                    color: AppColorManager.secondaryAppColor,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'الحالة: ${widget.report.location}',
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
+                  Expanded(
+                    child: Text(
+                      'موقع المشروع : ${widget.report.location}',
+                      style: const TextStyle(
+                        color: AppColorManager.secondaryAppColor,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -347,7 +361,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  "ملاحظة: ${widget.report.reportDescription[index].note!}",
+                                  "ملاحظة: ${widget.report.reportDescription[index].note ?? ''}",
                                   style: const TextStyle(
                                     color: AppColorManager.secondaryAppColor,
                                     fontSize: 16,
@@ -527,8 +541,15 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    getFullImageUrl(widget.report
-                                        .reportJobDescription[index].desImg!),
+                                    widget.report.reportJobDescription[index]
+                                                .desImg !=
+                                            null
+                                        ? getFullImageUrl(widget
+                                            .report
+                                            .reportJobDescription[index]
+                                            .desImg!)
+                                        : 'assets/images/default.png', // Provide a default image path
+
                                     fit: BoxFit.cover,
                                     loadingBuilder: (BuildContext context,
                                         Widget child,
@@ -572,10 +593,14 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    getFullImageUrl(widget
-                                        .report
-                                        .reportJobDescription[index]
-                                        .afterDesImg!),
+                                    widget.report.reportJobDescription[index]
+                                                .afterDesImg !=
+                                            null
+                                        ? getFullImageUrl(widget
+                                            .report
+                                            .reportJobDescription[index]
+                                            .afterDesImg!)
+                                        : 'assets/images/default.png', // Provide a default image path
                                     fit: BoxFit.cover,
                                     loadingBuilder: (BuildContext context,
                                         Widget child,
@@ -616,10 +641,59 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                   ),
                 ],
               ),
+              InkWell(
+                onTap: () async {
+                  EasyLoading.show(
+                      status: 'يتم التحميل...', dismissOnTap: true);
+                  String url = widget.report.workOrder;
+                  String filename = url.split('/').last;
+                  String filePath = await downloadPDF(url, filename);
+                  EasyLoading.dismiss();
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => PdfViewPage(file: File(filePath)),
+                  ));
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.report.workOrder.split('/').last,
+                          style: const TextStyle(
+                              color: AppColorManager.secondaryAppColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const Icon(Icons.picture_as_pdf, size: 30),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class PdfViewPage extends StatelessWidget {
+  final File file;
+  const PdfViewPage({super.key, required this.file});
+
+  @override
+  Widget build(BuildContext context) {
+    return PDFView(
+      filePath: file.path,
+      enableSwipe: true,
+      autoSpacing: false,
+      pageFling: false,
+      pageSnap: false,
+      defaultPage: 0,
+      fitPolicy: FitPolicy.BOTH,
+      preventLinkNavigation: false,
     );
   }
 }

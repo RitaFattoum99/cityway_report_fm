@@ -195,7 +195,7 @@ class _SignInState extends State<SignIn> {
     print("email: ${signinController.email}");
     print("password: ${signinController.password}");
     if (_formKey.currentState!.validate()) {
-      EasyLoading.show(status: 'loading...', dismissOnTap: true);
+      EasyLoading.show(status: 'يتم التحميل...', dismissOnTap: true);
       await signinController.doSignIn();
 
       if (signinController.loginStatus) {

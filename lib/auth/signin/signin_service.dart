@@ -44,10 +44,6 @@ class SignInService {
           userID = jsonresponse['data']['id'];
           username = jsonresponse['data']['username'];
           email = jsonresponse['data']['email'];
-          print('user id : $userID');
-          print("role: $role");
-          print("token $token");
-          print("user $username");
 
           Information.TOKEN = token;
           Information.role = role;
@@ -61,6 +57,11 @@ class SignInService {
           await secureStorage.save("username", Information.username);
           await secureStorage.save("email", Information.email);
           await secureStorage.saveInt("id", Information.userId);
+          print('user id : $userID');
+          print("role: $role");
+          print("token $token");
+          print("user $username");
+
           Get.offNamed('home');
 
           // message = "You are logged in successfully";

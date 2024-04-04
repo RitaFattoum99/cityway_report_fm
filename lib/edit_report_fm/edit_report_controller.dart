@@ -1,16 +1,16 @@
 // ignore_for_file: avoid_print
 
+import 'dart:io';
+
 import '/core/native_service/secure_storage.dart';
 import '/edit_report_fm/edit_report_service.dart';
 import '/homepage/allreport_model.dart';
 import 'package:get/get.dart';
 
 class EditReportController extends GetxController {
-  // final List<ReportJobDescription> reportJobDescription = [];
-  // Add a field to store the report ID
   int reportId = -1;
-
-  // Add a method to set the report ID
+  // ignore: prefer_typing_uninitialized_variables
+  var workOrder;
   void setReportId(int id) {
     reportId = id;
   }
@@ -25,13 +25,14 @@ class EditReportController extends GetxController {
   var isLoading = true.obs;
 
   Future<void> edit(List<ReportJobDescription> reportJobDescription) async {
+    print("work order: $workOrder");
     isLoading(true);
 
     try {
       String? token = await secureStorage.read("token");
       if (token != null) {
-        editStatus =
-            await service.editReports(reportJobDescription, token, reportId);
+        editStatus = await service.editReports(
+            reportJobDescription, token, reportId, workOrder);
         message = service.message;
 
         isLoading(true);
@@ -39,6 +40,16 @@ class EditReportController extends GetxController {
     } finally {
       isLoading(false);
     }
+  }
+
+  Future<void> upload(File file) async {
+    String? token = await secureStorage.read("token");
+    if (token == null) {
+      print("Authorization token is missing");
+      return;
+    }
+    int reportId = getReportId;
+    await service.uploadPDFFile(file, token, reportId);
   }
 
   var reportJobDescription = <ReportJobDescription>[].obs;

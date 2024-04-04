@@ -52,6 +52,7 @@ class DataAllReport {
   String statusAdmin;
   int urgent;
   int budget;
+  String workOrder;
   DateTime createdAt;
   DateTime updatedAt;
   String complaintParty;
@@ -77,6 +78,7 @@ class DataAllReport {
     required this.statusAdmin,
     required this.urgent,
     required this.budget,
+    required this.workOrder,
     required this.createdAt,
     required this.updatedAt,
     required this.complaintParty,
@@ -111,6 +113,7 @@ class DataAllReport {
         statusAdmin: json["status_admin"],
         urgent: json["urgent"] ?? 0,
         budget: json["budget"] ?? 0,
+        workOrder: json["work_order"] ?? '',
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
         complaintParty: json["complaint_party"],
@@ -146,6 +149,7 @@ class DataAllReport {
         "status_admin": statusAdmin,
         "urgent": urgent,
         "budget": budget,
+        "work_order": workOrder,
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),
         "complaint_party": complaintParty,

@@ -1,8 +1,10 @@
-// ignore_for_file: prefer_const_constructors, avoid_print
+// ignore_for_file: prefer_const_constructors, avoid_print, use_build_context_synchronously, unnecessary_null_comparison
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/config/service_config.dart';
+import '../core/native_service/secure_storage.dart';
 import '../create_report/report_controller.dart';
 import '../homepage/reoport_list_controller.dart';
 import '../jobDes/job_description_model.dart';
@@ -12,6 +14,8 @@ import '/edit_report_fm/edit_report_controller.dart';
 import '/homepage/allreport_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class EditReportScreen extends StatefulWidget {
   final DataAllReport report;
@@ -27,8 +31,8 @@ class _EditReportScreenState extends State<EditReportScreen> {
   final ReportController reportController = Get.put(ReportController());
   final List<TextEditingController> controllers = [];
   final ScrollController _scrollController = ScrollController();
-
   final _formKey = GlobalKey<FormState>();
+  File? _selectedFile;
 
   late List<Map<String, dynamic>> jobCards = [
     {
@@ -43,23 +47,63 @@ class _EditReportScreenState extends State<EditReportScreen> {
     }
   ];
 
+  late SecureStorage secureStorage = SecureStorage();
+  String userRole = '';
+
+  Future<void> initRoles() async {
+    final String? role = await secureStorage.read("role");
+    if (role != null) {
+      setState(() {
+        userRole = role;
+      });
+    }
+  }
+
+  Future<String> downloadPDF(String url, String filename) async {
+    final response = await http.get(Uri.parse(url));
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/$filename');
+    await file.writeAsBytes(response.bodyBytes);
+    return file.path;
+  }
+
   @override
   void initState() {
     super.initState();
+    initRoles();
+    print("userRole: $userRole");
     editController.reportId = widget.report.id;
+    editController.workOrder = widget.report.workOrder;
+    if (widget.report.workOrder != null) {
+      _selectedFile = File(widget.report.workOrder);
+    }
+    print('file: ${widget.report.workOrder}');
 
     // initializing jobCards with existing report data
     jobCards = widget.report.reportJobDescription.map((repjobDescription) {
-      final imagePath = repjobDescription.desImg!;
-      final isImageUrl =
-          imagePath.startsWith('http://') || imagePath.startsWith('https://');
-      final image = isImageUrl ? imagePath : File(imagePath);
+      dynamic image;
+      final imagePath = repjobDescription.desImg;
+      if (imagePath != null) {
+        final isImageUrl =
+            imagePath.startsWith('http://') || imagePath.startsWith('https://');
+        image = isImageUrl ? imagePath : File(imagePath);
+      } else {
+        image = null;
+      }
+      dynamic imageafter;
 
-      final imagePathafter = repjobDescription.afterDesImg!;
-      final isImageUrlafter = imagePathafter.startsWith('http://') ||
-          imagePathafter.startsWith('https://');
-      final imageafter =
-          isImageUrlafter ? imagePathafter : File(imagePathafter);
+      final imagePathafter = repjobDescription.afterDesImg;
+      if (imagePathafter != null) {
+        final isImageUrlafter = imagePathafter.startsWith('http://') ||
+            imagePathafter.startsWith('https://');
+        imageafter = isImageUrlafter ? imagePathafter : File(imagePathafter);
+      } else {
+        // Here, you might want to assign a default value or handle the null case
+        // For example, imageafter could be set to a placeholder image or remain null
+        // and later handled accordingly when being used.
+        imageafter = null; // Or your placeholder logic here
+      }
+
       return {
         'description': TextEditingController(
             text: repjobDescription.jobDescription?.description ?? ''),
@@ -69,9 +113,10 @@ class _EditReportScreenState extends State<EditReportScreen> {
             TextEditingController(text: repjobDescription.quantity.toString()),
         'note': TextEditingController(text: repjobDescription.note),
         'image': image,
-        'imageafter': imageafter,
-        'unit':
-            TextEditingController(text: repjobDescription.jobDescription!.unit),
+        'imageafter':
+            imageafter, // This now correctly refers to the declared variable
+        'unit': TextEditingController(
+            text: repjobDescription.jobDescription?.unit ?? ''),
         'jobDescriptionId': repjobDescription.jobDescriptionId,
       };
     }).toList();
@@ -175,7 +220,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
         if (isAfterImage) {
           // Update after-image data
           if (index < jobCards.length) {
-            jobCards[index]['imagefter'] = File(imagePath);
+            jobCards[index]['imageafter'] = File(imagePath);
           }
           if (index < editController.reportJobDescription.length) {
             editController.reportJobDescription[index].afterDesImg = imagePath;
@@ -190,6 +235,20 @@ class _EditReportScreenState extends State<EditReportScreen> {
           }
         }
       });
+    }
+  }
+
+  Future<File?> selectPDFFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null) {
+      return File(result.files.single.path!);
+    } else {
+      // User canceled the picker
+      return null;
     }
   }
 
@@ -242,12 +301,14 @@ class _EditReportScreenState extends State<EditReportScreen> {
                     Icons.numbers,
                     color: AppColorManager.mainAppColor,
                   ),
-                  Text(
-                    ' رقم البلاغ: ${widget.report.complaintNumber}',
-                    style: const TextStyle(
-                      color: AppColorManager.mainAppColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      ' رقم البلاغ: ${widget.report.complaintNumber}',
+                      style: const TextStyle(
+                        color: AppColorManager.mainAppColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -260,11 +321,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
                     color: AppColorManager.secondaryAppColor,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    ' مقدم البلاغ: ${widget.report.complaintParty}',
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
+                  Expanded(
+                    child: Text(
+                      ' مقدم البلاغ: ${widget.report.complaintParty}',
+                      style: const TextStyle(
+                        color: AppColorManager.secondaryAppColor,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -277,11 +340,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
                     color: AppColorManager.secondaryAppColor,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    'اسم المشروع : ${widget.report.project}',
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
+                  Expanded(
+                    child: Text(
+                      'اسم المشروع : ${widget.report.project}',
+                      style: const TextStyle(
+                        color: AppColorManager.secondaryAppColor,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -294,11 +359,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
                     color: AppColorManager.secondaryAppColor,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    'موقع المشروع : ${widget.report.location}',
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
+                  Expanded(
+                    child: Text(
+                      'موقع المشروع : ${widget.report.location}',
+                      style: const TextStyle(
+                        color: AppColorManager.secondaryAppColor,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -311,11 +378,13 @@ class _EditReportScreenState extends State<EditReportScreen> {
                     color: AppColorManager.secondaryAppColor,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    'الحالة: ${widget.report.location}',
-                    style: const TextStyle(
-                      color: AppColorManager.secondaryAppColor,
-                      fontSize: 16,
+                  Expanded(
+                    child: Text(
+                      'الحالة: ${widget.report.location}',
+                      style: const TextStyle(
+                        color: AppColorManager.secondaryAppColor,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -342,91 +411,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                   ),
                 ],
               ),
-              // SizedBox(
-              //   height: 120,
-              //   child: ListView.separated(
-              //     separatorBuilder: (context, index) => SizedBox(width: 10),
-              //     scrollDirection: Axis.horizontal,
-              //     itemCount: widget.report.contactInfo.length,
-              //     itemBuilder: (BuildContext context, int index) {
-              //       return Padding(
-              //         padding: const EdgeInsets.all(8.0),
-              //         child: Container(
-              //           decoration: BoxDecoration(
-              //             color: Colors.white,
-              //             boxShadow: [
-              //               BoxShadow(
-              //                 color: AppColorManager.secondaryAppColor
-              //                     .withOpacity(0.5),
-              //                 spreadRadius: 3,
-              //                 blurRadius: 4,
-              //                 offset: const Offset(0, 1),
-              //               ),
-              //             ],
-              //             borderRadius: BorderRadius.circular(10),
-              //           ),
-              //           child: Padding(
-              //             padding: const EdgeInsets.all(8.0),
-              //             child: Column(
-              //               crossAxisAlignment: CrossAxisAlignment.start,
-              //               children: [
-              //                 Row(
-              //                   children: [
-              //                     Icon(
-              //                       Icons.person_2_rounded,
-              //                       color: AppColorManager.secondaryAppColor,
-              //                     ),
-              //                     SizedBox(width: 10),
-              //                     Text(
-              //                       widget.report.contactInfo[index].name,
-              //                       style: const TextStyle(
-              //                         color: AppColorManager.secondaryAppColor,
-              //                         fontSize: 16,
-              //                       ),
-              //                     ),
-              //                   ],
-              //                 ),
-              //                 Row(
-              //                   children: [
-              //                     Icon(
-              //                       Icons.work_rounded,
-              //                       color: AppColorManager.secondaryAppColor,
-              //                     ),
-              //                     SizedBox(width: 10),
-              //                     Text(
-              //                       widget.report.contactInfo[index].position,
-              //                       style: const TextStyle(
-              //                         color: AppColorManager.secondaryAppColor,
-              //                         fontSize: 16,
-              //                       ),
-              //                     ),
-              //                   ],
-              //                 ),
-              //                 Row(
-              //                   children: [
-              //                     Icon(
-              //                       Icons.phone,
-              //                       color: AppColorManager.secondaryAppColor,
-              //                     ),
-              //                     SizedBox(width: 10),
-              //                     Text(
-              //                       widget.report.contactInfo[index].phone,
-              //                       style: const TextStyle(
-              //                         color: AppColorManager.secondaryAppColor,
-              //                         fontSize: 16,
-              //                       ),
-              //                     ),
-              //                   ],
-              //                 ),
-              //               ],
-              //             ),
-              //           ),
-              //         ),
-              //       );
-              //     },
-              //   ),
-              // ),
-
               SizedBox(
                 height: 100,
                 child: Stack(
@@ -541,7 +525,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                 endIndent: 10,
               ),
               const SizedBox(height: 5),
-
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -602,9 +585,10 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                   });
                                 },
                                 child: Text(
-                                  isExpanded ? "عرض أقل" : "عرض المزيد",
+                                  isExpanded ? "عرض أقل" : "...عرض المزيد",
                                   style: TextStyle(
-                                      color: Colors.blue, fontSize: 16),
+                                      color: AppColorManager.greyAppColor,
+                                      fontSize: 16),
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -616,7 +600,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    "ملاحظة: ${widget.report.reportDescription[index].note!}",
+                                    "ملاحظة: ${widget.report.reportDescription[index].note ?? ''}",
                                     style: const TextStyle(
                                       color: AppColorManager.secondaryAppColor,
                                       fontSize: 16,
@@ -687,9 +671,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                       ),
                     ),
                     SizedBox(height: 10),
-                    // Expanded(
-                    // height: 400,
-                    // child:
                     Form(
                       key: _formKey,
                       child: ListView.builder(
@@ -797,10 +778,84 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                       );
                                     },
                                   ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextFormField(
+                                  userRole == 'estimation' ||
+                                          userRole == 'admin'
+                                      ? Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextFormField(
+                                                // readOnly:
+                                                //     userRole == 'fme' ? true : false,
+                                                controller: data['unit'],
+                                                decoration:
+                                                    const InputDecoration(
+                                                        labelText: 'الوحدة'),
+                                                onChanged: (value) => setState(
+                                                    () => data['unit'].text =
+                                                        value),
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      value.isEmpty) {
+                                                    return 'ادخل الوحدة';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: TextFormField(
+                                                // readOnly:
+                                                //     userRole == 'fme' ? true : false,
+                                                controller: data['price'],
+                                                decoration:
+                                                    const InputDecoration(
+                                                        labelText: 'السعر'),
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    data['price'].text = value;
+                                                  });
+                                                },
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      value.isEmpty) {
+                                                    return 'إدخال السعر';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: TextFormField(
+                                                // readOnly:
+                                                //     userRole == 'fme' ? true : false,
+                                                controller: data['quantity'],
+                                                decoration:
+                                                    const InputDecoration(
+                                                        labelText: 'الكمية'),
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    data['quantity'].text =
+                                                        value;
+                                                  });
+                                                },
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      value.isEmpty) {
+                                                    return 'ادخل الكمية';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : TextFormField(
+                                          // readOnly:
+                                          //     userRole == 'fme' ? true : false,
                                           controller: data['unit'],
                                           decoration: const InputDecoration(
                                               labelText: 'الوحدة'),
@@ -814,49 +869,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                             return null;
                                           },
                                         ),
-                                      ),
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: data['price'],
-                                          decoration: const InputDecoration(
-                                              labelText: 'السعر'),
-                                          keyboardType: TextInputType.number,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              data['price'].text = value;
-                                            });
-                                          },
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'إدخال السعر';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: data['quantity'],
-                                          decoration: const InputDecoration(
-                                              labelText: 'الكمية'),
-                                          keyboardType: TextInputType.number,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              data['quantity'].text = value;
-                                            });
-                                          },
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'ادخل الكمية';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+
                                   TextFormField(
                                     controller: data['note'],
                                     decoration: const InputDecoration(
@@ -868,6 +881,139 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                       });
                                     },
                                   ),
+                                  // Row(
+                                  //   mainAxisAlignment:
+                                  //       MainAxisAlignment.spaceBetween,
+                                  //   children: [
+                                  //     Column(
+                                  //       crossAxisAlignment:
+                                  //           CrossAxisAlignment.start,
+                                  //       children: [
+                                  //         SizedBox(height: 10),
+                                  //         Text(
+                                  //           'صورة قبل:',
+                                  //           style: TextStyle(
+                                  //               color: AppColorManager
+                                  //                   .secondaryAppColor,
+                                  //               fontWeight: FontWeight.w600),
+                                  //         ),
+                                  //         GestureDetector(
+                                  //           onTap: () async => await _pickImage(
+                                  //               index,
+                                  //               isAfterImage: false),
+                                  //           child: Padding(
+                                  //             padding:
+                                  //                 const EdgeInsets.symmetric(
+                                  //                     vertical: 8),
+                                  //             child: jobCards[index]['image'] ==
+                                  //                     null
+                                  //                 ? const Icon(
+                                  //                     Icons.add_a_photo)
+                                  //                 : jobCards[index]['image']
+                                  //                         is File
+                                  //                     ? Image.file(
+                                  //                         jobCards[index]
+                                  //                             ['image'] as File,
+                                  //                         width: 150,
+                                  //                         height: 150,
+                                  //                         fit: BoxFit.cover,
+                                  //                       )
+                                  //                     : Image.network(
+                                  //                         jobCards[index]
+                                  //                                 ['image']
+                                  //                             as String,
+                                  //                         width: 150,
+                                  //                         height: 150,
+                                  //                         fit: BoxFit.cover,
+                                  //                         loadingBuilder:
+                                  //                             (BuildContext
+                                  //                                     context,
+                                  //                                 Widget child,
+                                  //                                 ImageChunkEvent?
+                                  //                                     loadingProgress) {
+                                  //                           if (loadingProgress ==
+                                  //                               null) {
+                                  //                             return child;
+                                  //                           }
+                                  //                           return Center(
+                                  //                             child:
+                                  //                                 CircularProgressIndicator(
+                                  //                               value: loadingProgress
+                                  //                                           .expectedTotalBytes !=
+                                  //                                       null
+                                  //                                   ? loadingProgress
+                                  //                                           .cumulativeBytesLoaded /
+                                  //                                       loadingProgress
+                                  //                                           .expectedTotalBytes!
+                                  //                                   : null,
+                                  //                             ),
+                                  //                           );
+                                  //                         },
+                                  //                       ),
+                                  //           ),
+                                  //         ),
+                                  //         SizedBox(height: 10),
+                                  //         Text(
+                                  //           'صورة بعد:',
+                                  //           style: TextStyle(
+                                  //               color: AppColorManager
+                                  //                   .secondaryAppColor,
+                                  //               fontWeight: FontWeight.w600),
+                                  //         ),
+                                  //         GestureDetector(
+                                  //           onTap: () async => await _pickImage(
+                                  //               index,
+                                  //               isAfterImage: true),
+                                  //           child: Padding(
+                                  //             padding:
+                                  //                 const EdgeInsets.symmetric(
+                                  //                     vertical: 8),
+                                  //             child: jobCards[index]
+                                  //                         ['imageafter'] ==
+                                  //                     null
+                                  //                 ? const Icon(
+                                  //                     Icons.add_a_photo)
+                                  //                 : jobCards[index]
+                                  //                         ['imageafter'] is File
+                                  //                     ? Image.file(
+                                  //                         jobCards[index]
+                                  //                                 ['imageafter']
+                                  //                             as File,
+                                  //                         width: 150,
+                                  //                         height: 150,
+                                  //                         fit: BoxFit.cover,
+                                  //                       )
+                                  //                     : Image.network(
+                                  //                         jobCards[index]
+                                  //                                 ['imageafter']
+                                  //                             as String,
+                                  //                         width: 150,
+                                  //                         height: 150,
+                                  //                         fit: BoxFit.cover,
+                                  //                       ),
+                                  //           ),
+                                  //         ),
+                                  //       ],
+                                  //     ),
+                                  // GestureDetector(
+                                  //   onTap: () {
+                                  //     _removeJobCard(index);
+                                  //   },
+                                  //   child: Container(
+                                  //     height: 35,
+                                  //     width: 35,
+                                  //     decoration: const BoxDecoration(
+                                  //       shape: BoxShape.circle,
+                                  //       color: Colors.red,
+                                  //     ),
+                                  //     child: const Icon(
+                                  //       Icons.remove,
+                                  //       color: AppColorManager.white,
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  //   ],
+                                  // ),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -892,51 +1038,10 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                       vertical: 8),
-                                              child: jobCards[index]['image'] ==
-                                                      null
-                                                  ? const Icon(
-                                                      Icons.add_a_photo)
-                                                  : jobCards[index]['image']
-                                                          is File
-                                                      ? Image.file(
-                                                          jobCards[index]
-                                                              ['image'] as File,
-                                                          width: 150,
-                                                          height: 150,
-                                                          fit: BoxFit.cover,
-                                                        )
-                                                      : Image.network(
-                                                          jobCards[index]
-                                                                  ['image']
-                                                              as String,
-                                                          width: 150,
-                                                          height: 150,
-                                                          fit: BoxFit.cover,
-                                                          loadingBuilder:
-                                                              (BuildContext
-                                                                      context,
-                                                                  Widget child,
-                                                                  ImageChunkEvent?
-                                                                      loadingProgress) {
-                                                            if (loadingProgress ==
-                                                                null) {
-                                                              return child;
-                                                            }
-                                                            return Center(
-                                                              child:
-                                                                  CircularProgressIndicator(
-                                                                value: loadingProgress
-                                                                            .expectedTotalBytes !=
-                                                                        null
-                                                                    ? loadingProgress
-                                                                            .cumulativeBytesLoaded /
-                                                                        loadingProgress
-                                                                            .expectedTotalBytes!
-                                                                    : null,
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
+                                              child: _buildImageDisplay(
+                                                  jobCards[index]['image'],
+                                                  150,
+                                                  150),
                                             ),
                                           ),
                                           SizedBox(height: 10),
@@ -955,52 +1060,33 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                       vertical: 8),
-                                              child: jobCards[index]
-                                                          ['imageafter'] ==
-                                                      null
-                                                  ? const Icon(
-                                                      Icons.add_a_photo)
-                                                  : jobCards[index]
-                                                          ['imageafter'] is File
-                                                      ? Image.file(
-                                                          jobCards[index]
-                                                                  ['imageafter']
-                                                              as File,
-                                                          width: 150,
-                                                          height: 150,
-                                                          fit: BoxFit.cover,
-                                                        )
-                                                      : Image.network(
-                                                          jobCards[index]
-                                                                  ['imageafter']
-                                                              as String,
-                                                          width: 150,
-                                                          height: 150,
-                                                          fit: BoxFit.cover,
-                                                        ),
+                                              child: _buildImageDisplay(
+                                                  jobCards[index]['imageafter'],
+                                                  150,
+                                                  150),
                                             ),
                                           ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              _removeJobCard(index);
+                                            },
+                                            child: Container(
+                                              height: 35,
+                                              width: 35,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.red,
+                                              ),
+                                              child: const Icon(
+                                                Icons.remove,
+                                                color: AppColorManager.white,
+                                              ),
+                                            ),
+                                          )
                                         ],
                                       ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          _removeJobCard(index);
-                                        },
-                                        child: Container(
-                                          height: 35,
-                                          width: 35,
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.red,
-                                          ),
-                                          child: const Icon(
-                                            Icons.remove,
-                                            color: AppColorManager.white,
-                                          ),
-                                        ),
-                                      ),
                                     ],
-                                  ),
+                                  )
                                 ],
                               ),
                             ),
@@ -1008,10 +1094,175 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         },
                       ),
                     ),
-                    // ),
                   ],
                 ),
               ),
+              SizedBox(height: 10),
+              Column(
+                children: [
+                  // InkWell(
+                  // onTap: () async {
+                  //   // Open the PDF file in a new full-screen page
+                  //   if (File(widget.report.workOrder) != null) {
+                  //     EasyLoading.show(
+                  //         status: 'يتم التحميل...', dismissOnTap: true);
+                  //     String url = widget.report.workOrder;
+                  //     String filename = url.split('/').last;
+                  //     String filePath = await downloadPDF(url, filename);
+                  //     EasyLoading.dismiss();
+                  //     Navigator.of(context).push(MaterialPageRoute(
+                  //       builder: (context) =>
+                  //           PdfViewPage(file: File(filePath)),
+                  //     ));
+                  //   } else if (_selectedFile != null) {
+                  //     print("_selectedFile:$_selectedFile");
+                  //     Navigator.of(context).push(
+                  //       MaterialPageRoute(
+                  //         builder: (context) =>
+                  //             PdfViewPage(file: _selectedFile!),
+                  //       ),
+                  //     );
+                  //   } else {
+                  //     ScaffoldMessenger.of(context).showSnackBar(
+                  //       SnackBar(
+                  //         content: Text("رجاءً اختر ملف أولاً."),
+                  //       ),
+                  //     );
+                  //   }
+                  // },
+                  // child:
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _selectedFile != null
+                                ? _selectedFile!.path.split('/').last
+                                : widget.report.workOrder.split('/').last,
+                            style: const TextStyle(
+                                color: AppColorManager.secondaryAppColor,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Icon(Icons.picture_as_pdf, size: 30),
+                      ],
+                    ),
+                  ),
+                  // ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColorManager.mainAppColor,
+                    ),
+                    onPressed: () async {
+                      File? file = await selectPDFFile();
+                      if (file != null) {
+                        setState(() {
+                          _selectedFile =
+                              file; // Update the UI to show selected file
+                        });
+                        editController.upload(file);
+                      }
+                    },
+                    child: const Text(
+                      'ملف بدء العمل',
+                      style: TextStyle(
+                          color: AppColorManager.white,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              // Column(
+              //   children: [
+              //     InkWell(
+              //       onTap: () async {
+              //         if (widget.report.workOrder != null &&
+              //             (Uri.tryParse(widget.report.workOrder!)
+              //                     ?.hasAbsolutePath ??
+              //                 false)) {
+              //           // Assuming widget.report.workOrder is a valid URL
+              //           EasyLoading.show(
+              //               status: 'يتم التحميل...', dismissOnTap: true);
+              //           try {
+              //             String url = widget.report.workOrder;
+              //             String filename = url.split('/').last;
+              //             String filePath = await downloadPDF(url, filename);
+              //             EasyLoading.dismiss();
+              //             Navigator.of(context).push(
+              //               MaterialPageRoute(
+              //                 builder: (context) =>
+              //                     PdfViewPage(file: File(filePath)),
+              //               ),
+              //             );
+              //           } catch (e) {
+              //             EasyLoading.dismiss();
+              //             ScaffoldMessenger.of(context).showSnackBar(
+              //               SnackBar(
+              //                   content: Text('حدث خطأ أثناء تحميل الملف.')),
+              //             );
+              //           }
+              //         } else if (_selectedFile != null) {
+              //           print("_selectedFile:$_selectedFile");
+              //           Navigator.of(context).push(
+              //             MaterialPageRoute(
+              //               builder: (context) =>
+              //                   PdfViewPage(file: _selectedFile!),
+              //             ),
+              //           );
+              //         } else {
+              //           ScaffoldMessenger.of(context).showSnackBar(
+              //             SnackBar(
+              //               content: Text("رجاءً اختر ملف أولاً."),
+              //             ),
+              //           );
+              //         }
+              //       },
+              //       child: Container(
+              //         padding: EdgeInsets.all(8.0),
+              //         child: Row(
+              //           children: [
+              //             Expanded(
+              //               child: Text(
+              //                 _selectedFile != null
+              //                     ? _selectedFile!.path.split('/').last
+              //                     : widget.report.workOrder?.split('/').last ??
+              //                         "No file selected",
+              //                 style: const TextStyle(
+              //                     color: AppColorManager.secondaryAppColor,
+              //                     fontWeight: FontWeight.bold),
+              //               ),
+              //             ),
+              //             Icon(Icons.picture_as_pdf, size: 30),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //     ElevatedButton(
+              //       style: ElevatedButton.styleFrom(
+              //         backgroundColor: AppColorManager.mainAppColor,
+              //       ),
+              //       onPressed: () async {
+              //         File? file = await selectPDFFile();
+              //         if (file != null) {
+              //           setState(() {
+              //             _selectedFile =
+              //                 file; // Update the UI to show selected file
+              //           });
+              //           editController.upload(file);
+              //         }
+              //       },
+              //       child: const Text(
+              //         'ملف بدء العمل',
+              //         style: TextStyle(
+              //             color: AppColorManager.white,
+              //             fontWeight: FontWeight.bold),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1053,8 +1304,8 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                 description: card['description'].text,
                                 unit: card['unit'].text),
                             note: card['note'].text,
-                            price: int.tryParse(card['price'].text) ?? 0,
-                            quantity: int.tryParse(card['quantity'].text) ?? 0,
+                            price: int.tryParse(card['price'].text),
+                            quantity: int.tryParse(card['quantity'].text),
                             desImg: imagePath,
                             afterDesImg: afterImagePath,
                             jobDescriptionId: card['jobDescriptionId'],
@@ -1065,9 +1316,8 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         // Now, update editController with the new list
                         editController.updateReportJobDescriptions(
                             updatedJobDescriptions);
-
                         EasyLoading.show(
-                            status: 'loading...', dismissOnTap: true);
+                            status: 'يتم التحميل...', dismissOnTap: true);
                         await editController.edit(updatedJobDescriptions);
                         if (editController.editStatus) {
                           print("editStatus: ${editController.editStatus}");
@@ -1096,6 +1346,77 @@ class _EditReportScreenState extends State<EditReportScreen> {
                           fontWeight: FontWeight.bold),
                     ),
                   ),
+
+                  // ElevatedButton(
+                  //   onPressed: () async {
+                  //     if (_formKey.currentState!.validate()) {
+                  //       print("تعديل");
+                  //       var updatedJobDescriptions = jobCards.map((card) {
+                  //         String? imagePath = card['image'] is File
+                  //             ? (card['image'] as File).path
+                  //             : card['image'];
+                  //         String? afterImagePath = card['imageafter'] is File
+                  //             ? (card['imageafter'] as File).path
+                  //             : card['imageafter'];
+
+                  //         int? price = int.tryParse(card['price'].text);
+                  //         int? quantity = int.tryParse(card['quantity'].text);
+
+                  //         // Check if both price and quantity are provided
+                  //         bool isPriceAndQuantityProvided =
+                  //             price != null && quantity != null;
+
+                  //         return ReportJobDescription(
+                  //           jobDescription: JobDescription(
+                  //             description: card['description'].text,
+                  //             unit: card['unit'].text,
+                  //           ),
+                  //           note: card['note'].text,
+                  //           price: isPriceAndQuantityProvided ? price : null,
+                  //           quantity:
+                  //               isPriceAndQuantityProvided ? quantity : null,
+                  //           desImg: imagePath,
+                  //           afterDesImg: afterImagePath,
+                  //           jobDescriptionId: card['jobDescriptionId'],
+                  //         );
+                  //       }).toList();
+                  //       print(
+                  //           "updatedJobDescriptions: $updatedJobDescriptions");
+                  //       // Now, update editController with the new list
+                  //       editController.updateReportJobDescriptions(
+                  //           updatedJobDescriptions);
+
+                  //       EasyLoading.show(
+                  //           status: 'يتم التحميل...', dismissOnTap: true);
+                  //       await editController.edit(updatedJobDescriptions);
+                  //       if (editController.editStatus) {
+                  //         print("editStatus: ${editController.editStatus}");
+                  //         EasyLoading.showSuccess(editController.message,
+                  //             duration: const Duration(seconds: 3));
+                  //         print(editController.message);
+
+                  //         final reportListController =
+                  //             Get.find<ReportListController>();
+                  //         reportListController.fetchReports();
+                  //         Get.offNamed('home');
+                  //       } else {
+                  //         EasyLoading.showError(editController.message,
+                  //             duration: const Duration(seconds: 3));
+                  //         print(editController.message);
+                  //       }
+                  //     }
+                  //   },
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: AppColorManager.mainAppColor,
+                  //   ),
+                  //   child: const Text(
+                  //     'إرسال',
+                  //     style: TextStyle(
+                  //       color: AppColorManager.white,
+                  //       fontWeight: FontWeight.bold,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ],
@@ -1137,5 +1458,54 @@ Widget displayImage(dynamic image) {
   } else {
     // Placeholder in case of null or unsupported type
     return Icon(Icons.broken_image);
+  }
+}
+
+// class PdfViewPage extends StatelessWidget {
+//   final File file;
+//   const PdfViewPage({super.key, required this.file});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return PDFView(
+//       filePath: file.path,
+//       enableSwipe: true,
+//       // swipeHorizontal: true,
+//       autoSpacing: false,
+//       pageFling: false,
+//       pageSnap: false,
+//       defaultPage: 0,
+//       fitPolicy: FitPolicy.BOTH,
+//       preventLinkNavigation: false,
+//     );
+//   }
+// }
+
+Widget _buildImageDisplay(dynamic image, double width, double height) {
+  if (image == null) {
+    return const Icon(Icons.add_a_photo);
+  } else if (image is File) {
+    return Image.file(image, width: width, height: height, fit: BoxFit.cover);
+  } else {
+    return Image.network(
+      image as String,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      loadingBuilder: (BuildContext context, Widget child,
+          ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        }
+        return Center(
+          child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                : null,
+          ),
+        );
+      },
+    );
   }
 }

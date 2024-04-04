@@ -197,7 +197,7 @@ class _SignUpState extends State<SignUp> {
           _buildCircularButton(size, () async {
             // Handle sign up
             if (_formKey.currentState!.validate()) {
-              EasyLoading.show(status: 'loading...', dismissOnTap: true);
+              EasyLoading.show(status: 'يتم التحميل...', dismissOnTap: true);
               await signUpController.doSignUp();
               if (signUpController.registerStatus) {
                 EasyLoading.showSuccess(signUpController.message,

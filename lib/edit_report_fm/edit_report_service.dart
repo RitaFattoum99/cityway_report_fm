@@ -14,7 +14,7 @@ class EditReportService {
   var message = '';
 
   Future<bool> editReports(List<ReportJobDescription> reportJobDescription,
-      String token, int reportId) async {
+      String token, int reportId, String workOrder) async {
     try {
       var url = Uri.parse(
           '${ServiceConfig.domainNameServer}${ServiceConfig.edit}/$reportId');
@@ -29,10 +29,20 @@ class EditReportService {
 
         request.fields['report_job_description[$i][description]'] =
             reportJobDescription[i].jobDescription!.description!;
-        request.fields['report_job_description[$i][price]'] =
-            reportJobDescription[i].price.toString();
-        request.fields['report_job_description[$i][quantity]'] =
-            reportJobDescription[i].quantity.toString();
+
+        if (reportJobDescription[i].price != null) {
+          request.fields['report_job_description[$i][price]'] =
+              reportJobDescription[i].price.toString();
+        }
+        // request.fields['report_job_description[$i][quantity]'] =
+        //     reportJobDescription[i].quantity.toString();
+        if (reportJobDescription[i].quantity != null) {
+          request.fields['report_job_description[$i][quantity]'] =
+              reportJobDescription[i].quantity.toString();
+        } else {
+          // Optional: Decide how you want to handle null quantities. Skip, set a default, etc.
+          // request.fields['report_job_description[$i][quantity]'] = "1";
+        }
         request.fields['report_job_description[$i][unit]'] =
             reportJobDescription[i].jobDescription!.unit.toString();
 
@@ -72,9 +82,11 @@ class EditReportService {
       print('Files: ${request.files}');
       print(request.fields);
       print("reportId: $reportId");
+      print("work  order: $workOrder");
       request.headers.addAll({
         'Accept': 'application/json',
         'Authorization': 'Bearer $token',
+        'Connection': 'keep-alive',
       });
 
       final response = await request.send();
@@ -91,7 +103,12 @@ class EditReportService {
         print("Response: $jsonResponse");
         print("Status Code: ${response.statusCode}");
         print("message: ${jsonEncode(message)}");
-        message = jsonResponse['message'] ?? "حدث خطـأ بالإرسال";
+        // message = jsonResponse['message'] ?? "حدث خطـأ بالإرسال";
+        if (jsonResponse['message'] is Map) {
+          message = jsonEncode(jsonResponse['message']);
+        } else {
+          message = jsonResponse['message'] ?? "حدث خطـأ بالإرسال";
+        }
         return false;
       }
     } catch (e) {
@@ -120,5 +137,26 @@ class EditReportService {
     final file = File('${documentDirectory.path}/$fileName');
     await file.writeAsBytes(response.bodyBytes);
     return file;
+  }
+
+  Future<void> uploadPDFFile(File file, String token, int reportId) async {
+    Uri uri = Uri.parse(
+        '${ServiceConfig.domainNameServer}${ServiceConfig.edit}/$reportId');
+    http.MultipartRequest request = http.MultipartRequest('POST', uri)
+      ..headers.addAll({
+        "Authorization": "Bearer $token",
+      })
+      ..files.add(await http.MultipartFile.fromPath(
+        'work_order',
+        file.path,
+      ));
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print("File uploaded successfully");
+    } else {
+      print("Failed to upload file. Status code: ${response.statusCode}");
+    }
   }
 }

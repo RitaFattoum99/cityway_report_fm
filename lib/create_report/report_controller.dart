@@ -35,25 +35,25 @@ class ReportController extends GetxController {
   var desList = <DataAllDes>[].obs; // Use RxList for reactivity
   @override
   void onInit() async {
-    secureStorage = SecureStorage();
-    String? token = await secureStorage.read("token");
-    complaintPartyList = await service.getComplaintList(token!);
-    selected.value =
-        complaintPartyList.isNotEmpty ? complaintPartyList[0].username : '';
+    // secureStorage = SecureStorage();
+    // String? token = await secureStorage.read("token");
+    // complaintPartyList = await service.getComplaintList(token!);
+    // selected.value =
+    //     complaintPartyList.isNotEmpty ? complaintPartyList[0].username : '';
     super.onInit();
     fetchDes(); // Fetch reports asynchronously
-    print("onInit");
+    print("onInit ReportController");
   }
 
   @override
   void onReady() async {
     super.onReady();
-    secureStorage = SecureStorage();
-    String? token = await secureStorage.read("token");
-    complaintPartyList = await service.getComplaintList(token!);
-    selected.value =
-        complaintPartyList.isNotEmpty ? complaintPartyList[0].username : '';
-    print("onReady");
+    // secureStorage = SecureStorage();
+    // String? token = await secureStorage.read("token");
+    // complaintPartyList = await service.getComplaintList(token!);
+    // selected.value =
+    //     complaintPartyList.isNotEmpty ? complaintPartyList[0].username : '';
+    print("onReady ReportController");
   }
 
   void setSelectedcomplaintPatry(String newValue) {
@@ -65,18 +65,17 @@ class ReportController extends GetxController {
     complaintPartyId = await secureStorage.readInt("id");
 
     Data report = Data(
-      id: id,
-      project: project,
-      location: location,
-      complaintPartyId: complaintPartyId,
-      typeOfWork: typeOfWork,
-      urgent: urgent,
-      budget: budget,
-      contactInfo: contactInfo,
-      complaintNumber: complaintNumber,
-      reportDescription: reportDescription,
-      reportJobDescription: reportJobDescription
-    );
+        id: id,
+        project: project,
+        location: location,
+        complaintPartyId: complaintPartyId,
+        typeOfWork: typeOfWork,
+        urgent: urgent,
+        budget: budget,
+        contactInfo: contactInfo,
+        complaintNumber: complaintNumber,
+        reportDescription: reportDescription,
+        reportJobDescription: reportJobDescription);
     String? token = await secureStorage.read("token");
     createStatus = await service.create(report, token!);
     message = service.message;

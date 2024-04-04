@@ -22,10 +22,18 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
   final ReportListController controller = Get.put(ReportListController());
 
   late SecureStorage secureStorage = SecureStorage();
-
+  String userRole = '';
   String userName = "";
-
   String email = "";
+
+  Future<void> initRoles() async {
+    final String? role = await secureStorage.read("role");
+    if (role != null) {
+      setState(() {
+        userRole = role;
+      });
+    }
+  }
 
   @override
   @override
@@ -34,12 +42,13 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
       // Fixed list of report statuses
       var statusList = [
         'Urgent',
+        'New-Report',
+        'Awaiting Pricing',
+        'Awaiting Approval',
+        'Approved',
+        'Declined',
+        'Work Has Started',
         'Done',
-        'Pending',
-        'In-Progress',
-        'Complete',
-        'Rejected',
-        'Approved'
       ];
 
       // Generating tabs with report status and count
@@ -79,8 +88,9 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
                 .toList(),
           ),
           drawer: _buildDrawer(context, userName, email), // Drawer widget
-          floatingActionButton:
-              _buildAddReportButton(context), // Floating action button
+          floatingActionButton: userRole == 'admin'
+              ? _buildAddReportButton(context)
+              : const SizedBox(),
         ),
       );
     });
@@ -88,7 +98,7 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
 
   int _getReportCountByStatus(String status) {
     return controller.reportList
-        .where((report) => report.statusClient == status)
+        .where((report) => report.statusAdmin == status)
         .length;
   }
 
@@ -143,7 +153,7 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
       return const Center(child: CircularProgressIndicator());
     } else {
       var reports = controller.reportList
-          .where((report) => report.statusClient == status)
+          .where((report) => report.statusAdmin == status)
           .toList();
 
       if (reports.isEmpty) {
@@ -184,8 +194,8 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
   }
 
   Widget _buildReportItem(DataAllReport report) {
-    Color statusColor = _getStatusColor(report.statusClient);
-    String statusValue = _getStatusValue(report.statusClient);
+    Color statusColor = _getStatusColor(report.statusAdmin);
+    String statusValue = _getStatusValue(report.statusAdmin);
     return Column(
       children: [
         Padding(
@@ -298,20 +308,24 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
     switch (status) {
       case 'Urgent':
         return Colors.red;
-      case 'Complete':
-        return Colors.deepOrange;
-      case 'Rejected':
-        return Colors.pink;
-      case 'In-Progress':
-        return Colors.blue;
-      case 'Pending':
+      case 'New-Report':
         return Colors.grey;
+      case 'Awaiting Pricing':
+        return Colors.blue;
+      case 'Awaiting Approval':
+        return Colors.deepOrange;
+      case 'Approved':
+        return Colors.pink;
+      case 'Declined':
+        return Colors.indigo;
+      case 'Work Has Started':
+        return Colors.purple;
       case 'Done':
         return Colors.yellow[700]!;
-      case 'Approved':
+      case 'Complete':
         return Colors.green;
       default:
-        return Colors.purple;
+        return Colors.black;
     }
   }
 
@@ -319,18 +333,22 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
     switch (status) {
       case 'Urgent':
         return 'عاجل';
-      case 'Complete':
-        return 'مكتمل';
-      case 'Rejected':
+      case 'New-Report':
+        return 'بلاغ جديد';
+      case 'Awaiting Pricing':
+        return 'بانتظار التسعير';
+      case 'Awaiting Approval':
+        return 'بانتظار الموافقة';
+      case 'Approved':
+        return 'تمت الموافقة';
+      case 'Declined':
         return 'مرفوض';
-      case 'In-Progress':
-        return 'قيد التطوير';
-      case 'Pending':
-        return 'قيد الانتظار';
+      case 'Work Has Started':
+        return 'تم بدأ العمل';
       case 'Done':
         return 'منتهي';
-      case 'Approved':
-        return 'مقبول';
+      case 'Complete':
+        return 'مكتمل';
       default:
         return '';
     }
@@ -339,27 +357,23 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
   @override
   void initState() {
     super.initState();
-    // Fetch user name on widget initialization
     fetchUserName();
+    initRoles();
   }
 
   Future<void> fetchUserName() async {
     secureStorage = SecureStorage();
     String? name = await secureStorage.read("username");
     String? myEmail = await secureStorage.read("email");
-    print('username : $name');
-    print('myEmail : $myEmail');
     // Fetch user name using the key
     if (name != null) {
       setState(() {
         userName = name; // Set the user name if found
-        print("username in drawer: $userName");
       });
     }
     if (myEmail != null) {
       setState(() {
         email = myEmail; // Set the user name if found
-        print("email in drawer: $email");
       });
     }
   }

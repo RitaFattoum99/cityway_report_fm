@@ -15,6 +15,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'complaint_party_controller.dart';
 import 'complaint_party_model.dart';
 
 class CreateReport extends StatefulWidget {
@@ -27,6 +28,8 @@ class CreateReport extends StatefulWidget {
 
 class _CreateReportState extends State<CreateReport> {
   final ReportController reportController = Get.put(ReportController());
+  final ComplaintPartyController complaintPartyController =
+      Get.put(ComplaintPartyController());
 
   final TextEditingController _projectController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -99,8 +102,7 @@ class _CreateReportState extends State<CreateReport> {
     // Fetch user name using the key
     if (name != null) {
       setState(() {
-        userName = name; // Set the user name if found
-        print("username in create screen: $userName");
+        userName = name;
       });
     }
   }
@@ -246,11 +248,12 @@ class _CreateReportState extends State<CreateReport> {
                     ),
                     const SizedBox(width: 20),
                     Obx(() {
-                      if (reportController.isLoading.value) {
+                      if (complaintPartyController.isLoading.value) {
                         return const CircularProgressIndicator();
                       } else {
-                        if (reportController.complaintPartyList.isNotEmpty) {
-                          var dropdownItems = reportController
+                        if (complaintPartyController
+                            .complaintPartyList.isNotEmpty) {
+                          var dropdownItems = complaintPartyController
                               .complaintPartyList
                               .map((complaintParty) {
                             return DropdownMenuItem<String>(
@@ -262,7 +265,7 @@ class _CreateReportState extends State<CreateReport> {
                           }).toList();
 
                           String? validSelectedValue =
-                              reportController.selected.value;
+                              complaintPartyController.selected.value;
                           if (!dropdownItems.any(
                               (item) => item.value == validSelectedValue)) {
                             validSelectedValue = dropdownItems.first.value;
@@ -275,21 +278,21 @@ class _CreateReportState extends State<CreateReport> {
                             onChanged: (String? newValue) {
                               if (newValue != null) {
                                 DataComplaintParty selectedComplaintParty =
-                                    reportController.complaintPartyList
+                                    complaintPartyController.complaintPartyList
                                         .firstWhere(
                                   (complaintParty) =>
-                                      complaintParty.username ==
-                                      newValue, // Use 'username' instead of 'name'
+                                      complaintParty.username == newValue,
                                 );
-                                reportController.complaintPartyId =
+                                complaintPartyController.complaintPartyId =
                                     selectedComplaintParty.id;
-                                reportController.selected.value = newValue;
+                                complaintPartyController.selected.value =
+                                    newValue;
                               }
                             },
                             items: dropdownItems,
                           );
                         } else {
-                          return const Text('No items available');
+                          return const Text('لا توجد عناصر متاحة');
                         }
                       }
                     }),
@@ -833,7 +836,7 @@ class _CreateReportState extends State<CreateReport> {
                           }
 
                           EasyLoading.show(
-                              status: 'loading...', dismissOnTap: true);
+                              status: 'يتم التحميل...', dismissOnTap: true);
                           await reportController.create();
                           if (reportController.createStatus) {
                             print(
