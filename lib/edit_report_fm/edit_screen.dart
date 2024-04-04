@@ -679,6 +679,22 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         itemCount: jobCards.length,
                         itemBuilder: (context, index) {
                           final data = jobCards[index];
+                          // void calculateTotalPrice() {
+                          //   final price = int.tryParse(data['price'].text) ?? 0;
+                          //   final quantity =
+                          //       int.tryParse(data['quantity'].text) ?? 0;
+                          //   final totalPrice = price * quantity;
+
+                          //   // Ensure the TextEditingController for totalPrice is not null
+                          //   if (data['totalPrice'] != null) {
+                          //     data['totalPrice'].text = totalPrice.toString();
+                          //   } else {
+                          //     // Handle the case where the controller might be null, or initialize it here
+                          //     print(
+                          //         'Total price TextEditingController is null');
+                          //   }
+                          // }
+
                           return Card(
                             elevation: 4.0,
                             margin: const EdgeInsets.all(8.0),
@@ -780,77 +796,100 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                   ),
                                   userRole == 'estimation' ||
                                           userRole == 'admin'
-                                      ? Row(
+                                      ? Column(
                                           children: [
-                                            Expanded(
-                                              child: TextFormField(
-                                                // readOnly:
-                                                //     userRole == 'fme' ? true : false,
-                                                controller: data['unit'],
-                                                decoration:
-                                                    const InputDecoration(
-                                                        labelText: 'الوحدة'),
-                                                onChanged: (value) => setState(
-                                                    () => data['unit'].text =
-                                                        value),
-                                                validator: (value) {
-                                                  if (value == null ||
-                                                      value.isEmpty) {
-                                                    return 'ادخل الوحدة';
-                                                  }
-                                                  return null;
-                                                },
-                                              ),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: TextFormField(
+                                                    controller: data['unit'],
+                                                    decoration:
+                                                        const InputDecoration(
+                                                            labelText:
+                                                                'الوحدة'),
+                                                    onChanged: (value) =>
+                                                        setState(() =>
+                                                            data['unit'].text =
+                                                                value),
+                                                    validator: (value) {
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return 'ادخل الوحدة';
+                                                      }
+                                                      return null;
+                                                    },
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: TextFormField(
+                                                    // readOnly:
+                                                    //     userRole == 'fme' ? true : false,
+                                                    controller: data['price'],
+                                                    decoration:
+                                                        const InputDecoration(
+                                                            labelText: 'السعر'),
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        data['price'].text =
+                                                            value;
+                                                        // calculateTotalPrice();
+                                                      });
+                                                    },
+                                                    validator: (value) {
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return 'إدخال السعر';
+                                                      }
+                                                      return null;
+                                                    },
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: TextFormField(
+                                                    controller:
+                                                        data['quantity'],
+                                                    decoration:
+                                                        const InputDecoration(
+                                                            labelText:
+                                                                'الكمية'),
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        data['quantity'].text =
+                                                            value;
+                                                        // calculateTotalPrice();
+                                                      });
+                                                    },
+                                                    validator: (value) {
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return 'ادخل الكمية';
+                                                      }
+                                                      return null;
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                // readOnly:
-                                                //     userRole == 'fme' ? true : false,
-                                                controller: data['price'],
-                                                decoration:
-                                                    const InputDecoration(
-                                                        labelText: 'السعر'),
-                                                keyboardType:
-                                                    TextInputType.number,
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    data['price'].text = value;
-                                                  });
-                                                },
-                                                validator: (value) {
-                                                  if (value == null ||
-                                                      value.isEmpty) {
-                                                    return 'إدخال السعر';
-                                                  }
-                                                  return null;
-                                                },
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                // readOnly:
-                                                //     userRole == 'fme' ? true : false,
-                                                controller: data['quantity'],
-                                                decoration:
-                                                    const InputDecoration(
-                                                        labelText: 'الكمية'),
-                                                keyboardType:
-                                                    TextInputType.number,
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    data['quantity'].text =
-                                                        value;
-                                                  });
-                                                },
-                                                validator: (value) {
-                                                  if (value == null ||
-                                                      value.isEmpty) {
-                                                    return 'ادخل الكمية';
-                                                  }
-                                                  return null;
-                                                },
-                                              ),
-                                            ),
+                                            // Row(
+                                            //   children: [
+                                            //     Expanded(
+                                            //       child: TextFormField(
+                                            //         controller:
+                                            //             data['totalPrice'],
+                                            //         readOnly:
+                                            //             true, // Make this field read-only
+                                            //         decoration:
+                                            //             const InputDecoration(
+                                            //           labelText: 'السعر الكلي',
+                                            //         ),
+                                            //       ),
+                                            //     ),
+                                            //   ],
+                                            // )
                                           ],
                                         )
                                       : TextFormField(
@@ -881,139 +920,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                       });
                                     },
                                   ),
-                                  // Row(
-                                  //   mainAxisAlignment:
-                                  //       MainAxisAlignment.spaceBetween,
-                                  //   children: [
-                                  //     Column(
-                                  //       crossAxisAlignment:
-                                  //           CrossAxisAlignment.start,
-                                  //       children: [
-                                  //         SizedBox(height: 10),
-                                  //         Text(
-                                  //           'صورة قبل:',
-                                  //           style: TextStyle(
-                                  //               color: AppColorManager
-                                  //                   .secondaryAppColor,
-                                  //               fontWeight: FontWeight.w600),
-                                  //         ),
-                                  //         GestureDetector(
-                                  //           onTap: () async => await _pickImage(
-                                  //               index,
-                                  //               isAfterImage: false),
-                                  //           child: Padding(
-                                  //             padding:
-                                  //                 const EdgeInsets.symmetric(
-                                  //                     vertical: 8),
-                                  //             child: jobCards[index]['image'] ==
-                                  //                     null
-                                  //                 ? const Icon(
-                                  //                     Icons.add_a_photo)
-                                  //                 : jobCards[index]['image']
-                                  //                         is File
-                                  //                     ? Image.file(
-                                  //                         jobCards[index]
-                                  //                             ['image'] as File,
-                                  //                         width: 150,
-                                  //                         height: 150,
-                                  //                         fit: BoxFit.cover,
-                                  //                       )
-                                  //                     : Image.network(
-                                  //                         jobCards[index]
-                                  //                                 ['image']
-                                  //                             as String,
-                                  //                         width: 150,
-                                  //                         height: 150,
-                                  //                         fit: BoxFit.cover,
-                                  //                         loadingBuilder:
-                                  //                             (BuildContext
-                                  //                                     context,
-                                  //                                 Widget child,
-                                  //                                 ImageChunkEvent?
-                                  //                                     loadingProgress) {
-                                  //                           if (loadingProgress ==
-                                  //                               null) {
-                                  //                             return child;
-                                  //                           }
-                                  //                           return Center(
-                                  //                             child:
-                                  //                                 CircularProgressIndicator(
-                                  //                               value: loadingProgress
-                                  //                                           .expectedTotalBytes !=
-                                  //                                       null
-                                  //                                   ? loadingProgress
-                                  //                                           .cumulativeBytesLoaded /
-                                  //                                       loadingProgress
-                                  //                                           .expectedTotalBytes!
-                                  //                                   : null,
-                                  //                             ),
-                                  //                           );
-                                  //                         },
-                                  //                       ),
-                                  //           ),
-                                  //         ),
-                                  //         SizedBox(height: 10),
-                                  //         Text(
-                                  //           'صورة بعد:',
-                                  //           style: TextStyle(
-                                  //               color: AppColorManager
-                                  //                   .secondaryAppColor,
-                                  //               fontWeight: FontWeight.w600),
-                                  //         ),
-                                  //         GestureDetector(
-                                  //           onTap: () async => await _pickImage(
-                                  //               index,
-                                  //               isAfterImage: true),
-                                  //           child: Padding(
-                                  //             padding:
-                                  //                 const EdgeInsets.symmetric(
-                                  //                     vertical: 8),
-                                  //             child: jobCards[index]
-                                  //                         ['imageafter'] ==
-                                  //                     null
-                                  //                 ? const Icon(
-                                  //                     Icons.add_a_photo)
-                                  //                 : jobCards[index]
-                                  //                         ['imageafter'] is File
-                                  //                     ? Image.file(
-                                  //                         jobCards[index]
-                                  //                                 ['imageafter']
-                                  //                             as File,
-                                  //                         width: 150,
-                                  //                         height: 150,
-                                  //                         fit: BoxFit.cover,
-                                  //                       )
-                                  //                     : Image.network(
-                                  //                         jobCards[index]
-                                  //                                 ['imageafter']
-                                  //                             as String,
-                                  //                         width: 150,
-                                  //                         height: 150,
-                                  //                         fit: BoxFit.cover,
-                                  //                       ),
-                                  //           ),
-                                  //         ),
-                                  //       ],
-                                  //     ),
-                                  // GestureDetector(
-                                  //   onTap: () {
-                                  //     _removeJobCard(index);
-                                  //   },
-                                  //   child: Container(
-                                  //     height: 35,
-                                  //     width: 35,
-                                  //     decoration: const BoxDecoration(
-                                  //       shape: BoxShape.circle,
-                                  //       color: Colors.red,
-                                  //     ),
-                                  //     child: const Icon(
-                                  //       Icons.remove,
-                                  //       color: AppColorManager.white,
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                  //   ],
-                                  // ),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -1094,43 +1000,27 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         },
                       ),
                     ),
+                    GestureDetector(
+                      onTap: _addJobCard,
+                      child: Container(
+                        height: 35,
+                        width: 35,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.green,
+                        ),
+                        child: const Icon(
+                          Icons.add,
+                          color: AppColorManager.white,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
               SizedBox(height: 10),
               Column(
                 children: [
-                  // InkWell(
-                  // onTap: () async {
-                  //   // Open the PDF file in a new full-screen page
-                  //   if (File(widget.report.workOrder) != null) {
-                  //     EasyLoading.show(
-                  //         status: 'يتم التحميل...', dismissOnTap: true);
-                  //     String url = widget.report.workOrder;
-                  //     String filename = url.split('/').last;
-                  //     String filePath = await downloadPDF(url, filename);
-                  //     EasyLoading.dismiss();
-                  //     Navigator.of(context).push(MaterialPageRoute(
-                  //       builder: (context) =>
-                  //           PdfViewPage(file: File(filePath)),
-                  //     ));
-                  //   } else if (_selectedFile != null) {
-                  //     print("_selectedFile:$_selectedFile");
-                  //     Navigator.of(context).push(
-                  //       MaterialPageRoute(
-                  //         builder: (context) =>
-                  //             PdfViewPage(file: _selectedFile!),
-                  //       ),
-                  //     );
-                  //   } else {
-                  //     ScaffoldMessenger.of(context).showSnackBar(
-                  //       SnackBar(
-                  //         content: Text("رجاءً اختر ملف أولاً."),
-                  //       ),
-                  //     );
-                  //   }
-                  // },
-                  // child:
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Row(
@@ -1149,7 +1039,12 @@ class _EditReportScreenState extends State<EditReportScreen> {
                       ],
                     ),
                   ),
-                  // ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColorManager.mainAppColor,
@@ -1161,7 +1056,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                           _selectedFile =
                               file; // Update the UI to show selected file
                         });
-                        editController.upload(file);
                       }
                     },
                     child: const Text(
@@ -1171,121 +1065,12 @@ class _EditReportScreenState extends State<EditReportScreen> {
                           fontWeight: FontWeight.bold),
                     ),
                   ),
-                ],
-              ),
-              // Column(
-              //   children: [
-              //     InkWell(
-              //       onTap: () async {
-              //         if (widget.report.workOrder != null &&
-              //             (Uri.tryParse(widget.report.workOrder!)
-              //                     ?.hasAbsolutePath ??
-              //                 false)) {
-              //           // Assuming widget.report.workOrder is a valid URL
-              //           EasyLoading.show(
-              //               status: 'يتم التحميل...', dismissOnTap: true);
-              //           try {
-              //             String url = widget.report.workOrder;
-              //             String filename = url.split('/').last;
-              //             String filePath = await downloadPDF(url, filename);
-              //             EasyLoading.dismiss();
-              //             Navigator.of(context).push(
-              //               MaterialPageRoute(
-              //                 builder: (context) =>
-              //                     PdfViewPage(file: File(filePath)),
-              //               ),
-              //             );
-              //           } catch (e) {
-              //             EasyLoading.dismiss();
-              //             ScaffoldMessenger.of(context).showSnackBar(
-              //               SnackBar(
-              //                   content: Text('حدث خطأ أثناء تحميل الملف.')),
-              //             );
-              //           }
-              //         } else if (_selectedFile != null) {
-              //           print("_selectedFile:$_selectedFile");
-              //           Navigator.of(context).push(
-              //             MaterialPageRoute(
-              //               builder: (context) =>
-              //                   PdfViewPage(file: _selectedFile!),
-              //             ),
-              //           );
-              //         } else {
-              //           ScaffoldMessenger.of(context).showSnackBar(
-              //             SnackBar(
-              //               content: Text("رجاءً اختر ملف أولاً."),
-              //             ),
-              //           );
-              //         }
-              //       },
-              //       child: Container(
-              //         padding: EdgeInsets.all(8.0),
-              //         child: Row(
-              //           children: [
-              //             Expanded(
-              //               child: Text(
-              //                 _selectedFile != null
-              //                     ? _selectedFile!.path.split('/').last
-              //                     : widget.report.workOrder?.split('/').last ??
-              //                         "No file selected",
-              //                 style: const TextStyle(
-              //                     color: AppColorManager.secondaryAppColor,
-              //                     fontWeight: FontWeight.bold),
-              //               ),
-              //             ),
-              //             Icon(Icons.picture_as_pdf, size: 30),
-              //           ],
-              //         ),
-              //       ),
-              //     ),
-              //     ElevatedButton(
-              //       style: ElevatedButton.styleFrom(
-              //         backgroundColor: AppColorManager.mainAppColor,
-              //       ),
-              //       onPressed: () async {
-              //         File? file = await selectPDFFile();
-              //         if (file != null) {
-              //           setState(() {
-              //             _selectedFile =
-              //                 file; // Update the UI to show selected file
-              //           });
-              //           editController.upload(file);
-              //         }
-              //       },
-              //       child: const Text(
-              //         'ملف بدء العمل',
-              //         style: TextStyle(
-              //             color: AppColorManager.white,
-              //             fontWeight: FontWeight.bold),
-              //       ),
-              //     ),
-              //   ],
-              // ),
-
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: _addJobCard,
-                    child: Container(
-                      height: 35,
-                      width: 35,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.green,
-                      ),
-                      child: const Icon(
-                        Icons.add,
-                        color: AppColorManager.white,
-                      ),
-                    ),
-                  ),
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         print("تعديل");
+
                         var updatedJobDescriptions = jobCards.map((card) {
                           String? imagePath;
                           if (card['image'] is File) {
@@ -1306,6 +1091,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                             note: card['note'].text,
                             price: int.tryParse(card['price'].text),
                             quantity: int.tryParse(card['quantity'].text),
+                            // totalPrice: int.tryParse(data['totalPrice'].text),
                             desImg: imagePath,
                             afterDesImg: afterImagePath,
                             jobDescriptionId: card['jobDescriptionId'],
@@ -1319,6 +1105,8 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         EasyLoading.show(
                             status: 'يتم التحميل...', dismissOnTap: true);
                         await editController.edit(updatedJobDescriptions);
+                        // Send the selected file
+                        await editController.upload(_selectedFile!);
                         if (editController.editStatus) {
                           print("editStatus: ${editController.editStatus}");
                           EasyLoading.showSuccess(editController.message,
@@ -1346,77 +1134,6 @@ class _EditReportScreenState extends State<EditReportScreen> {
                           fontWeight: FontWeight.bold),
                     ),
                   ),
-
-                  // ElevatedButton(
-                  //   onPressed: () async {
-                  //     if (_formKey.currentState!.validate()) {
-                  //       print("تعديل");
-                  //       var updatedJobDescriptions = jobCards.map((card) {
-                  //         String? imagePath = card['image'] is File
-                  //             ? (card['image'] as File).path
-                  //             : card['image'];
-                  //         String? afterImagePath = card['imageafter'] is File
-                  //             ? (card['imageafter'] as File).path
-                  //             : card['imageafter'];
-
-                  //         int? price = int.tryParse(card['price'].text);
-                  //         int? quantity = int.tryParse(card['quantity'].text);
-
-                  //         // Check if both price and quantity are provided
-                  //         bool isPriceAndQuantityProvided =
-                  //             price != null && quantity != null;
-
-                  //         return ReportJobDescription(
-                  //           jobDescription: JobDescription(
-                  //             description: card['description'].text,
-                  //             unit: card['unit'].text,
-                  //           ),
-                  //           note: card['note'].text,
-                  //           price: isPriceAndQuantityProvided ? price : null,
-                  //           quantity:
-                  //               isPriceAndQuantityProvided ? quantity : null,
-                  //           desImg: imagePath,
-                  //           afterDesImg: afterImagePath,
-                  //           jobDescriptionId: card['jobDescriptionId'],
-                  //         );
-                  //       }).toList();
-                  //       print(
-                  //           "updatedJobDescriptions: $updatedJobDescriptions");
-                  //       // Now, update editController with the new list
-                  //       editController.updateReportJobDescriptions(
-                  //           updatedJobDescriptions);
-
-                  //       EasyLoading.show(
-                  //           status: 'يتم التحميل...', dismissOnTap: true);
-                  //       await editController.edit(updatedJobDescriptions);
-                  //       if (editController.editStatus) {
-                  //         print("editStatus: ${editController.editStatus}");
-                  //         EasyLoading.showSuccess(editController.message,
-                  //             duration: const Duration(seconds: 3));
-                  //         print(editController.message);
-
-                  //         final reportListController =
-                  //             Get.find<ReportListController>();
-                  //         reportListController.fetchReports();
-                  //         Get.offNamed('home');
-                  //       } else {
-                  //         EasyLoading.showError(editController.message,
-                  //             duration: const Duration(seconds: 3));
-                  //         print(editController.message);
-                  //       }
-                  //     }
-                  //   },
-                  //   style: ElevatedButton.styleFrom(
-                  //     backgroundColor: AppColorManager.mainAppColor,
-                  //   ),
-                  //   child: const Text(
-                  //     'إرسال',
-                  //     style: TextStyle(
-                  //       color: AppColorManager.white,
-                  //       fontWeight: FontWeight.bold,
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
             ],
@@ -1460,26 +1177,6 @@ Widget displayImage(dynamic image) {
     return Icon(Icons.broken_image);
   }
 }
-
-// class PdfViewPage extends StatelessWidget {
-//   final File file;
-//   const PdfViewPage({super.key, required this.file});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return PDFView(
-//       filePath: file.path,
-//       enableSwipe: true,
-//       // swipeHorizontal: true,
-//       autoSpacing: false,
-//       pageFling: false,
-//       pageSnap: false,
-//       defaultPage: 0,
-//       fitPolicy: FitPolicy.BOTH,
-//       preventLinkNavigation: false,
-//     );
-//   }
-// }
 
 Widget _buildImageDisplay(dynamic image, double width, double height) {
   if (image == null) {
