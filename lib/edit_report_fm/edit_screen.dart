@@ -39,6 +39,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
       'description': TextEditingController(),
       'price': TextEditingController(),
       'quantity': TextEditingController(),
+      'total': TextEditingController(),
       'note': TextEditingController(),
       'image': null,
       'imageafter': null,
@@ -98,12 +99,12 @@ class _EditReportScreenState extends State<EditReportScreen> {
             imagePathafter.startsWith('https://');
         imageafter = isImageUrlafter ? imagePathafter : File(imagePathafter);
       } else {
-        // Here, you might want to assign a default value or handle the null case
-        // For example, imageafter could be set to a placeholder image or remain null
-        // and later handled accordingly when being used.
-        imageafter = null; // Or your placeholder logic here
+        imageafter = null;
       }
-
+      // Calculate total price
+      final price = int.tryParse(repjobDescription.price.toString()) ?? 0;
+      final quantity = int.tryParse(repjobDescription.quantity.toString()) ?? 0;
+      final totalPrice = price * quantity;
       return {
         'description': TextEditingController(
             text: repjobDescription.jobDescription?.description ?? ''),
@@ -111,6 +112,9 @@ class _EditReportScreenState extends State<EditReportScreen> {
             TextEditingController(text: repjobDescription.price.toString()),
         'quantity':
             TextEditingController(text: repjobDescription.quantity.toString()),
+        'total': TextEditingController(
+            text: totalPrice.toString()), // Add total price
+
         'note': TextEditingController(text: repjobDescription.note),
         'image': image,
         'imageafter':
@@ -145,6 +149,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
       card['description'].dispose();
       card['price'].dispose();
       card['quantity'].dispose();
+      card['total'].dispose();
       card['note'].dispose();
       card['unit'].dispose();
     }
@@ -157,6 +162,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
         'description': TextEditingController(),
         'price': TextEditingController(),
         'quantity': TextEditingController(),
+        'total': TextEditingController(),
         'note': TextEditingController(),
         'image': null,
         'imageafter': null,
@@ -679,21 +685,21 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         itemCount: jobCards.length,
                         itemBuilder: (context, index) {
                           final data = jobCards[index];
-                          // void calculateTotalPrice() {
-                          //   final price = int.tryParse(data['price'].text) ?? 0;
-                          //   final quantity =
-                          //       int.tryParse(data['quantity'].text) ?? 0;
-                          //   final totalPrice = price * quantity;
+                          void calculateTotalPrice() {
+                            final price = int.tryParse(data['price'].text) ?? 0;
+                            final quantity =
+                                int.tryParse(data['quantity'].text) ?? 0;
+                            final totalPrice = price * quantity;
 
-                          //   // Ensure the TextEditingController for totalPrice is not null
-                          //   if (data['totalPrice'] != null) {
-                          //     data['totalPrice'].text = totalPrice.toString();
-                          //   } else {
-                          //     // Handle the case where the controller might be null, or initialize it here
-                          //     print(
-                          //         'Total price TextEditingController is null');
-                          //   }
-                          // }
+                            // Ensure the TextEditingController for totalPrice is not null
+                            if (data['total'] != null) {
+                              data['total'].text = totalPrice.toString();
+                            } else {
+                              // Handle the case where the controller might be null, or initialize it here
+                              print(
+                                  'Total price TextEditingController is null');
+                            }
+                          }
 
                           return Card(
                             elevation: 4.0,
@@ -834,7 +840,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                                       setState(() {
                                                         data['price'].text =
                                                             value;
-                                                        // calculateTotalPrice();
+                                                        calculateTotalPrice();
                                                       });
                                                     },
                                                     validator: (value) {
@@ -860,7 +866,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                                       setState(() {
                                                         data['quantity'].text =
                                                             value;
-                                                        // calculateTotalPrice();
+                                                        calculateTotalPrice();
                                                       });
                                                     },
                                                     validator: (value) {
@@ -874,22 +880,22 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                                 ),
                                               ],
                                             ),
-                                            // Row(
-                                            //   children: [
-                                            //     Expanded(
-                                            //       child: TextFormField(
-                                            //         controller:
-                                            //             data['totalPrice'],
-                                            //         readOnly:
-                                            //             true, // Make this field read-only
-                                            //         decoration:
-                                            //             const InputDecoration(
-                                            //           labelText: 'السعر الكلي',
-                                            //         ),
-                                            //       ),
-                                            //     ),
-                                            //   ],
-                                            // )
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: TextFormField(
+                                                    controller:
+                                                        data['total'],
+                                                    readOnly:
+                                                        true, // Make this field read-only
+                                                    decoration:
+                                                        const InputDecoration(
+                                                      labelText: 'السعر الكلي',
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
                                           ],
                                         )
                                       : TextFormField(
@@ -1091,7 +1097,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                             note: card['note'].text,
                             price: int.tryParse(card['price'].text),
                             quantity: int.tryParse(card['quantity'].text),
-                            // totalPrice: int.tryParse(data['totalPrice'].text),
+                            totalPrice: int.tryParse(card['total'].text),
                             desImg: imagePath,
                             afterDesImg: afterImagePath,
                             jobDescriptionId: card['jobDescriptionId'],

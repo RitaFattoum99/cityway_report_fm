@@ -39,9 +39,10 @@ class EditReportService {
         if (reportJobDescription[i].quantity != null) {
           request.fields['report_job_description[$i][quantity]'] =
               reportJobDescription[i].quantity.toString();
-        } else {
-          // Optional: Decide how you want to handle null quantities. Skip, set a default, etc.
-          // request.fields['report_job_description[$i][quantity]'] = "1";
+        } else {}
+        if (reportJobDescription[i].totalPrice != null) {
+          request.fields['report_job_description[$i][total_price]'] =
+              reportJobDescription[i].totalPrice.toString();
         }
         request.fields['report_job_description[$i][unit]'] =
             reportJobDescription[i].jobDescription!.unit.toString();
@@ -139,7 +140,34 @@ class EditReportService {
     return file;
   }
 
+  // Future<void> uploadPDFFile(File file, String token, int reportId) async {
+  //   Uri uri = Uri.parse(
+  //       '${ServiceConfig.domainNameServer}${ServiceConfig.edit}/$reportId');
+  //   http.MultipartRequest request = http.MultipartRequest('POST', uri)
+  //     ..headers.addAll({
+  //       "Authorization": "Bearer $token",
+  //     })
+  //     ..files.add(await http.MultipartFile.fromPath(
+  //       'work_order',
+  //       file.path,
+  //     ));
+
+  //   http.StreamedResponse response = await request.send();
+
+  //   if (response.statusCode == 200) {
+  //     print("File uploaded successfully");
+  //   } else {
+  //     print("Failed to upload file. Status code: ${response.statusCode}");
+  //   }
+  // }
   Future<void> uploadPDFFile(File file, String token, int reportId) async {
+    // First, check if the file exists
+    if (!file.existsSync()) {
+      print("File does not exist at path: ${file.path}");
+      return;
+    }
+
+    // Continue with the upload if the file exists
     Uri uri = Uri.parse(
         '${ServiceConfig.domainNameServer}${ServiceConfig.edit}/$reportId');
     http.MultipartRequest request = http.MultipartRequest('POST', uri)

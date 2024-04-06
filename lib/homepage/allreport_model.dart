@@ -276,6 +276,7 @@ class ReportJobDescription {
   String? afterDesImg;
   int? price;
   int? quantity;
+  int? totalPrice;
   String? note;
   JobDescription? jobDescription;
 
@@ -287,6 +288,7 @@ class ReportJobDescription {
     this.afterDesImg,
     this.price,
     this.quantity,
+    this.totalPrice,
     this.note,
     this.jobDescription,
   });
@@ -305,6 +307,7 @@ class ReportJobDescription {
         afterDesImg: json["after_des_img"],
         price: json["price"],
         quantity: json["quantity"],
+        totalPrice: json["total_price"],
         note: json["note"],
         jobDescription: JobDescription.fromJson(json["job_description"]),
       );
@@ -317,6 +320,7 @@ class ReportJobDescription {
         "after_des_img": afterDesImg,
         "price": price,
         "quantity": quantity,
+        "total_price": totalPrice,
         "note": note,
         "job_description": jobDescription!.toJson(),
       };

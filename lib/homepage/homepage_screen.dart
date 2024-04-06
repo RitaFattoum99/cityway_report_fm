@@ -9,6 +9,7 @@ import '/core/native_service/secure_storage.dart';
 import '/core/resource/color_manager.dart';
 import '/homepage/allreport_model.dart';
 import 'reoport_list_controller.dart';
+import '../auth/profile.dart';
 
 class DynamicTabBarWithReports extends StatefulWidget {
   const DynamicTabBarWithReports({Key? key}) : super(key: key);
@@ -41,6 +42,7 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
     return Obx(() {
       // Fixed list of report statuses
       var statusList = [
+        'الكل',
         'Urgent',
         'New-Report',
         'Awaiting Pricing',
@@ -50,12 +52,12 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
         'Work Has Started',
         'Done',
       ];
-
-      // Generating tabs with report status and count
       var tabs = statusList
           .map((status) => Tab(
-              text:
-                  '${_getStatusValue(status)} (${_getReportCountByStatus(status)})'))
+                text: status == 'الكل'
+                    ? 'الكل (${controller.reportList.length})' // Display count for all reports
+                    : '${_getStatusValue(status)} (${_getReportCountByStatus(status)})',
+              ))
           .toList();
 
       return DefaultTabController(
@@ -97,9 +99,13 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
   }
 
   int _getReportCountByStatus(String status) {
-    return controller.reportList
-        .where((report) => report.statusAdmin == status)
-        .length;
+    if (status == 'الكل') {
+      return controller.reportList.length; // Return total count for "All"
+    } else {
+      return controller.reportList
+          .where((report) => report.statusAdmin == status)
+          .length;
+    }
   }
 
   // AppBar _buildAppBar(BuildContext context, List<Widget> tabs) {
@@ -132,6 +138,21 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
           ),
           ListTile(
             leading: const Icon(
+              Icons.person_2_rounded,
+              color: AppColorManager.secondaryAppColor,
+            ),
+            title: const Text(
+              'الملف الشخصي',
+              style: TextStyle(
+                  color: AppColorManager.secondaryAppColor,
+                  fontWeight: FontWeight.bold),
+            ),
+            onTap: () {
+              Get.to(() => const Profile());
+            },
+          ),
+          ListTile(
+            leading: const Icon(
               Icons.logout,
               color: AppColorManager.secondaryAppColor,
             ),
@@ -152,10 +173,11 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
     if (controller.isLoading.value) {
       return const Center(child: CircularProgressIndicator());
     } else {
-      var reports = controller.reportList
-          .where((report) => report.statusAdmin == status)
-          .toList();
-
+      var reports = status == 'الكل'
+          ? controller.reportList
+          : controller.reportList
+              .where((report) => report.statusAdmin == status)
+              .toList();
       if (reports.isEmpty) {
         return _buildEmptyListAnimation();
       } else {
@@ -344,7 +366,7 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
       case 'Declined':
         return 'مرفوض';
       case 'Work Has Started':
-        return 'تم بدأ العمل';
+        return 'تم بدء العمل';
       case 'Done':
         return 'منتهي';
       case 'Complete':
