@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
+import '../auth/signature.dart';
 import '../core/config/service_config.dart';
 import '../core/native_service/secure_storage.dart';
 import '../create_report/report_controller.dart';
 import '../homepage/reoport_list_controller.dart';
 import '../jobDes/job_description_model.dart';
+import '../star_rating.dart';
 import '/core/resource/color_manager.dart';
 import '../core/resource/size_manager.dart';
 import '/edit_report_fm/edit_report_controller.dart';
@@ -29,11 +32,18 @@ class EditReportScreen extends StatefulWidget {
 class _EditReportScreenState extends State<EditReportScreen> {
   final EditReportController editController = Get.put(EditReportController());
   final ReportController reportController = Get.put(ReportController());
+  final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _adminNoteController = TextEditingController();
+
   final List<TextEditingController> controllers = [];
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<SfSignaturePadState> signatureGlobalKey = GlobalKey();
+
   final _formKey = GlobalKey<FormState>();
   File? _selectedFile;
-
+  bool _isDraft = false;
+  Color _acceptedColor = Colors.grey;
+  Color _confirmColor = Colors.grey;
   late List<Map<String, dynamic>> jobCards = [
     {
       'description': TextEditingController(),
@@ -73,6 +83,11 @@ class _EditReportScreenState extends State<EditReportScreen> {
     super.initState();
     initRoles();
     print("userRole: $userRole");
+    print("Signature client: ${widget.report.clientSignature}");
+    print("Signature fme: ${widget.report.fmeSignature}");
+    print("Signature estimation: ${widget.report.estimationSignature}");
+    _noteController.text = widget.report.clientNotes;
+    _adminNoteController.text = widget.report.adminNotes;
     editController.reportId = widget.report.id;
     editController.workOrder = widget.report.workOrder;
     if (widget.report.workOrder != null) {
@@ -884,8 +899,7 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                               children: [
                                                 Expanded(
                                                   child: TextFormField(
-                                                    controller:
-                                                        data['total'],
+                                                    controller: data['total'],
                                                     readOnly:
                                                         true, // Make this field read-only
                                                     decoration:
@@ -957,27 +971,45 @@ class _EditReportScreenState extends State<EditReportScreen> {
                                             ),
                                           ),
                                           SizedBox(height: 10),
-                                          Text(
-                                            'صورة بعد:',
-                                            style: TextStyle(
-                                                color: AppColorManager
-                                                    .secondaryAppColor,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                          GestureDetector(
-                                            onTap: () async => await _pickImage(
-                                                index,
-                                                isAfterImage: true),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8),
-                                              child: _buildImageDisplay(
-                                                  jobCards[index]['imageafter'],
-                                                  150,
-                                                  150),
-                                            ),
-                                          ),
+                                          (widget.report.statusAdmin ==
+                                                      'Work Has Started' ||
+                                                  widget.report.statusAdmin ==
+                                                      'Work is Finished' ||
+                                                  widget.report.statusAdmin ==
+                                                      'Rejected By Admin' ||
+                                                  widget.report.statusAdmin ==
+                                                      'Done')
+                                              ? Column(
+                                                  children: [
+                                                    Text(
+                                                      'صورة بعد:',
+                                                      style: TextStyle(
+                                                          color: AppColorManager
+                                                              .secondaryAppColor,
+                                                          fontWeight:
+                                                              FontWeight.w600),
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: () async =>
+                                                          await _pickImage(
+                                                              index,
+                                                              isAfterImage:
+                                                                  true),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                vertical: 8),
+                                                        child: _buildImageDisplay(
+                                                            jobCards[index]
+                                                                ['imageafter'],
+                                                            150,
+                                                            150),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : SizedBox(),
                                           GestureDetector(
                                             onTap: () {
                                               _removeJobCard(index);
@@ -1021,60 +1053,279 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         ),
                       ),
                     ),
+                    SizedBox(height: 10),
+                    widget.report.statusAdmin == 'Work is Finished' &&
+                            (userRole == 'fme' || userRole == 'admin')
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "توقيع المهندس:",
+                                style: const TextStyle(
+                                    color: AppColorManager.secondaryAppColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(
+                                child: _buildImage(widget.report.fmeSignature),
+                              ),
+                              Text(
+                                "توقيع المسؤول:",
+                                style: const TextStyle(
+                                    color: AppColorManager.secondaryAppColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 5),
+                              widget.report.clientSignature != null
+                                  ? SizedBox(
+                                      child: _loadImage(
+                                          widget.report.clientSignature),
+                                    )
+                                  : SizedBox(
+                                      height: 100,
+                                      child: SignaturePage(
+                                        signatureGlobalKey: signatureGlobalKey,
+                                        name: 'توقيع المسؤول.png',
+                                        onSignatureSaved: (signatureFile) {
+                                          editController
+                                                  .responsibleSignatureFile =
+                                              signatureFile;
+                                        },
+                                      ),
+                                    ),
+                              TextFormField(
+                                controller: _noteController,
+                                decoration: const InputDecoration(
+                                    labelText: 'ملاحظات المسؤول',
+                                    labelStyle: TextStyle(fontSize: 12)),
+                                onChanged: (value) {
+                                  setState(() {
+                                    editController.responsibleNote = value;
+                                    print(editController.responsibleNote);
+                                  });
+                                },
+                              ),
+                              SizedBox(
+                                width: 400,
+                                height: 70,
+                                child: StarRating(
+                                  onRatingChanged: (rating) {
+                                    editController.responsibleSatisfaction =
+                                        rating;
+                                    print('Selected Rating: $rating');
+                                  },
+                                  initialRating:
+                                      widget.report.clientSatisfaction,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Container(),
                   ],
                 ),
               ),
               SizedBox(height: 10),
-              Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8.0),
-                    child: Row(
+              widget.report.statusAdmin == 'Approved'
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            _selectedFile != null
-                                ? _selectedFile!.path.split('/').last
-                                : widget.report.workOrder.split('/').last,
-                            style: const TextStyle(
-                                color: AppColorManager.secondaryAppColor,
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColorManager.secondaryAppColor,
+                          ),
+                          onPressed: () async {
+                            File? file = await selectPDFFile();
+                            if (file != null) {
+                              setState(() {
+                                _selectedFile =
+                                    file; // Update the UI to show selected file
+                              });
+                            }
+                          },
+                          child: const Text(
+                            'اختر ملف بدء العمل',
+                            style: TextStyle(
+                                color: AppColorManager.white,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
-                        Icon(Icons.picture_as_pdf, size: 30),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _selectedFile != null
+                                      ? _selectedFile!.path.split('/').last
+                                      : widget.report.workOrder.split('/').last,
+                                  style: const TextStyle(
+                                      color: AppColorManager.secondaryAppColor,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Icon(Icons.picture_as_pdf, size: 30),
+                            ],
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                ],
+                    )
+                  : SizedBox(),
+              CheckboxListTile(
+                title: const Text(
+                  'حفظ كمسودة لوقت لاحق؟',
+                  style: TextStyle(
+                      color: AppColorManager.secondaryAppColor,
+                      fontWeight: FontWeight.bold),
+                ),
+                value: _isDraft,
+                onChanged: (bool? value) {
+                  setState(() {
+                    _isDraft = value!;
+                    if (_isDraft) {
+                      editController.isDraft = 1;
+                    } else {
+                      editController.isDraft = 0;
+                    }
+                  });
+                },
               ),
-              SizedBox(height: 10),
+              (userRole == 'admin') &&
+                      widget.report.statusAdmin == 'Work is Finished'
+                  ? Column(
+                      children: [
+                        TextFormField(
+                          controller: _adminNoteController,
+                          decoration: const InputDecoration(
+                              labelText: 'ملاحظات الأدمن',
+                              labelStyle: TextStyle(fontSize: 12)),
+                          onChanged: (value) {
+                            setState(() {
+                              editController.adminNotes = value;
+                              print(editController.adminNotes);
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              GestureDetector(
+                                onTap: () async {
+                                  setState(() {
+                                    _acceptedColor = Colors.green;
+                                    _confirmColor = Colors.grey;
+                                  });
+                                  EasyLoading.show(
+                                      status: 'loading...', dismissOnTap: true);
+                                  await editController.doAcceptance(
+                                      1, widget.report.id);
+                                  // await editController.sendNote();
+                                  if (editController.approvalStatus) {
+                                    EasyLoading.showSuccess(
+                                        editController.message,
+                                        duration: const Duration(seconds: 2));
+                                    final reportListController =
+                                        Get.find<ReportListController>();
+                                    reportListController.fetchReports();
+
+                                    Get.offNamed('home');
+                                  } else {
+                                    EasyLoading.showError(
+                                        editController.message);
+                                    print("Approval error");
+                                  }
+                                },
+                                child: Container(
+                                  width: size.width * 0.3,
+                                  padding: EdgeInsets.only(
+                                    top: MediaQuery.of(context).size.width *
+                                        0.01,
+                                    bottom: MediaQuery.of(context).size.width *
+                                        0.01,
+                                    left: MediaQuery.of(context).size.width *
+                                        0.01,
+                                    right: MediaQuery.of(context).size.width *
+                                        0.01,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _acceptedColor,
+                                    borderRadius: BorderRadius.circular(4.0),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'قبول',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () async {
+                                  setState(() {
+                                    _acceptedColor = Colors.grey;
+                                    _confirmColor = Colors.red;
+                                  });
+                                  EasyLoading.show(
+                                      status: 'loading...', dismissOnTap: true);
+                                  await editController.doAcceptance(
+                                      0, widget.report.id);
+                                  if (editController.approvalStatus) {
+                                    EasyLoading.showSuccess(
+                                        editController.message,
+                                        duration: const Duration(seconds: 2));
+                                    final reportListController =
+                                        Get.find<ReportListController>();
+                                    reportListController.fetchReports();
+
+                                    Get.offNamed('home');
+                                  } else {
+                                    EasyLoading.showError(
+                                        editController.message);
+                                    print("Approval error");
+                                  }
+                                },
+                                child: Container(
+                                  width: size.width * 0.3,
+                                  padding: EdgeInsets.only(
+                                    top: MediaQuery.of(context).size.width *
+                                        0.01,
+                                    bottom: MediaQuery.of(context).size.width *
+                                        0.01,
+                                    left: MediaQuery.of(context).size.width *
+                                        0.01,
+                                    right: MediaQuery.of(context).size.width *
+                                        0.01,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _confirmColor,
+                                    borderRadius: BorderRadius.circular(4.0),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'رفض',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ]),
+                        SizedBox(height: 15),
+                      ],
+                    )
+                  : SizedBox(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColorManager.mainAppColor,
-                    ),
-                    onPressed: () async {
-                      File? file = await selectPDFFile();
-                      if (file != null) {
-                        setState(() {
-                          _selectedFile =
-                              file; // Update the UI to show selected file
-                        });
-                      }
-                    },
-                    child: const Text(
-                      'ملف بدء العمل',
-                      style: TextStyle(
-                          color: AppColorManager.white,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
+                      if (_isDraft ||
+                          (!_isDraft && _formKey.currentState!.validate())) {
                         print("تعديل");
 
                         var updatedJobDescriptions = jobCards.map((card) {
@@ -1111,6 +1362,9 @@ class _EditReportScreenState extends State<EditReportScreen> {
                         EasyLoading.show(
                             status: 'يتم التحميل...', dismissOnTap: true);
                         await editController.edit(updatedJobDescriptions);
+                        // if (widget.report.statusAdmin == 'Work is Finished') {
+                        // await editController.rate();
+                        // }
                         // Send the selected file
                         await editController.upload(_selectedFile!);
                         if (editController.editStatus) {
@@ -1147,6 +1401,53 @@ class _EditReportScreenState extends State<EditReportScreen> {
         ),
       ),
     );
+  }
+
+  Widget _loadImage(String? imageUri) {
+    // Check if the URI is a network image.
+    if (imageUri != null && imageUri.startsWith('http')) {
+      return Image.network(
+        imageUri,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(child: CircularProgressIndicator());
+        },
+      );
+    }
+    // For local file images, use FutureBuilder to await file existence check.
+    else if (imageUri != null && imageUri.isNotEmpty) {
+      final filePath =
+          imageUri.replaceFirst('file://', ''); // Correct file path
+      return FutureBuilder<bool>(
+        future:
+            File(filePath).exists(), // Check if the file exists asynchronously
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Show loading indicator while waiting for Future to complete
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasData && snapshot.data == true) {
+            // If file exists, display it
+            return Image.file(File(filePath));
+          } else {
+            // If file does not exist, or path is invalid, show an error or placeholder
+            return Icon(Icons.error);
+          }
+        },
+      );
+    }
+    // If imageUri is null or empty, return a placeholder or alternative widget
+    else {
+      return SizedBox(
+        height: 100,
+        child: SignaturePage(
+          signatureGlobalKey: signatureGlobalKey,
+          name: 'توقيع المسؤول.png',
+          onSignatureSaved: (signatureFile) {
+            editController.responsibleSignatureFile = signatureFile;
+          },
+        ),
+      );
+    }
   }
 }
 
@@ -1211,4 +1512,29 @@ Widget _buildImageDisplay(dynamic image, double width, double height) {
       },
     );
   }
+}
+
+Widget _buildImage(String? imageUrl) {
+  // If the URL is valid, use Image.network with a loading builder
+  return Image.network(
+    imageUrl!,
+    loadingBuilder:
+        (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+      if (loadingProgress == null) return child; // Image is fully loaded
+      // While the image is loading, show a progress indicator
+      return Center(
+        child: CircularProgressIndicator(
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+              : null,
+        ),
+      );
+    },
+    errorBuilder:
+        (BuildContext context, Object exception, StackTrace? stackTrace) {
+      // If the image fails to load, show an alternative widget
+      return Center(child: Text('Failed to load image'));
+    },
+  );
 }

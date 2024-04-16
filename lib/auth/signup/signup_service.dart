@@ -38,7 +38,6 @@ class SignUpService {
         'password_confirmation': user.confirmPassword,
       });
 
-      // ... (rest of the code)
 
       print(response.statusCode);
       print(response.body);

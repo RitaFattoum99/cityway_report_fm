@@ -427,250 +427,392 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                 endIndent: 10,
               ),
               const SizedBox(height: 5),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.description,
-                        color: AppColorManager.mainAppColor,
-                      ),
-                      SizedBox(width: 6),
-                      Text(
-                        "وصف الأعمال:",
-                        style: TextStyle(
-                            color: AppColorManager.mainAppColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 600,
-                    width: 300,
-                    child: ListView.separated(
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 20),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: widget.report.reportJobDescription.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+              widget.report.statusAdmin == 'Awaiting Approval' ||
+                      widget.report.statusAdmin == 'Approved' ||
+                      widget.report.statusAdmin == 'Declined' ||
+                      widget.report.statusAdmin == 'Work Has Started' ||
+                      widget.report.statusAdmin == 'Work is Finished' ||
+                      widget.report.statusAdmin == 'Rejected By Admin' ||
+                      widget.report.statusAdmin == 'Done'
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
                           children: [
-                            SizedBox(
-                              width: 300,
-                              child: Text(
-                                isExpanded1
-                                    ? widget.report.reportJobDescription[index]
-                                        .jobDescription!.description!
-                                    : widget
-                                                .report
-                                                .reportJobDescription[index]
-                                                .jobDescription!
-                                                .description!
-                                                .length >
-                                            50
-                                        ? "${widget.report.reportJobDescription[index].jobDescription!.description!.substring(0, 40)}..."
-                                        : widget
-                                            .report
-                                            .reportJobDescription[index]
-                                            .jobDescription!
-                                            .description!,
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                ),
-                              ),
+                            Icon(
+                              Icons.description,
+                              color: AppColorManager.mainAppColor,
                             ),
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  isExpanded1 = !isExpanded1;
-                                });
-                              },
-                              child: Text(
-                                isExpanded1 ? "عرض أقل" : "...عرض المزيد",
-                                style: const TextStyle(
-                                    color: AppColorManager.greyAppColor,
-                                    fontSize: 16),
-                              ),
+                            SizedBox(width: 6),
+                            Text(
+                              "وصف الأعمال:",
+                              style: TextStyle(
+                                  color: AppColorManager.mainAppColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18),
                             ),
-                            const SizedBox(height: 5),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.attach_money,
-                                  color: AppColorManager.secondaryAppColor,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'السعر: ${widget.report.reportJobDescription[index].jobDescription!.price.toString()}',
-                                  style: const TextStyle(
-                                    color: AppColorManager.secondaryAppColor,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.note_add,
-                                  color: AppColorManager.secondaryAppColor,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'ملاحظة: ${widget.report.reportJobDescription[index].note ?? ' '}',
-                                  style: const TextStyle(
-                                    color: AppColorManager.secondaryAppColor,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Expanded(
-                              child: Container(
-                                height: 200,
-                                width: 300,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    widget.report.reportJobDescription[index]
-                                                .desImg !=
-                                            null
-                                        ? getFullImageUrl(widget
-                                            .report
-                                            .reportJobDescription[index]
-                                            .desImg!)
-                                        : 'assets/images/default.png', // Provide a default image path
-
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (BuildContext context,
-                                        Widget child,
-                                        ImageChunkEvent? loadingProgress) {
-                                      if (loadingProgress == null) {
-                                        // Image is fully loaded
-                                        return child;
-                                      }
-                                      // While the image is loading, return a loader widget
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value: loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
-                                              : null,
-                                        ),
-                                      );
-                                    },
-                                    errorBuilder: (BuildContext context,
-                                        Object error, StackTrace? stackTrace) {
-                                      return const Center(
-                                        child: Icon(Icons.error),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Expanded(
-                              child: Container(
-                                height: 200,
-                                width: 300,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    widget.report.reportJobDescription[index]
-                                                .afterDesImg !=
-                                            null
-                                        ? getFullImageUrl(widget
-                                            .report
-                                            .reportJobDescription[index]
-                                            .afterDesImg!)
-                                        : 'assets/images/default.png', // Provide a default image path
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (BuildContext context,
-                                        Widget child,
-                                        ImageChunkEvent? loadingProgress) {
-                                      if (loadingProgress == null) {
-                                        // Image is fully loaded
-                                        return child;
-                                      }
-                                      // While the image is loading, return a loader widget
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value: loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
-                                              : null,
-                                        ),
-                                      );
-                                    },
-                                    errorBuilder: (BuildContext context,
-                                        Object error, StackTrace? stackTrace) {
-                                      return const Center(
-                                        child: Icon(Icons.error),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
                           ],
-                        );
+                        ),
+                        SizedBox(
+                          height: 600,
+                          width: 300,
+                          child: ListView.separated(
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(width: 20),
+                            scrollDirection: Axis.horizontal,
+                            itemCount:
+                                widget.report.reportJobDescription.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 300,
+                                    child: Text(
+                                      isExpanded1
+                                          ? widget
+                                              .report
+                                              .reportJobDescription[index]
+                                              .jobDescription!
+                                              .description!
+                                          : widget
+                                                      .report
+                                                      .reportJobDescription[
+                                                          index]
+                                                      .jobDescription!
+                                                      .description!
+                                                      .length >
+                                                  50
+                                              ? "${widget.report.reportJobDescription[index].jobDescription!.description!.substring(0, 40)}..."
+                                              : widget
+                                                  .report
+                                                  .reportJobDescription[index]
+                                                  .jobDescription!
+                                                  .description!,
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        isExpanded1 = !isExpanded1;
+                                      });
+                                    },
+                                    child: Text(
+                                      isExpanded1 ? "عرض أقل" : "...عرض المزيد",
+                                      style: const TextStyle(
+                                          color: AppColorManager.greyAppColor,
+                                          fontSize: 16),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  // Row(
+                                  //   children: [
+                                  //     const Icon(
+                                  //       Icons.attach_money,
+                                  //       color: AppColorManager.secondaryAppColor,
+                                  //     ),
+                                  //     const SizedBox(width: 6),
+                                  //     Text(
+                                  //       'السعر: ${widget.report.reportJobDescription[index].jobDescription!.price.toString()}',
+                                  //       style: const TextStyle(
+                                  //         color: AppColorManager.secondaryAppColor,
+                                  //         fontSize: 16,
+                                  //       ),
+                                  //     ),
+                                  //   ],
+                                  // ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment
+                                        .spaceEvenly, // This will distribute space evenly between the elements
+                                    children: [
+                                      const Icon(Icons.attach_money,
+                                          color: AppColorManager
+                                              .secondaryAppColor),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'السعر: ${widget.report.reportJobDescription[index].jobDescription!.price.toString()}',
+                                        style: const TextStyle(
+                                          color:
+                                              AppColorManager.secondaryAppColor,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10), // Added space
+                                      const Icon(
+                                          Icons.production_quantity_limits,
+                                          color: AppColorManager
+                                              .secondaryAppColor),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'الكمية: ${widget.report.reportJobDescription[index].quantity.toString()}',
+                                        style: const TextStyle(
+                                          color:
+                                              AppColorManager.secondaryAppColor,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10), // Added space
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.attach_money,
+                                          color: AppColorManager
+                                              .secondaryAppColor),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'الإجمالي: ${((widget.report.reportJobDescription[index].quantity ?? 0) * (widget.report.reportJobDescription[index].jobDescription!.price ?? 0)).toStringAsFixed(2)}',
+                                        style: const TextStyle(
+                                          color:
+                                              AppColorManager.secondaryAppColor,
+                                          fontSize: 16,
+                                        ),
+                                      ), // Added some space before the note
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.note_add,
+                                        color:
+                                            AppColorManager.secondaryAppColor,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'ملاحظة: ${widget.report.reportJobDescription[index].note ?? ' '}',
+                                        style: const TextStyle(
+                                          color:
+                                              AppColorManager.secondaryAppColor,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Expanded(
+                                    child: Container(
+                                      height: 200,
+                                      width: 300,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          widget
+                                                      .report
+                                                      .reportJobDescription[
+                                                          index]
+                                                      .desImg !=
+                                                  null
+                                              ? getFullImageUrl(widget
+                                                  .report
+                                                  .reportJobDescription[index]
+                                                  .desImg!)
+                                              : 'assets/images/default.png', // Provide a default image path
+
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent?
+                                                  loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              // Image is fully loaded
+                                              return child;
+                                            }
+                                            // While the image is loading, return a loader widget
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder: (BuildContext context,
+                                              Object error,
+                                              StackTrace? stackTrace) {
+                                            return const Center(
+                                              child: Icon(Icons.error),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Expanded(
+                                    child: Container(
+                                      height: 200,
+                                      width: 300,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          widget
+                                                      .report
+                                                      .reportJobDescription[
+                                                          index]
+                                                      .afterDesImg !=
+                                                  null
+                                              ? getFullImageUrl(widget
+                                                  .report
+                                                  .reportJobDescription[index]
+                                                  .afterDesImg!)
+                                              : 'assets/images/default.png', // Provide a default image path
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent?
+                                                  loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              // Image is fully loaded
+                                              return child;
+                                            }
+                                            // While the image is loading, return a loader widget
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder: (BuildContext context,
+                                              Object error,
+                                              StackTrace? stackTrace) {
+                                            return const Center(
+                                              child: Icon(Icons.error),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox(),
+              widget.report.statusAdmin == 'Work Has Started' ||
+                      widget.report.statusAdmin == 'Work is Finished' ||
+                      widget.report.statusAdmin == 'Rejected By Admin' ||
+                      widget.report.statusAdmin == 'Done'
+                  ? InkWell(
+                      onTap: () async {
+                        EasyLoading.show(
+                            status: 'يتم التحميل...', dismissOnTap: true);
+                        String url = widget.report.workOrder;
+                        String filename = url.split('/').last;
+                        String filePath = await downloadPDF(url, filename);
+                        EasyLoading.dismiss();
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) =>
+                              PdfViewPage(file: File(filePath)),
+                        ));
                       },
-                    ),
-                  ),
-                ],
-              ),
-              InkWell(
-                onTap: () async {
-                  EasyLoading.show(
-                      status: 'يتم التحميل...', dismissOnTap: true);
-                  String url = widget.report.workOrder;
-                  String filename = url.split('/').last;
-                  String filePath = await downloadPDF(url, filename);
-                  EasyLoading.dismiss();
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => PdfViewPage(file: File(filePath)),
-                  ));
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.report.workOrder.split('/').last,
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.report.workOrder.split('/').last,
+                                style: const TextStyle(
+                                    color: AppColorManager.secondaryAppColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const Icon(Icons.picture_as_pdf, size: 30),
+                          ],
+                        ),
+                      ),
+                    )
+                  : const SizedBox(),
+              const SizedBox(height: 10),
+              widget.report.statusAdmin == 'Work is Finished' ||
+                      widget.report.statusAdmin == 'Rejected By Admin' ||
+                      widget.report.statusAdmin == 'Done'
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "توقيع المهندس:",
+                          style: TextStyle(
+                              color: AppColorManager.secondaryAppColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          child: _buildImage(widget.report.fmeSignature),
+                        ),
+                        const Text(
+                          "ملاحظات المسؤول:",
+                          style: TextStyle(
+                              color: AppColorManager.secondaryAppColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          widget.report.clientNotes,
                           style: const TextStyle(
                               color: AppColorManager.secondaryAppColor,
                               fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      const Icon(Icons.picture_as_pdf, size: 30),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
+                        const Text(
+                          "توقيع المسؤول:",
+                          style: TextStyle(
+                              color: AppColorManager.secondaryAppColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          child: _buildImage(widget.report.clientSignature),
+                        ),
+                        const Text(
+                          "ملاحظات الأدمن:",
+                          style: TextStyle(
+                              color: AppColorManager.secondaryAppColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          widget.report.adminNotes,
+                          style: const TextStyle(
+                              color: AppColorManager.secondaryAppColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const Text(
+                          "توقيع الأدمن:",
+                          style: TextStyle(
+                              color: AppColorManager.secondaryAppColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          child: _buildImage(widget.report.adminSignature),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    )
+                  : const SizedBox(),
             ],
           ),
         ),
@@ -696,4 +838,41 @@ class PdfViewPage extends StatelessWidget {
       preventLinkNavigation: false,
     );
   }
+}
+
+Widget _buildImage(String? imageUrl) {
+  // Check if the URL is valid and is a network URL
+  final isNetworkUrl = imageUrl?.startsWith('http') ?? false;
+
+  if (!isNetworkUrl) {
+    // Return an alternative widget or image if the URL is not valid
+    return const Center(
+        child: Text(
+      'لم يتم التوقيع بعد',
+      style: TextStyle(color: AppColorManager.mainAppColor),
+    ));
+  }
+
+  // If the URL is valid, use Image.network with a loading builder
+  return Image.network(
+    imageUrl!,
+    loadingBuilder:
+        (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+      if (loadingProgress == null) return child; // Image is fully loaded
+      // While the image is loading, show a progress indicator
+      return Center(
+        child: CircularProgressIndicator(
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+              : null,
+        ),
+      );
+    },
+    errorBuilder:
+        (BuildContext context, Object exception, StackTrace? stackTrace) {
+      // If the image fails to load, show an alternative widget
+      return const Center(child: Text('Failed to load image'));
+    },
+  );
 }

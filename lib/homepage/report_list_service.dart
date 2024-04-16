@@ -6,6 +6,7 @@ import '/homepage/allreport_model.dart';
 import 'package:http/http.dart' as http;
 
 class ReportListService {
+  var message = '';
   var url =
       Uri.parse(ServiceConfig.domainNameServer + ServiceConfig.getListReport);
 
@@ -31,6 +32,35 @@ class ReportListService {
       print(response.statusCode);
       print(response.body);
       throw Exception('Failed to load list');
+    }
+  }
+
+  Future<bool> deleteReport(int reportId, String token) async {
+    var url = Uri.parse(
+        '${ServiceConfig.domainNameServer}${ServiceConfig.deleteReport}/$reportId');
+    var response = await http.delete(url, headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token',
+      'User-Agent': 'PostmanRuntime/7.37.0',
+      'Connection': 'keep-alive'
+    });
+
+    print(response.statusCode);
+    print(response.body);
+    var jsonresponse = jsonDecode(response.body);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      var jsonresponse = jsonDecode(response.body);
+      message = jsonresponse['message'];
+      print(message);
+      return true;
+    } else if (response.statusCode == 422 || response.statusCode == 500) {
+      message = jsonresponse['message'];
+      print(message);
+      return false;
+    } else {
+      message = jsonresponse['message'];
+      print(message);
+      return false;
     }
   }
 }

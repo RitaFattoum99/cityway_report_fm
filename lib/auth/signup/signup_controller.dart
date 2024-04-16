@@ -8,7 +8,6 @@ class SignUpController extends GetxController {
   var email = '';
   var password = '';
   var confirmPassword = '';
-
   var registerStatus = false;
   // ignore: prefer_typing_uninitialized_variables
   var message;

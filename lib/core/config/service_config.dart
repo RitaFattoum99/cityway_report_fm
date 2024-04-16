@@ -16,6 +16,9 @@ class ServiceConfig {
   static const getListReport = 'report';
   static const getListMaterial = 'material';
   static const getListDes = 'job_description';
+  static const getListDraft = 'report/drafts';
+  static const adminApproval = 'report/revise';
+  static const deleteReport = 'report';
 }
 
 String getFullImageUrl(String? partialUrl) {

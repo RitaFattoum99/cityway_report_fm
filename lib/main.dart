@@ -9,10 +9,12 @@ import '/create_report/report_bindings.dart';
 import '/create_report/create_report_screen.dart';
 import '/homepage/report_list_bindings.dart';
 import '/homepage/homepage_screen.dart';
-import '/notification_report.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+
+import 'drafts/draft_list_bindings.dart';
+import 'drafts/draft_list_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,7 +47,9 @@ class MyApp extends StatelessWidget {
 
       getPages: [
         GetPage(
-            name: '/splash', page: () => const Splash(), binding: SplashBindings()),
+            name: '/splash',
+            page: () => const Splash(),
+            binding: SplashBindings()),
         GetPage(
             name: '/signin',
             page: () => const SignIn(),
@@ -56,13 +60,14 @@ class MyApp extends StatelessWidget {
           binding: ReportListBindings(),
         ),
         GetPage(
+          name: '/draft',
+          page: () => const DraftReportsScreen(),
+          binding: DraftListBindings(),
+        ),
+        GetPage(
             name: '/create',
             page: () => const CreateReport(),
             binding: ReportBindings()),
-        GetPage(
-          name: '/notification',
-          page: () => const NotificationListScreen(),
-        ),
       ],
       builder: EasyLoading.init(),
     );

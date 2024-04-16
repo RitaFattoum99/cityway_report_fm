@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, prefer_typing_uninitialized_variables
 
 import 'dart:io';
 
@@ -9,8 +9,14 @@ import 'package:get/get.dart';
 
 class EditReportController extends GetxController {
   int reportId = -1;
-  // ignore: prefer_typing_uninitialized_variables
   var workOrder;
+  var isDraft = 0;
+  var responsibleSignatureFile = File('');
+  var responsibleSatisfaction = 1;
+  var responsibleNote = '';
+  var adminNotes = '';
+  var approvalStatus = false;
+
   void setReportId(int id) {
     reportId = id;
   }
@@ -23,16 +29,43 @@ class EditReportController extends GetxController {
   late SecureStorage secureStorage = SecureStorage();
 
   var isLoading = true.obs;
+  Future<void> rate() async {
+    isLoading(true);
+    try {
+      String? token = await secureStorage.read("token");
+      if (token != null) {
+        editStatus = await service.rating(
+            reportJobDescription,
+            token,
+            reportId,
+            isDraft,
+            responsibleSignatureFile,
+            responsibleSatisfaction,
+            responsibleNote);
+        message = service.message;
+
+        isLoading(true);
+      }
+    } finally {
+      isLoading(false);
+    }
+  }
 
   Future<void> edit(List<ReportJobDescription> reportJobDescription) async {
-    print("work order: $workOrder");
     isLoading(true);
 
     try {
       String? token = await secureStorage.read("token");
       if (token != null) {
         editStatus = await service.editReports(
-            reportJobDescription, token, reportId, workOrder);
+            reportJobDescription,
+            token,
+            reportId,
+            workOrder,
+            isDraft,
+            responsibleSignatureFile,
+            responsibleSatisfaction,
+            responsibleNote);
         message = service.message;
 
         isLoading(true);
@@ -62,5 +95,14 @@ class EditReportController extends GetxController {
   // Update job descriptions
   void updateReportJobDescriptions(List<ReportJobDescription> updatedList) {
     reportJobDescription.assignAll(updatedList);
+  }
+
+  Future<void> doAcceptance(int approval, int reportId) async {
+    secureStorage = SecureStorage();
+    String? token = await secureStorage.read("token");
+
+    approvalStatus =
+        await service.accceptance(approval, reportId, token!, adminNotes);
+    message = service.message;
   }
 }

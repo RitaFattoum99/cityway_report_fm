@@ -41,4 +41,11 @@ class ReportListController extends GetxController {
   List<DataAllReport> filteredReports(String status) {
     return reportList.where((report) => report.statusClient == status).toList();
   }
+
+
+      Future<void>doDelete(int reportId) async{
+    secureStorage = SecureStorage();
+    String? token = await secureStorage.read("token");
+    _service.deleteReport(reportId, token!);
+  }
 }

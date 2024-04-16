@@ -2,14 +2,15 @@
 
 import 'package:cityway_report_fm/edit_report_fm/edit_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import '../drafts/draft_list_screen.dart';
 import '../final report/report_details.dart';
 import '/core/config/information.dart';
 import '/core/native_service/secure_storage.dart';
 import '/core/resource/color_manager.dart';
 import '/homepage/allreport_model.dart';
 import 'reoport_list_controller.dart';
-import '../auth/profile.dart';
 
 class DynamicTabBarWithReports extends StatefulWidget {
   const DynamicTabBarWithReports({Key? key}) : super(key: key);
@@ -45,11 +46,12 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
         'الكل',
         'Urgent',
         'New-Report',
-        'Awaiting Pricing',
         'Awaiting Approval',
         'Approved',
         'Declined',
         'Work Has Started',
+        'Work is Finished',
+        'Rejected By Admin',
         'Done',
       ];
       var tabs = statusList
@@ -138,17 +140,17 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
           ),
           ListTile(
             leading: const Icon(
-              Icons.person_2_rounded,
+              Icons.drafts,
               color: AppColorManager.secondaryAppColor,
             ),
             title: const Text(
-              'الملف الشخصي',
+              'المسودات',
               style: TextStyle(
                   color: AppColorManager.secondaryAppColor,
                   fontWeight: FontWeight.bold),
             ),
             onTap: () {
-              Get.to(() => const Profile());
+              Get.to(() => const DraftReportsScreen());
             },
           ),
           ListTile(
@@ -215,6 +217,35 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
     );
   }
 
+  // Widget _buildReportItem(DataAllReport report) {
+  //   Color statusColor = _getStatusColor(report.statusAdmin);
+  //   String statusValue = _getStatusValue(report.statusAdmin);
+  //   return Column(
+  //     children: [
+  //       Padding(
+  //         padding: const EdgeInsets.all(10),
+  //         child: Container(
+  //           decoration: _itemDecoration(statusColor),
+  //           child: ListTile(
+  //             title: _buildTitle(report),
+  //             subtitle: Text("حالة المشروع: $statusValue",
+  //                 style: TextStyle(
+  //                     color: statusColor, fontWeight: FontWeight.w500)),
+  //             leading:
+  //                 Icon(Icons.stacked_bar_chart, color: statusColor, size: 25),
+  //             trailing: IconButton(
+  //               icon: const Icon(Icons.edit, color: Colors.green),
+  //               onPressed: () {
+  //                 // Navigate to the edit report screen
+  //                 Get.to(() => EditReportScreen(report: report));
+  //               },
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
   Widget _buildReportItem(DataAllReport report) {
     Color statusColor = _getStatusColor(report.statusAdmin);
     String statusValue = _getStatusValue(report.statusAdmin);
@@ -226,22 +257,66 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
             decoration: _itemDecoration(statusColor),
             child: ListTile(
               title: _buildTitle(report),
-              subtitle: Text("حالة المشروع: $statusValue",
-                  style: TextStyle(
-                      color: statusColor, fontWeight: FontWeight.w500)),
+              subtitle: Text(
+                "حالة المشروع: $statusValue",
+                style:
+                    TextStyle(color: statusColor, fontWeight: FontWeight.w500),
+              ),
               leading:
                   Icon(Icons.stacked_bar_chart, color: statusColor, size: 25),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit, color: Colors.green),
-                onPressed: () {
-                  // Navigate to the edit report screen
-                  Get.to(() => EditReportScreen(report: report));
-                },
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.green),
+                    onPressed: () {
+                      // Navigate to the edit report screen
+                      Get.to(() => EditReportScreen(report: report));
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _showDeleteConfirmationDialog(report);
+                      // controller.doDelete(report.id);
+                    },
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  void _showDeleteConfirmationDialog(DataAllReport report) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("تأكيد الحذف"),
+        content: const Text("هل أنت متأكد؟"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text("إلغاء"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+              EasyLoading.show(status: '', dismissOnTap: true);
+              controller.doDelete(report.id);
+              EasyLoading.showSuccess("Report deleted successfully",
+                  duration: const Duration(seconds: 3));
+              // controller.fetchReports();
+              // Get.offNamed('home');
+            },
+            child: const Text("حذف"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -332,8 +407,6 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
         return Colors.red;
       case 'New-Report':
         return Colors.grey;
-      case 'Awaiting Pricing':
-        return Colors.blue;
       case 'Awaiting Approval':
         return Colors.deepOrange;
       case 'Approved':
@@ -342,9 +415,11 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
         return Colors.indigo;
       case 'Work Has Started':
         return Colors.purple;
-      case 'Done':
+      case 'Work is Finished':
         return Colors.yellow[700]!;
-      case 'Complete':
+      case 'Rejected By Admin':
+        return Colors.blue;
+      case 'Done':
         return Colors.green;
       default:
         return Colors.black;
@@ -357,20 +432,20 @@ class _DynamicTabBarWithReportsState extends State<DynamicTabBarWithReports> {
         return 'عاجل';
       case 'New-Report':
         return 'بلاغ جديد';
-      case 'Awaiting Pricing':
-        return 'بانتظار التسعير';
       case 'Awaiting Approval':
         return 'بانتظار الموافقة';
       case 'Approved':
         return 'تمت الموافقة';
       case 'Declined':
-        return 'مرفوض';
+        return 'تم رفض المسؤول';
       case 'Work Has Started':
         return 'تم بدء العمل';
+      case 'Work is Finished':
+        return 'تم إنهاء العمل';
+      case 'Rejected By Admin':
+        return 'تم رفض الأدمن';
       case 'Done':
         return 'منتهي';
-      case 'Complete':
-        return 'مكتمل';
       default:
         return '';
     }
